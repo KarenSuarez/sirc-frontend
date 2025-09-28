@@ -1,10 +1,44 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './modulos/auth/login/login.component';
-import { RegistroComponent } from './modulos/auth/registro/register.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
-  { path: 'auth/login', component: LoginComponent },
-  { path: 'auth/registro', component: RegistroComponent}
 
+  {
+    path: 'auth',
+    loadChildren: () =>
+      import('./modulos/auth/auth.routes').then((m) => m.AUTH_ROUTES),
+  },
+
+  {
+    path: 'referentes',
+    loadChildren: () =>
+      import('./modulos/referentes/referentes.routes').then(
+        (m) => m.REFERENTES_ROUTES
+      ),
+  },
+
+  {
+    path: 'reportes',
+    loadChildren: () =>
+      import('./modulos/reportes/reportes.routes').then(
+        (m) => m.REPORTES_ROUTES
+      ),
+  },
+
+  {
+    path: 'panel',
+    loadChildren: () =>
+      import('./modulos/paneles/paneles.routes').then((m) => m.PANELES_ROUTES),
+  },
+
+  {
+    path: 'gamificacion',
+    loadChildren: () =>
+      import('./modulos/gamificacion/gamificacion.routes').then(
+        (m) => m.GAMIFICACION_ROUTES
+      ),
+  },
+
+  // Wildcard para 404
+  { path: '**', redirectTo: 'auth/login' },
 ];

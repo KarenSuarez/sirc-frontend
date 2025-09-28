@@ -1,224 +1,307 @@
 .login-container {
-  display: flex;
+  position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.login-left {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: white;
-  color: black;
+  overflow: hidden;
 }
 
-.brand-section {
-  text-align: center;
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('../../../../assets/images/backgrounds/imagen-login-clarisa.jpg');
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  z-index: 1;
+}
+
+.login-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+.login-card-wrapper {
+  flex: 0 0 400px;
   max-width: 400px;
 }
 
-.logo {
-  margin-bottom: 1rem;
+.login-card {
+  background-color: var(--white) !important;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-card ::ng-deep .ant-card-body {
+  padding: 2.5rem 2rem;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .logo-img {
-  width: 80px;
-  height: 80px;
+  width: 200px;
+  height: 100px;
   object-fit: contain;
+  margin-bottom: 0.5rem;
 }
 
 .brand-title {
-  font-size: 3rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
+  color: var(--primary-color) !important;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  margin: 0.5rem 0 0.25rem 0 !important;
   letter-spacing: 2px;
 }
 
 .brand-subtitle {
-  font-size: 1rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-  font-weight: 300;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin: 0 0 1rem 0;
+  font-weight: 400;
 }
 
-.system-info {
-  margin-top: 2rem;
-}
-
-.system-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  line-height: 1.4;
-}
-
-.system-description {
-  font-size: 0.95rem;
-  opacity: 0.8;
-  line-height: 1.5;
-}
-
-.login-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.login-form-container {
-  width: 100%;
-  max-width: 400px;
-  background: white;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.1);
-}
-
-.form-header {
+.system-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1%;
 }
 
-.form-header h3 {
-  color: #4a5568;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
+.system-header h3 {
+  color: var(--text-dark) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 0.5rem 0 !important;
   line-height: 1.4;
+}
+
+.system-header p {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  width: 100%;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
+.login-form ::ng-deep .ant-form-item {
+  margin-bottom: 1.2rem;
 }
 
-.form-input {
-  padding: 0.875rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  background: #f8fafc;
+.login-input {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #E5E7EB !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
 }
 
-.form-input:focus {
-  outline: none;
-  border-color: #136AA9;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.login-input:hover {
+  border-color: var(--primary-color) !important;
 }
 
-.form-input::placeholder {
-  color: #a0aec0;
+.login-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
 }
 
-.form-input.error {
-  border-color: #e53e3e;
-  background: #fed7d7;
-}
-
-.error-message {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #e53e3e;
+::ng-deep .ant-input-group {
   display: flex;
   align-items: center;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+::ng-deep .ant-input-group .login-input {
+  flex: 1;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .ant-input-group-addon {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.password-toggle {
+  cursor: pointer;
+  color: var(--text-light);
+  transition: color 0.3s ease;
+  padding: 0 12px;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color);
 }
 
 .login-btn {
-  background: #2583C6;
-  color: white;
-  border: none;
-  padding: 0.875rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  border-radius: var(--border-radius) !important;
+  height: 48px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease !important;
 }
 
-.login-btn:hover:not(:disabled) {
+.login-btn:hover {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.login-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+/* Divider */
+::ng-deep .login-divider {
+  margin: 1.5rem 0 !important;
+  color: var(--text-light) !important;
 }
 
-.register-link {
+/* Enlaces */
+.login-links {
   text-align: center;
-  margin-top: 1.5rem;
   font-size: 0.9rem;
-  color: #718096;
 }
 
-.register-link-text {
-  color: #2583C6;
-  text-decoration: none;
+.login-links p {
+  margin: 0.5rem 0;
+  color: var(--text-light);
+}
+
+.register-link,
+.forgot-password-link {
+  color: var(--primary-color) !important;
   font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.3s ease;
 }
 
-.register-link-text:hover {
-  color: #136AA9;
+.register-link:hover,
+.forgot-password-link:hover {
+  color: var(--primary-dark) !important;
   text-decoration: underline;
 }
 
+.register-link ~ .anticon,
+.forgot-password-link ~ .anticon,
+.login-links .anticon {
+  color: var(--primary-color) !important;
+  font-size: 1.1em;
+  vertical-align: middle;
+  transition: color 0.3s;
+}
+
+.register-link:hover ~ .anticon,
+.forgot-password-link:hover ~ .anticon,
+.login-links .anticon:hover {
+  color: var(--primary-dark) !important;
+}
+
+/* Alert de error */
+::ng-deep .error-alert {
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
+}
+
+/* Estados de validación */
+::ng-deep .ant-form-item-has-error .login-input {
+  border-color: #ff4d4f !important;
+}
+
+::ng-deep .ant-form-item-has-error .login-input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+}
+
 /* Responsive Design */
-@media (max-width: 768px) {
-  .login-container {
+@media (max-width: 1024px) {
+  .login-content {
     flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 2rem;
   }
 
-  .login-left {
-    min-height: 40vh;
+  .login-card-wrapper {
+    order: 1;
+    flex: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-content {
     padding: 1.5rem;
   }
 
-  .brand-title {
-    font-size: 2rem;
+  .login-card ::ng-deep .ant-card-body {
+    padding: 2rem 1.5rem;
   }
 
-  .system-title {
-    font-size: 1.25rem;
+  .login-card-wrapper {
+    max-width: 100%;
+    width: 100%;
   }
 
-  .login-right {
-    padding: 1.5rem;
-  }
-
-  .login-form-container {
-    padding: 2rem;
+  .background-overlay {
+    background-position: center;
   }
 }
 
 @media (max-width: 480px) {
-  .login-form-container {
-    padding: 1.5rem;
+  .login-content {
+    padding: 1rem;
+  }
+
+  .login-card ::ng-deep .ant-card-body {
+    padding: 1.5rem 1rem;
   }
 
   .brand-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem !important;
   }
+}
 
-  .form-header h3 {
-    font-size: 1.1rem;
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-card {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
