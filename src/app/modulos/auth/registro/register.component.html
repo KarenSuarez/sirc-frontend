@@ -1,0 +1,134 @@
+<div class="register-container">
+  <div class="register-left">
+    <!-- Logo y branding -->
+    <div class="brand-section">
+      <div class="logo">
+        <img src="assets/images/clarisa-logo.png" alt="Clarisa Logo" class="logo-img">
+      </div>
+      <h1 class="brand-title">CLARISA</h1>
+      <p class="brand-subtitle">Software Administrativo y de Facturación</p>
+
+      <div class="system-info">
+        <h2 class="system-title">Sistema de puntos y referidos de Clarisa Cloud</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="register-right">
+    <div class="register-form-container">
+      <div class="form-header">
+        <h3>Regístrate y comienza a recibir recompensas</h3>
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+        <!-- Campo Nombre Completo -->
+        <div class="form-group">
+          <input
+            type="text"
+            formControlName="fullName"
+            placeholder="Nombre completo"
+            class="form-input"
+            [class.error]="fullName?.invalid && fullName?.touched"
+          >
+          <div *ngIf="fullName?.invalid && fullName?.touched" class="error-message">
+            <span *ngIf="fullName?.errors?.['required']">El nombre completo es requerido</span>
+            <span *ngIf="fullName?.errors?.['minlength']">El nombre debe tener al menos 2 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Campo Tipo de Identidad -->
+        <div class="form-group">
+          <select
+            formControlName="identityType"
+            class="form-select"
+            [class.error]="identityType?.invalid && identityType?.touched"
+          >
+            <option value="" disabled>Tipo de identidad</option>
+            <option *ngFor="let type of identityTypes" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+          <div *ngIf="identityType?.invalid && identityType?.touched" class="error-message">
+            <span *ngIf="identityType?.errors?.['required']">El tipo de identidad es requerido</span>
+          </div>
+        </div>
+
+        <!-- Campo Correo Electrónico -->
+        <div class="form-group">
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Correo electrónico"
+            class="form-input"
+            [class.error]="email?.invalid && email?.touched"
+          >
+          <div *ngIf="email?.invalid && email?.touched" class="error-message">
+            <span *ngIf="email?.errors?.['required']">El correo electrónico es requerido</span>
+            <span *ngIf="email?.errors?.['email']">Ingresa un correo electrónico válido</span>
+          </div>
+        </div>
+
+        <!-- Campo Teléfono -->
+        <div class="form-group">
+          <input
+            type="tel"
+            formControlName="phone"
+            placeholder="Teléfono"
+            class="form-input"
+            [class.error]="phone?.invalid && phone?.touched"
+          >
+          <div *ngIf="phone?.invalid && phone?.touched" class="error-message">
+            <span *ngIf="phone?.errors?.['required']">El teléfono es requerido</span>
+            <span *ngIf="phone?.errors?.['pattern']">El teléfono debe tener 10 dígitos</span>
+          </div>
+        </div>
+
+        <!-- Campo Contraseña -->
+        <div class="form-group">
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="Contraseña"
+            class="form-input"
+            [class.error]="password?.invalid && password?.touched"
+          >
+          <div *ngIf="password?.invalid && password?.touched" class="error-message">
+            <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
+            <span *ngIf="password?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Campo Confirmar Contraseña -->
+        <div class="form-group">
+          <input
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="Confirmar contraseña"
+            class="form-input"
+            [class.error]="confirmPassword?.invalid && confirmPassword?.touched"
+          >
+          <div *ngIf="confirmPassword?.invalid && confirmPassword?.touched" class="error-message">
+            <span *ngIf="confirmPassword?.errors?.['required']">Confirma tu contraseña</span>
+            <span *ngIf="confirmPassword?.errors?.['passwordMismatch']">Las contraseñas no coinciden</span>
+          </div>
+        </div>
+
+        <!-- Botón de registro -->
+        <button
+          type="submit"
+          class="register-btn"
+          [disabled]="isLoading"
+        >
+          <span *ngIf="!isLoading">Registrarse</span>
+          <span *ngIf="isLoading">Registrando...</span>
+        </button>
+      </form>
+
+      <!-- Link para login -->
+      <div class="login-link">
+        <span>Ya tienes una cuenta </span>
+        <a (click)="navigateToLogin()" class="login-link-text">Inicia sesión</a>
+      </div>
+    </div>
+  </div>
+</div>

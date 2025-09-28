@@ -1,0 +1,71 @@
+<div class="login-container">
+  <div class="login-left">
+    <!-- Logo y branding -->
+    <div class="brand-section">
+      <div class="logo">
+            <img src="assets\images\clarisa-plano.png" alt="Clarisa Logo" class="logo-img">
+      </div>
+      <h1 class="brand-title">CLARISA</h1>
+      <p class="brand-subtitle">Software Administrativo y de Facturación</p>
+
+      <div class="system-info">
+        <h2 class="system-title">Sistema de puntos y referidos de Clarisa Cloud</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-form-container">
+      <div class="form-header">
+        <h3>Ingresa y gestiona tus referidos con nosotros</h3>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <!-- Campo NIT -->
+        <div class="form-group">
+          <input
+            type="text"
+            formControlName="nit"
+            placeholder="NIT o cédula de ciudadanía"
+            class="form-input"
+            [class.error]="nit?.invalid && nit?.touched"
+          >
+          <div *ngIf="nit?.invalid && nit?.touched" class="error-message">
+            <span *ngIf="nit?.errors?.['required']">El NIT es requerido</span>
+          </div>
+        </div>
+
+        <!-- Campo Contraseña -->
+        <div class="form-group">
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="Contraseña"
+            class="form-input"
+            [class.error]="password?.invalid && password?.touched"
+          >
+          <div *ngIf="password?.invalid && password?.touched" class="error-message">
+            <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
+            <span *ngIf="password?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Botón de login -->
+        <button
+          type="submit"
+          class="login-btn"
+          [disabled]="isLoading"
+        >
+          <span *ngIf="!isLoading">Ingresar</span>
+          <span *ngIf="isLoading">Ingresando...</span>
+        </button>
+      </form>
+
+      <!-- Link para registro -->
+      <div class="register-link">
+        <span>¿Aún no creaste tu cuenta? </span>
+        <a (click)="navigateToRegister()" class="register-link-text">Regístrate aquí</a>
+      </div>
+    </div>
+  </div>
+</div>
