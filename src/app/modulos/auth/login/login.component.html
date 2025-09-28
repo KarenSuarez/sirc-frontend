@@ -1,71 +1,124 @@
 <div class="login-container">
-  <div class="login-left">
-    <!-- Logo y branding -->
-    <div class="brand-section">
-      <div class="logo">
-            <img src="assets\images\clarisa-plano.png" alt="Clarisa Logo" class="logo-img">
-      </div>
-      <h1 class="brand-title">CLARISA</h1>
-      <p class="brand-subtitle">Software Administrativo y de Facturación</p>
+  <div class="background-overlay"></div>
 
-      <div class="system-info">
-        <h2 class="system-title">Sistema de puntos y referidos de Clarisa Cloud</h2>
-      </div>
-    </div>
-  </div>
+  <div class="login-content">
 
-  <div class="login-right">
-    <div class="login-form-container">
-      <div class="form-header">
-        <h3>Ingresa y gestiona tus referidos con nosotros</h3>
-      </div>
-
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <!-- Campo NIT -->
-        <div class="form-group">
-          <input
-            type="text"
-            formControlName="nit"
-            placeholder="NIT o cédula de ciudadanía"
-            class="form-input"
-            [class.error]="nit?.invalid && nit?.touched"
-          >
-          <div *ngIf="nit?.invalid && nit?.touched" class="error-message">
-            <span *ngIf="nit?.errors?.['required']">El NIT es requerido</span>
-          </div>
+    <!-- Tarjeta de login -->
+    <div class="login-card-wrapper">
+      <nz-card class="login-card" [nzBordered]="false">
+        <div class="logo-section">
+          <img src="assets/images/logo/clarisa-plano.png" alt="Clarisa Logo" class="logo-img">
+        </div>
+        <div class="system-header">
+          <h3>Sistema de puntos y referidos<br>de Clarisa Cloud</h3>
+          <p>Ingresa y gestiona tus referidos con nosotros</p>
         </div>
 
-        <!-- Campo Contraseña -->
-        <div class="form-group">
-          <input
-            type="password"
-            formControlName="password"
-            placeholder="Contraseña"
-            class="form-input"
-            [class.error]="password?.invalid && password?.touched"
-          >
-          <div *ngIf="password?.invalid && password?.touched" class="error-message">
-            <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
-            <span *ngIf="password?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
-          </div>
-        </div>
+        <!-- Alert de error -->
+        <nz-alert
+          *ngIf="errorMessage"
+          [nzMessage]="errorMessage"
+          nzType="error"
+          nzCloseable
+          nzShowIcon
+          (nzOnClose)="clearError()"
+          class="error-alert">
+        </nz-alert>
 
-        <!-- Botón de login -->
-        <button
-          type="submit"
-          class="login-btn"
-          [disabled]="isLoading"
-        >
-          <span *ngIf="!isLoading">Ingresar</span>
-          <span *ngIf="isLoading">Ingresando...</span>
-        </button>
-      </form>
+        <!-- Loading spinner overlay -->
+        <nz-spin [nzSpinning]="isLoading" nzTip="Ingresando...">
+          <form nz-form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
 
-      <!-- Link para registro -->
-      <div class="register-link">
-        <span>¿Aún no creaste tu cuenta? </span>
-        <a (click)="navigateToRegister()" class="register-link-text">Regístrate aquí</a>
-      </div>
+            <!-- Campo NIT -->
+            <nz-form-item>
+              <nz-form-control [nzErrorTip]="nitErrorTemplate">
+                <input
+                  nz-input
+                  formControlName="nit"
+                  placeholder="NIT o cédula de ciudadanía"
+                  id="nit"
+                  autocomplete="username"
+                  nzSize="large"
+                  class="login-input">
+
+                <ng-template #nitErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    El NIT o cédula es requerido
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('pattern')">
+                    Formato de NIT o cédula no válido
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+
+            <!-- Campo Contraseña -->
+            <nz-form-item>
+              <nz-form-control [nzErrorTip]="passwordErrorTemplate">
+                <nz-input-group nzSize="large">
+                  <input
+                    nz-input
+                    [type]="passwordVisible ? 'text' : 'password'"
+                    formControlName="password"
+                    placeholder="Contraseña"
+                    id="password"
+                    autocomplete="current-password"
+                    nzSize="large"
+                    class="login-input">
+                  <i
+                    nz-icon
+                    [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+                    (click)="togglePasswordVisibility()"
+                    class="password-toggle">
+                  </i>
+                </nz-input-group>
+
+                <ng-template #passwordErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    La contraseña es requerida
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('minlength')">
+                    La contraseña debe tener al menos 6 caracteres
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+
+            <!-- Botón de login -->
+            <nz-form-item>
+              <nz-form-control>
+                <button
+                  nz-button
+                  nzType="primary"
+                  nzSize="large"
+                  nzBlock
+                  [nzLoading]="isLoading"
+                  [disabled]="!loginForm.valid || isLoading"
+                  class="login-btn"
+                  type="submit">
+                  Ingresar
+                </button>
+              </nz-form-control>
+            </nz-form-item>
+
+            <!-- Divider -->
+            <nz-divider nzText="O" nzOrientation="center" class="login-divider"></nz-divider>
+
+            <!-- Enlaces -->
+            <div class="login-links">
+              <p class="register-text">
+                ¿Aún no creaste tu cuenta?
+                 <i nz-icon nzType="user-add" nzTheme="outline"></i>
+                <a (click)="navigateToRegister()" class="register-link"> Regístrate aquí</a>
+              </p>
+              <p>
+                <i nz-icon nzType="question-circle" nzTheme="outline"></i>
+                <a (click)="navigateToForgotPassword()" class="forgot-password-link"> ¿Olvidaste tu contraseña?</a>
+              </p>
+            </div>
+          </form>
+        </nz-spin>
+      </nz-card>
     </div>
   </div>
 </div>
