@@ -3,7 +3,6 @@
 
   <div class="login-content">
 
-    <!-- Tarjeta de login -->
     <div class="login-card-wrapper">
       <nz-card class="login-card" [nzBordered]="false">
         <div class="logo-section">
@@ -14,7 +13,6 @@
           <p>Ingresa y gestiona tus referidos con nosotros</p>
         </div>
 
-        <!-- Alert de error -->
         <nz-alert
           *ngIf="errorMessage"
           [nzMessage]="errorMessage"
@@ -25,11 +23,9 @@
           class="error-alert">
         </nz-alert>
 
-        <!-- Loading spinner overlay -->
         <nz-spin [nzSpinning]="isLoading" nzTip="Ingresando...">
           <form nz-form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
 
-            <!-- Campo NIT -->
             <nz-form-item>
               <nz-form-control [nzErrorTip]="nitErrorTemplate">
                 <input
@@ -52,7 +48,6 @@
               </nz-form-control>
             </nz-form-item>
 
-            <!-- Campo Contraseña -->
             <nz-form-item>
               <nz-form-control [nzErrorTip]="passwordErrorTemplate">
                 <nz-input-group nzSize="large">
@@ -84,7 +79,6 @@
               </nz-form-control>
             </nz-form-item>
 
-            <!-- Botón de login -->
             <nz-form-item>
               <nz-form-control>
                 <button
@@ -101,10 +95,8 @@
               </nz-form-control>
             </nz-form-item>
 
-            <!-- Divider -->
             <nz-divider nzText="O" nzOrientation="center" class="login-divider"></nz-divider>
 
-            <!-- Enlaces -->
             <div class="login-links">
               <p class="register-text">
                 ¿Aún no creaste tu cuenta?

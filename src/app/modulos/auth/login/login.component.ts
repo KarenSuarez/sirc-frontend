@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
-// NG-ZORRO imports
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -111,7 +110,6 @@ export class LoginComponent {
     this.router.navigate(['/auth/forgot-password']);
   }
 
-  // Getters para fácil acceso a los controles del formulario
   get nit() {
     return this.loginForm.get('nit');
   }
