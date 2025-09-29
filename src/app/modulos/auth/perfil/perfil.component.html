@@ -1,1 +1,53 @@
-<p>perfil works!</p>
+<div class="perfil-container">
+  <h1>Tu perfil</h1>
+    <h2>Estas son tus estadisticas</h2>
+
+  <!-- Estadísticas -->
+  <div class="estadisticas-card">
+    <div class="avatar">
+      <img src="../../../../assets/images/icons/perfil_icon.png" alt="Avatar" />
+    </div>
+    <div class="estadisticas">
+      <div>
+        <span class="numero azul">3000</span>
+        <p>puntos</p>
+      </div>
+      <div>
+        <span class="numero verde">150</span>
+        <p>referidos</p>
+      </div>
+      <div>
+        <span class="numero rojo">$350.000</span>
+        <p>créditos</p>
+      </div>
+      <div>
+        <span class="numero naranja">A</span>
+        <p>categoría</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-cards">
+    <!-- Datos del usuario -->
+    <div class="card datos">
+      <h3>Tus datos</h3>
+      <p class="dato"><strong>Nombre completo:</strong> {{ usuario.nombre }}</p>
+      <p class="dato"><strong>Correo:</strong> {{ usuario.correo }}</p>
+      <p class="dato"><strong>Tipo:</strong> {{ usuario.tipoDoc }} {{ usuario.documento }}</p>
+      <p class="dato"><strong>Número de teléfono:</strong> {{ usuario.telefono }}</p>
+      <p class="dato"><strong>Fecha de nacimiento:</strong> {{ usuario.fechaNacimiento }}</p>
+
+      <button class="btn primary">Actualizar tus datos ✏️</button>
+      <button class="btn secondary">Cambia tu contraseña</button>
+    </div>
+
+    <!-- Código de referidos -->
+    <div class="card referidos">
+      <h3>Tu código y enlace de referidos</h3>
+      <p class="codigo">{{ usuario.codigo }}</p>
+      <input type="text" [value]="usuario.link" readonly />
+      <button class="btn link">Copiar link</button>
+      <p class="nota">¡Comparte tu código y agrega a tu próximo referido! </p>
+    </div>
+  </div>
+</div>
