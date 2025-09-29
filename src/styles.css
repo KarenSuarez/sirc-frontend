@@ -1,6 +1,3 @@
-/* src/styles.css */
-
-/* Variables CSS globales - DEBEN ESTAR AQUÍ */
 :root {
   --primary-color: #4A90E2;
   --primary-dark: #3A7BC8;
@@ -11,7 +8,6 @@
   --border-radius: 8px;
 }
 
-/* Estilos globales de Ant Design si los necesitas */
 .ant-btn-primary {
   background-color: var(--primary-color) !important;
   border-color: var(--primary-color) !important;
@@ -31,3 +27,4 @@
 .ant-input:hover {
   border-color: var(--primary-color) !important;
 }
+

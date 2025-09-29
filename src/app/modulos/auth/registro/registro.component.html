@@ -1,134 +1,237 @@
 <div class="register-container">
-  <div class="register-left">
-    <!-- Logo y branding -->
-    <div class="brand-section">
-      <div class="logo">
-        <img src="assets/images/clarisa-logo.png" alt="Clarisa Logo" class="logo-img">
-      </div>
-      <h1 class="brand-title">CLARISA</h1>
-      <p class="brand-subtitle">Software Administrativo y de Facturación</p>
+  <div class="background-overlay"></div>
 
-      <div class="system-info">
-        <h2 class="system-title">Sistema de puntos y referidos de Clarisa Cloud</h2>
-      </div>
-    </div>
-  </div>
-
-  <div class="register-right">
-    <div class="register-form-container">
-      <div class="form-header">
-        <h3>Regístrate y comienza a recibir recompensas</h3>
-      </div>
-
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
-        <!-- Campo Nombre Completo -->
-        <div class="form-group">
-          <input
-            type="text"
-            formControlName="fullName"
-            placeholder="Nombre completo"
-            class="form-input"
-            [class.error]="fullName?.invalid && fullName?.touched"
-          >
-          <div *ngIf="fullName?.invalid && fullName?.touched" class="error-message">
-            <span *ngIf="fullName?.errors?.['required']">El nombre completo es requerido</span>
-            <span *ngIf="fullName?.errors?.['minlength']">El nombre debe tener al menos 2 caracteres</span>
-          </div>
+  <div class="register-content">
+    <div class="register-card-wrapper">
+      <nz-card class="register-card" [nzBordered]="false">
+        <div class="logo-section">
+          <img src="assets/images/logo/clarisa-plano.png" alt="Clarisa Logo" class="logo-img">
+        </div>
+        <div class="system-header">
+          <h3>Crear nueva cuenta en Puntos Clarisa</h3>
+          <p>Regístrate y comienza a gestionar tus referidos</p>
         </div>
 
-        <!-- Campo Tipo de Identidad -->
-        <div class="form-group">
-          <select
-            formControlName="identityType"
-            class="form-select"
-            [class.error]="identityType?.invalid && identityType?.touched"
-          >
-            <option value="" disabled>Tipo de identidad</option>
-            <option *ngFor="let type of identityTypes" [value]="type.value">
-              {{ type.label }}
-            </option>
-          </select>
-          <div *ngIf="identityType?.invalid && identityType?.touched" class="error-message">
-            <span *ngIf="identityType?.errors?.['required']">El tipo de identidad es requerido</span>
-          </div>
-        </div>
+        <nz-alert
+          *ngIf="errorMessage"
+          [nzMessage]="errorMessage"
+          nzType="error"
+          nzCloseable
+          nzShowIcon
+          (nzOnClose)="clearError()"
+          class="error-alert">
+        </nz-alert>
 
-        <!-- Campo Correo Electrónico -->
-        <div class="form-group">
-          <input
-            type="email"
-            formControlName="email"
-            placeholder="Correo electrónico"
-            class="form-input"
-            [class.error]="email?.invalid && email?.touched"
-          >
-          <div *ngIf="email?.invalid && email?.touched" class="error-message">
-            <span *ngIf="email?.errors?.['required']">El correo electrónico es requerido</span>
-            <span *ngIf="email?.errors?.['email']">Ingresa un correo electrónico válido</span>
-          </div>
-        </div>
+        <nz-spin [nzSpinning]="isLoading" nzTip="Creando cuenta...">
+          <form nz-form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
 
-        <!-- Campo Teléfono -->
-        <div class="form-group">
-          <input
-            type="tel"
-            formControlName="phone"
-            placeholder="Teléfono"
-            class="form-input"
-            [class.error]="phone?.invalid && phone?.touched"
-          >
-          <div *ngIf="phone?.invalid && phone?.touched" class="error-message">
-            <span *ngIf="phone?.errors?.['required']">El teléfono es requerido</span>
-            <span *ngIf="phone?.errors?.['pattern']">El teléfono debe tener 10 dígitos</span>
-          </div>
-        </div>
+            <nz-form-item>
+              <nz-form-control [nzErrorTip]="fullNameErrorTemplate">
+                <input
+                  nz-input
+                  formControlName="fullName"
+                  placeholder="Nombre completo"
+                  id="fullName"
+                  autocomplete="name"
+                  nzSize="large"
+                  class="register-input">
 
-        <!-- Campo Contraseña -->
-        <div class="form-group">
-          <input
-            type="password"
-            formControlName="password"
-            placeholder="Contraseña"
-            class="form-input"
-            [class.error]="password?.invalid && password?.touched"
-          >
-          <div *ngIf="password?.invalid && password?.touched" class="error-message">
-            <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
-            <span *ngIf="password?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
-          </div>
-        </div>
+                <ng-template #fullNameErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    El nombre completo es requerido
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('minlength')">
+                    El nombre debe tener al menos 2 caracteres
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
 
-        <!-- Campo Confirmar Contraseña -->
-        <div class="form-group">
-          <input
-            type="password"
-            formControlName="confirmPassword"
-            placeholder="Confirmar contraseña"
-            class="form-input"
-            [class.error]="confirmPassword?.invalid && confirmPassword?.touched"
-          >
-          <div *ngIf="confirmPassword?.invalid && confirmPassword?.touched" class="error-message">
-            <span *ngIf="confirmPassword?.errors?.['required']">Confirma tu contraseña</span>
-            <span *ngIf="confirmPassword?.errors?.['passwordMismatch']">Las contraseñas no coinciden</span>
-          </div>
-        </div>
+            <div class="form-row">
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="identityTypeErrorTemplate">
+                  <nz-select
+                    formControlName="identityType"
+                    nzPlaceHolder="Tipo de identidad"
+                    nzSize="large"
+                    class="register-select">
+                    <nz-option
+                      *ngFor="let type of identityTypes"
+                      [nzValue]="type.value"
+                      [nzLabel]="type.label">
+                    </nz-option>
+                  </nz-select>
 
-        <!-- Botón de registro -->
-        <button
-          type="submit"
-          class="register-btn"
-          [disabled]="isLoading"
-        >
-          <span *ngIf="!isLoading">Registrarse</span>
-          <span *ngIf="isLoading">Registrando...</span>
-        </button>
-      </form>
+                  <ng-template #identityTypeErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      Selecciona el tipo de identidad
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
 
-      <!-- Link para login -->
-      <div class="login-link">
-        <span>Ya tienes una cuenta </span>
-        <a (click)="navigateToLogin()" class="login-link-text">Inicia sesión</a>
-      </div>
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="identityNumberErrorTemplate">
+                  <input
+                    nz-input
+                    formControlName="identityNumber"
+                    placeholder="Número de identidad"
+                    id="identityNumber"
+                    autocomplete="off"
+                    nzSize="large"
+                    class="register-input">
+
+                  <ng-template #identityNumberErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      El número de identidad es requerido
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('pattern')">
+                      Formato de identidad no válido
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <div class="form-row">
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="emailErrorTemplate">
+                  <input
+                    nz-input
+                    formControlName="email"
+                    placeholder="Correo electrónico"
+                    id="email"
+                    autocomplete="email"
+                    type="email"
+                    nzSize="large"
+                    class="register-input">
+
+                  <ng-template #emailErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      El correo electrónico es requerido
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('email')">
+                      Ingresa un correo electrónico válido
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="phoneErrorTemplate">
+                  <input
+                    nz-input
+                    formControlName="phone"
+                    placeholder="Teléfono (10 dígitos)"
+                    id="phone"
+                    autocomplete="tel"
+                    type="tel"
+                    nzSize="large"
+                    class="register-input">
+
+                  <ng-template #phoneErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      El teléfono es requerido
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('pattern')">
+                      El teléfono debe tener 10 dígitos
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <div class="form-row">
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="passwordErrorTemplate">
+                  <nz-input-group nzSize="large">
+                    <input
+                      nz-input
+                      [type]="passwordVisible ? 'text' : 'password'"
+                      formControlName="password"
+                      placeholder="Contraseña"
+                      id="password"
+                      autocomplete="new-password"
+                      nzSize="large"
+                      class="register-input">
+                    <i
+                      nz-icon
+                      [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+                      (click)="togglePasswordVisibility()"
+                      class="password-toggle">
+                    </i>
+                  </nz-input-group>
+
+                  <ng-template #passwordErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      La contraseña es requerida
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('minlength')">
+                      La contraseña debe tener al menos 6 caracteres
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="confirmPasswordErrorTemplate">
+                  <nz-input-group nzSize="large">
+                    <input
+                      nz-input
+                      [type]="confirmPasswordVisible ? 'text' : 'password'"
+                      formControlName="confirmPassword"
+                      placeholder="Confirmar contraseña"
+                      id="confirmPassword"
+                      autocomplete="new-password"
+                      nzSize="large"
+                      class="register-input">
+                    <i
+                      nz-icon
+                      [nzType]="confirmPasswordVisible ? 'eye-invisible' : 'eye'"
+                      (click)="toggleConfirmPasswordVisibility()"
+                      class="password-toggle">
+                    </i>
+                  </nz-input-group>
+
+                  <ng-template #confirmPasswordErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      Confirma tu contraseña
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('passwordMismatch')">
+                      Las contraseñas no coinciden
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <nz-form-item>
+              <nz-form-control>
+                <button
+                  nz-button
+                  nzType="primary"
+                  nzSize="large"
+                  nzBlock
+                  [nzLoading]="isLoading"
+                  [disabled]="!registerForm.valid || isLoading"
+                  class="register-btn"
+                  type="submit">
+                  Crear cuenta
+                </button>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-divider nzText="O" nzOrientation="center" class="register-divider"></nz-divider>
+            <div class="register-links">
+              <p class="login-text">
+                ¿Ya tienes una cuenta?
+                <i nz-icon nzType="login" nzTheme="outline"></i>
+                <a (click)="navigateToLogin()" class="login-link"> Inicia sesión aquí</a>
+              </p>
+            </div>
+          </form>
+        </nz-spin>
+      </nz-card>
     </div>
   </div>
 </div>
