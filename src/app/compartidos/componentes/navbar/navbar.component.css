@@ -1,0 +1,54 @@
+.navbar {
+  background-color: #ffffff;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* 👈 sombra */
+}
+
+/* Lista horizontal */
+.navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 20px; /* Espaciado entre enlaces */
+}
+
+/* Links */
+.navbar a {
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s, border-bottom 0.3s;
+  padding: 5px 2px 5px 2px ;
+}
+
+/* Hover */
+.navbar a:hover {
+  background: #3091CB;
+  border-radius: 10%;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid #c3c3c3;
+}
+
+/* Enlace activo (cuando está en la ruta actual) */
+.navbar a.active {
+  font-weight: bold;
+  border-bottom: 2px solid white;
+}
+
+/* Responsive: menú se apila en pantallas pequeñas */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar ul {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+}
