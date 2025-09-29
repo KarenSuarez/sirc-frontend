@@ -7,18 +7,6 @@
   overflow: hidden;
 }
 
-.background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('../../../../assets/images/backgrounds/imagen-login-clarisa.jpg');
-  background-size: cover;
-  background-position: center right;
-  background-repeat: no-repeat;
-  z-index: 1;
-}
 
 .login-content {
   position: relative;
@@ -171,13 +159,11 @@
   transform: translateY(-1px);
 }
 
-/* Divider */
 ::ng-deep .login-divider {
   margin: 1.5rem 0 !important;
   color: var(--text-light) !important;
 }
 
-/* Enlaces */
 .login-links {
   text-align: center;
   font-size: 0.9rem;
@@ -218,13 +204,11 @@
   color: var(--primary-dark) !important;
 }
 
-/* Alert de error */
 ::ng-deep .error-alert {
   margin-bottom: 1.5rem;
   border-radius: var(--border-radius);
 }
 
-/* Estados de validación */
 ::ng-deep .ant-form-item-has-error .login-input {
   border-color: #ff4d4f !important;
 }
@@ -233,7 +217,6 @@
   box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
   .login-content {
     flex-direction: column;
@@ -281,7 +264,6 @@
   }
 }
 
-/* Animaciones */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -297,7 +279,6 @@
   animation: fadeInUp 0.8s ease-out;
 }
 
-/* Mejoras de accesibilidad */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

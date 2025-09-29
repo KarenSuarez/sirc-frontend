@@ -1,265 +1,321 @@
 .register-container {
-  display: flex;
+  position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.register-left {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+
+
+.register-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
   padding: 2rem;
-  background: white;
-  color: black;
 }
 
-.brand-section {
+.register-card-wrapper {
+  flex: 0 0 650px;
+  max-width: 650px;
+  width: 100%;
+}
+
+.register-card {
+  background-color: var(--white) !important;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.register-card ::ng-deep .ant-card-body {
+  padding: 2.5rem 2rem;
+}
+
+.logo-section {
   text-align: center;
-  max-width: 400px;
-}
-
-.logo {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .logo-img {
-  width: 80px;
-  height: 80px;
+  width: 200px;
+  height: 100px;
   object-fit: contain;
+  margin-bottom: 0.5rem;
 }
 
-.brand-title {
-  font-size: 3rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
-  letter-spacing: 2px;
-}
-
-.brand-subtitle {
-  font-size: 1rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-  font-weight: 300;
-}
-
-.system-info {
-  margin-top: 2rem;
-}
-
-.system-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  line-height: 1.4;
-}
-
-.register-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.register-form-container {
-  width: 100%;
-  max-width: 420px;
-  background: white;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.1);
-}
-
-.form-header {
+.system-header {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.form-header h3 {
-  color: #4a5568;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
+.system-header h3 {
+  color: var(--text-dark) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  margin: 0 0 0.5rem 0 !important;
   line-height: 1.4;
+}
+
+.system-header p {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-input,
-.form-select {
-  padding: 0.875rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  background: #f8fafc;
   width: 100%;
-  box-sizing: border-box;
 }
 
-.form-input:focus,
-.form-select:focus {
-  outline: none;
-  border-color: #2583C6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.register-form ::ng-deep .ant-form-item {
+  margin-bottom: 1rem;
 }
 
-.form-input::placeholder {
-  color: #a0aec0;
+.form-row {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
 }
 
-.form-select {
+.form-item-half {
+  flex: 1;
+  margin-bottom: 1rem !important;
+}
+
+.register-input {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #E5E7EB !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  width: 100% !important;
+}
+
+.register-input:hover {
+  border-color: var(--primary-color) !important;
+}
+
+.register-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+}
+
+.register-select {
+  width: 100% !important;
+}
+
+::ng-deep .register-select .ant-select-selector {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #E5E7EB !important;
+  padding: 8px 16px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .register-select .ant-select-selector:hover {
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .register-select.ant-select-focused .ant-select-selector {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+}
+
+::ng-deep .register-select .ant-select-selection-placeholder {
+  color: #999 !important;
+  font-size: 14px !important;
+}
+
+::ng-deep .ant-input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+::ng-deep .ant-input-group .register-input {
+  flex: 1;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .ant-input-group-addon {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
-.form-select option:disabled {
-  color: #a0aec0;
+.password-toggle {
+  cursor: pointer;
+  color: var(--text-light);
+  transition: color 0.3s ease;
+  padding: 0 12px;
 }
 
-.form-input.error,
-.form-select.error {
-  border-color: #e53e3e;
-  background: #fed7d7;
-}
-
-.error-message {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #e53e3e;
-  display: flex;
-  align-items: center;
+.password-toggle:hover {
+  color: var(--primary-color);
 }
 
 .register-btn {
-  background: #2583C6;
-  color: white;
-  border: none;
-  padding: 0.875rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  border-radius: var(--border-radius) !important;
+  height: 48px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease !important;
   margin-top: 0.5rem;
 }
 
-.register-btn:hover:not(:disabled) {
+.register-btn:hover {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.register-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+::ng-deep .register-divider {
+  margin: 1.5rem 0 !important;
+  color: var(--text-light) !important;
+}
+
+.register-links {
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.register-links p {
+  margin: 0.5rem 0;
+  color: var(--text-light);
 }
 
 .login-link {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
-  color: #718096;
-}
-
-.login-link-text {
-  color: #2583C6;
-  text-decoration: none;
+  color: var(--primary-color) !important;
   font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.3s ease;
 }
 
-.login-link-text:hover {
-  color: #136AA9;
+.login-link:hover {
+  color: var(--primary-dark) !important;
   text-decoration: underline;
 }
 
-/* Responsive Design */
+.login-link ~ .anticon,
+.register-links .anticon {
+  color: var(--primary-color) !important;
+  font-size: 1.1em;
+  vertical-align: middle;
+  transition: color 0.3s;
+}
+
+.login-link:hover ~ .anticon,
+.register-links .anticon:hover {
+  color: var(--primary-dark) !important;
+}
+
+::ng-deep .error-alert {
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
+}
+
+::ng-deep .ant-form-item-has-error .register-input {
+  border-color: #ff4d4f !important;
+}
+
+::ng-deep .ant-form-item-has-error .register-input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+}
+
+::ng-deep .ant-form-item-has-error .ant-select-selector {
+  border-color: #ff4d4f !important;
+}
+
+::ng-deep .ant-form-item-has-error .ant-select-focused .ant-select-selector {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+}
+
 @media (max-width: 768px) {
-  .register-container {
+  .register-content {
+    padding: 1.5rem;
+  }
+
+  .register-card ::ng-deep .ant-card-body {
+    padding: 2rem 1.5rem;
+  }
+
+  .register-card-wrapper {
+    max-width: 100%;
+    width: 100%;
+    flex: none;
+  }
+
+  .background-overlay {
+    background-position: center;
+  }
+
+  .form-row {
     flex-direction: column;
+    gap: 0;
   }
 
-  .register-left {
-    min-height: 30vh;
-    padding: 1.5rem;
-  }
-
-  .brand-title {
-    font-size: 2rem;
-  }
-
-  .system-title {
-    font-size: 1.25rem;
-  }
-
-  .register-right {
-    padding: 1.5rem;
-  }
-
-  .register-form-container {
-    padding: 2rem;
+  .form-item-half {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .register-form-container {
-    padding: 1.5rem;
+  .register-content {
+    padding: 1rem;
   }
 
-  .brand-title {
-    font-size: 1.75rem;
+  .register-card ::ng-deep .ant-card-body {
+    padding: 1.5rem 1rem;
   }
 
-  .form-header h3 {
-    font-size: 1.1rem;
+  .system-header h3 {
+    font-size: 1rem !important;
   }
 
-  .register-form {
-    gap: 1rem;
+  .form-row {
+    gap: 0;
   }
 }
 
-/* Mejoras adicionales para mejor UX */
-.form-input:valid:not(:placeholder-shown) {
-  border-color: #38a169;
-}
-
-.form-select:valid {
-  border-color: #38a169;
-}
-
-.register-btn:active {
-  transform: translateY(0);
-}
-
-/* Animación suave para el contenedor */
-.register-form-container {
-  animation: fadeInUp 0.6s ease-out;
-}
-
+/* Animaciones */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.register-card {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
