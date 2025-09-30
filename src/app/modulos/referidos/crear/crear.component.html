@@ -1,1 +1,26 @@
-<p>crear works!</p>
+<div class="card codigo-card">
+  <p><strong>¿Quieres referir a un próximo cliente con sus datos?</strong></p>
+    <button class="btn primary" (click)="abrirModal()">Agregar</button>
+
+  <h4>Tu código y enlace de referidos</h4>
+  <p class="codigo">{{ usuario.codigo }}</p>
+  <input type="text" [value]="usuario.link" readonly />
+  <button class="btn link" (click)="copiarLink()">Copiar link</button>
+</div>
+<!-- Formulario ventana emergente -->
+<div class="modal" *ngIf="mostrarModal">
+  <div class="modal-content">
+    <h3>¿Cuáles son los datos de tu referido?</h3>
+
+    <label for="nit">Su NIT o CC</label>
+    <input id="nit" type="text" [(ngModel)]="nuevoReferido.nit" />
+
+    <label for="correo">Su correo de contacto</label>
+    <input id="correo" type="email" [(ngModel)]="nuevoReferido.correo" />
+
+    <div class="modal-actions">
+      <button class="btn primary" (click)="guardarReferido()">Agregar</button>
+      <button class="btn secondary" (click)="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
