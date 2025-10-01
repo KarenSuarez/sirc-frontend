@@ -5,6 +5,7 @@ import { PerfilComponent } from './perfil/perfil.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 export const AUTH_ROUTES: Routes = [
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegistroComponent },
   { path: 'perfil', component: PerfilComponent },

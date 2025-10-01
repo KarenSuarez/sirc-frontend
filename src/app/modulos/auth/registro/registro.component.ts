@@ -54,7 +54,8 @@ export class RegistroComponent {
   constructor(private formBuilder: FormBuilder, private router: Router) {
     this.registerForm = this.formBuilder.group(
       {
-        fullName: ['', [Validators.required, Validators.minLength(2)]],
+        firstName: ['', [Validators.required, Validators.minLength(2)]],
+        lastName: ['', [Validators.required, Validators.minLength(2)]],
         identityType: ['', [Validators.required]],
         identityNumber: [
           '',
@@ -71,7 +72,6 @@ export class RegistroComponent {
     );
   }
 
-  // Validador personalizado para confirmar contraseñas
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('confirmPassword');
@@ -112,7 +112,8 @@ export class RegistroComponent {
       this.errorMessage = '';
 
       const registerData = {
-        fullName: this.registerForm.get('fullName')?.value,
+        firstName: this.registerForm.get('firstName')?.value,
+        lastName: this.registerForm.get('lastName')?.value,
         identityType: this.registerForm.get('identityType')?.value,
         identityNumber: this.registerForm.get('identityNumber')?.value,
         email: this.registerForm.get('email')?.value,
@@ -146,24 +147,35 @@ export class RegistroComponent {
     this.router.navigate(['/auth/login']);
   }
 
-  get fullName() {
-    return this.registerForm.get('fullName');
+  // Getters actualizados
+  get firstName() {
+    return this.registerForm.get('firstName');
   }
+
+  get lastName() {
+    return this.registerForm.get('lastName');
+  }
+
   get identityType() {
     return this.registerForm.get('identityType');
   }
+
   get identityNumber() {
     return this.registerForm.get('identityNumber');
   }
+
   get email() {
     return this.registerForm.get('email');
   }
+
   get phone() {
     return this.registerForm.get('phone');
   }
+
   get password() {
     return this.registerForm.get('password');
   }
+
   get confirmPassword() {
     return this.registerForm.get('confirmPassword');
   }

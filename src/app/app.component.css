@@ -1,5 +1,5 @@
 .background-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -8,5 +8,20 @@
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
+  z-index: 0;
+}
+
+.main-content {
+  min-height: 100vh;
+  transition: padding-top 0.3s ease;
+}
+
+.main-content.with-navbar {
+  padding-top: 70px;
+}
+
+/* Asegurar que el contenido esté por encima del background */
+.main-content > * {
+  position: relative;
   z-index: 1;
 }
