@@ -1,19 +1,53 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  // Redirección inicial
+  { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
 
+  // Rutas de autenticación (sin navbar)
   {
     path: 'auth',
     loadChildren: () =>
       import('./modulos/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
 
+  // Dashboard principal (con navbar)
+  {
+    path: 'dashboard',
+    loadChildren: () =>
+      import('./modulos/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
+  },
+
+  // Rutas principales del sistema (con navbar)
   {
     path: 'referentes',
     loadChildren: () =>
       import('./modulos/referentes/referentes.routes').then(
         (m) => m.REFERENTES_ROUTES
+      ),
+  },
+
+  {
+    path: 'referidos',
+    loadChildren: () =>
+      import('./modulos/referidos/referidos.routes').then(
+        (m) => m.REFERIDOS_ROUTES
+      ),
+  },
+
+//  {
+//    path: 'recompensas',
+//    loadChildren: () =>
+//      import('./modulos/recompensas/recompensas.routes').then(
+//        (m) => m.RECOMPENSAS_ROUTES
+//      ),
+//  },
+
+  {
+    path: 'gamificacion',
+    loadChildren: () =>
+      import('./modulos/gamificacion/gamificacion.routes').then(
+        (m) => m.GAMIFICACION_ROUTES
       ),
   },
 
@@ -25,20 +59,17 @@ export const routes: Routes = [
       ),
   },
 
+//  {
+//    path: 'pagos',
+//    loadChildren: () =>
+//      import('./modulos/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
+//  },
+
   {
-    path: 'panel',
+    path: 'paneles',
     loadChildren: () =>
       import('./modulos/paneles/paneles.routes').then((m) => m.PANELES_ROUTES),
   },
-
-  {
-    path: 'gamificacion',
-    loadChildren: () =>
-      import('./modulos/gamificacion/gamificacion.routes').then(
-        (m) => m.GAMIFICACION_ROUTES
-      ),
-  },
-
   // Wildcard para 404
-  { path: '**', redirectTo: 'auth/login' },
+  { path: '**', redirectTo: '/auth/login' },
 ];
