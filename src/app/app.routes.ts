@@ -16,6 +16,13 @@ export const routes: Routes = [
         (m) => m.REFERENTES_ROUTES
       ),
   },
+    {
+    path: 'referidos',
+    loadChildren: () =>
+      import('./modulos/referidos/referidos.routes').then(
+        (m) => m.REFERIDOS_ROUTES
+      ),
+  },
 
   {
     path: 'reportes',
@@ -39,6 +46,5 @@ export const routes: Routes = [
       ),
   },
 
-  // Wildcard para 404
   { path: '**', redirectTo: 'auth/login' },
 ];
