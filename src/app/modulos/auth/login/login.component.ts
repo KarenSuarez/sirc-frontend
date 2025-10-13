@@ -15,6 +15,8 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
 
+import { UsuarioService } from '../../../core/servicios/usuario.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -45,7 +47,8 @@ export class LoginComponent {
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private usuarioService: UsuarioService
   ) {
     this.loginForm = this.formBuilder.group({
       nit: ['', [Validators.required]],
@@ -65,21 +68,23 @@ export class LoginComponent {
         rememberMe: this.loginForm.get('rememberMe')?.value
       };
 
-      console.log('Datos de login:', loginData);
-
-      // Simulación de llamada a API
-      setTimeout(() => {
-        this.isLoading = false;
-
-        // Simular validación (reemplazar con lógica real)
-        if (loginData.nit === '12345678' && loginData.password === 'test123') {
-          this.message.success('¡Bienvenido! Inicio de sesión exitoso');
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.errorMessage = 'NIT/Cédula o contraseña incorrectos. Por favor, verifique sus credenciales.';
-          this.message.error('Credenciales incorrectas');
+      this.usuarioService.login(loginData.nit, loginData.password).subscribe({
+        next: (success) => {
+          this.isLoading = false;
+          if (success) {
+            this.message.success('¡Bienvenido! Inicio de sesión exitoso');
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.errorMessage = 'NIT/Cédula o contraseña incorrectos. Por favor, verifique sus credenciales.';
+            this.message.error('Credenciales incorrectas');
+          }
+        },
+        error: () => {
+          this.isLoading = false;
+          this.errorMessage = 'Error de conexión. Intente nuevamente.';
+          this.message.error('Error de conexión');
         }
-      }, 2000);
+      });
     } else {
       this.markFormGroupTouched();
       this.message.warning('Por favor, complete todos los campos requeridos');

@@ -25,27 +25,52 @@
         <nz-spin [nzSpinning]="isLoading" nzTip="Creando cuenta...">
           <form nz-form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
 
-            <nz-form-item>
-              <nz-form-control [nzErrorTip]="fullNameErrorTemplate">
-                <input
-                  nz-input
-                  formControlName="fullName"
-                  placeholder="Nombre completo"
-                  id="fullName"
-                  autocomplete="name"
-                  nzSize="large"
-                  class="register-input">
+            <!-- Nombres y Apellidos en una fila -->
+            <div class="form-row">
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="firstNameErrorTemplate">
+                  <input
+                    nz-input
+                    formControlName="firstName"
+                    placeholder="Nombres"
+                    id="firstName"
+                    autocomplete="given-name"
+                    nzSize="large"
+                    class="register-input">
 
-                <ng-template #fullNameErrorTemplate let-control>
-                  <ng-container *ngIf="control.hasError('required')">
-                    El nombre completo es requerido
-                  </ng-container>
-                  <ng-container *ngIf="control.hasError('minlength')">
-                    El nombre debe tener al menos 2 caracteres
-                  </ng-container>
-                </ng-template>
-              </nz-form-control>
-            </nz-form-item>
+                  <ng-template #firstNameErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      Los nombres son requeridos
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('minlength')">
+                      Los nombres deben tener al menos 2 caracteres
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item class="form-item-half">
+                <nz-form-control [nzErrorTip]="lastNameErrorTemplate">
+                  <input
+                    nz-input
+                    formControlName="lastName"
+                    placeholder="Apellidos"
+                    id="lastName"
+                    autocomplete="family-name"
+                    nzSize="large"
+                    class="register-input">
+
+                  <ng-template #lastNameErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      Los apellidos son requeridos
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('minlength')">
+                      Los apellidos deben tener al menos 2 caracteres
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
 
             <div class="form-row">
               <nz-form-item class="form-item-half">

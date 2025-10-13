@@ -1,30 +1,38 @@
 :root {
   --primary-color: #4A90E2;
-  --primary-dark: #3A7BC8;
+  --primary-dark: #357ABD;
+  --primary-light: #6BA3E8;
+  --white: #FFFFFF;
   --text-dark: #2C3E50;
   --text-light: #7F8C8D;
-  --white: #ffffff;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --success-color: #27AE60;
+  --warning-color: #F39C12;
+  --danger-color: #E74C3C;
+  --info-color: #3498DB;
   --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-.ant-btn-primary {
-  background-color: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.ant-btn-primary:hover {
-  background-color: var(--primary-dark) !important;
-  border-color: var(--primary-dark) !important;
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-.ant-input:focus,
-.ant-input-focused {
-  border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) fixed;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
-
-.ant-input:hover {
-  border-color: var(--primary-color) !important;
-}
-

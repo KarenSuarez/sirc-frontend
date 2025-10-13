@@ -1,14 +1,24 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  // Redirección inicial
+  { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
 
+  // Rutas de autenticación (sin navbar)
   {
     path: 'auth',
     loadChildren: () =>
       import('./modulos/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
 
+  // Dashboard principal (con navbar)
+  {
+    path: 'dashboard',
+    loadChildren: () =>
+      import('./modulos/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
+  },
+
+  // Rutas principales del sistema (con navbar)
   {
     path: 'referentes',
     loadChildren: () =>
@@ -25,18 +35,20 @@ export const routes: Routes = [
   },
 
   {
-    path: 'reportes',
+    path: 'referidos',
     loadChildren: () =>
-      import('./modulos/reportes/reportes.routes').then(
-        (m) => m.REPORTES_ROUTES
+      import('./modulos/referidos/referidos.routes').then(
+        (m) => m.REFERIDOS_ROUTES
       ),
   },
 
-  {
-    path: 'panel',
-    loadChildren: () =>
-      import('./modulos/paneles/paneles.routes').then((m) => m.PANELES_ROUTES),
-  },
+//  {
+//    path: 'recompensas',
+//    loadChildren: () =>
+//      import('./modulos/recompensas/recompensas.routes').then(
+//        (m) => m.RECOMPENSAS_ROUTES
+//      ),
+//  },
 
   {
     path: 'gamificacion',
@@ -46,5 +58,24 @@ export const routes: Routes = [
       ),
   },
 
-  { path: '**', redirectTo: 'auth/login' },
+  {
+    path: 'reportes',
+    loadChildren: () =>
+      import('./modulos/reportes/reportes.routes').then(
+        (m) => m.REPORTES_ROUTES
+      ),
+  },
+
+//  {
+//    path: 'pagos',
+//    loadChildren: () =>
+//      import('./modulos/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
+//  },
+
+  {
+    path: 'paneles',
+    loadChildren: () =>
+      import('./modulos/paneles/paneles.routes').then((m) => m.PANELES_ROUTES),
+  },
+
 ];
