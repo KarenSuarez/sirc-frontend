@@ -8,7 +8,7 @@ import { Usuario } from '../../../core/modelos/usuario.interface';
 interface MenuItem {
   label: string;
   route: string;
-  icon: string;  // ahora usaremos los nombres de iconos de ng-zorro
+  icon: string;
   roles: string[];
 }
 
@@ -28,37 +28,37 @@ export class NavbarComponent implements OnInit {
   showUserMenu = false;
 
   menuItems: MenuItem[] = [
-    {
-      label: 'Inicio',
-      route: '/dashboard',
-      icon: 'home',
-      roles: ['referente', 'asesor', 'admin', 'contador']
-    },
-    {
-      label: 'Mis referidos',
-      route: '/referidos',
-      icon: 'team',
-      roles: ['referente', 'asesor']
-    },
-    {
-      label: 'Recompensas',
-      route: '/recompensas',
-      icon: 'gift',
-      roles: ['referente']
-    },
-    {
-      label: 'Puntos y categorías',
-      route: '/gamificacion',
-      icon: 'trophy',
-      roles: ['referente']
-    },
-    {
-      label: 'Mi perfil',
-      route: '/auth/perfil',
-      icon: 'user',
-      roles: ['referente', 'asesor', 'admin', 'contador']
-    }
-  ];
+  {
+    label: 'Inicio',
+    route: '/dashboard',
+    icon: 'home',
+    roles: ['referente', 'asesor', 'admin', 'contador']
+  },
+  {
+    label: 'Mis referidos',
+    route: '/referidos/lista',
+    icon: 'team',
+    roles: ['referente']
+  },
+  {
+    label: 'Recompensas',
+    route: '/recompensas/monetaria', // ← Correcto
+    icon: 'gift',
+    roles: ['referente']
+  },
+  {
+    label: 'Puntos y categorías',
+    route: '/gamificacion/puntos', // ← Correcto
+    icon: 'trophy',
+    roles: ['referente']
+  },
+  {
+    label: 'Mi perfil',
+    route: '/auth/perfil',
+    icon: 'user',
+    roles: ['referente', 'asesor', 'admin', 'contador']
+  }
+];
 
   constructor(
     private router: Router,

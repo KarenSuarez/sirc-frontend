@@ -10,15 +10,12 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./modulos/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
-
-  // Dashboard principal (con navbar)
   {
     path: 'dashboard',
     loadChildren: () =>
       import('./modulos/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
   },
 
-  // Rutas principales del sistema (con navbar)
   {
     path: 'referentes',
     loadChildren: () =>
@@ -42,13 +39,13 @@ export const routes: Routes = [
       ),
   },
 
-//  {
-//    path: 'recompensas',
-//    loadChildren: () =>
-//      import('./modulos/recompensas/recompensas.routes').then(
-//        (m) => m.RECOMPENSAS_ROUTES
-//      ),
-//  },
+  {
+    path: 'recompensas',
+    loadChildren: () =>
+      import('./modulos/recompensas/recompensas.routes').then(
+        (m) => m.RECOMPENSAS_ROUTES
+      ),
+  },
 
   {
     path: 'gamificacion',

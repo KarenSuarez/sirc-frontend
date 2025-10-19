@@ -57,39 +57,57 @@ export class LoginComponent {
     });
   }
 
-  onSubmit() {
-    if (this.loginForm.valid) {
-      this.isLoading = true;
-      this.clearError();
+ onSubmit() {
+  if (this.loginForm.valid) {
+    this.isLoading = true;
+    this.clearError();
 
-      const loginData = {
-        nit: this.loginForm.get('nit')?.value,
-        password: this.loginForm.get('password')?.value,
-        rememberMe: this.loginForm.get('rememberMe')?.value
-      };
+    const loginData = {
+      nit: this.loginForm.get('nit')?.value,
+      password: this.loginForm.get('password')?.value,
+      rememberMe: this.loginForm.get('rememberMe')?.value
+    };
 
-      this.usuarioService.login(loginData.nit, loginData.password).subscribe({
-        next: (success) => {
-          this.isLoading = false;
-          if (success) {
-            this.message.success('¡Bienvenido! Inicio de sesión exitoso');
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.errorMessage = 'NIT/Cédula o contraseña incorrectos. Por favor, verifique sus credenciales.';
-            this.message.error('Credenciales incorrectas');
+    this.usuarioService.login(loginData.nit, loginData.password).subscribe({
+      next: (success) => {
+        this.isLoading = false;
+        if (success) {
+          const usuario = this.usuarioService.getUsuarioActual();
+
+          if (usuario) {
+            this.message.success(`¡Bienvenido, ${usuario.nombre}!`);
+
+            // Redirección directa según el rol
+            const panelRoutes: any = {
+              'referente': '/paneles/referente',
+              'asesor': '/paneles/asesor',
+              'admin': '/paneles/admin',
+              'contador': '/paneles/contador'
+            };
+
+            const route = panelRoutes[usuario.rol] || '/paneles/referente';
+
+            // Usar setTimeout para asegurar que la navegación ocurra
+            setTimeout(() => {
+              this.router.navigate([route]);
+            }, 100);
           }
-        },
-        error: () => {
-          this.isLoading = false;
-          this.errorMessage = 'Error de conexión. Intente nuevamente.';
-          this.message.error('Error de conexión');
+        } else {
+          this.errorMessage = 'NIT/Cédula o contraseña incorrectos. Por favor, verifique sus credenciales.';
+          this.message.error('Credenciales incorrectas');
         }
-      });
-    } else {
-      this.markFormGroupTouched();
-      this.message.warning('Por favor, complete todos los campos requeridos');
-    }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = 'Error de conexión. Intente nuevamente.';
+        this.message.error('Error de conexión');
+      }
+    });
+  } else {
+    this.markFormGroupTouched();
+    this.message.warning('Por favor, complete todos los campos requeridos');
   }
+}
 
   private markFormGroupTouched() {
     Object.keys(this.loginForm.controls).forEach(key => {

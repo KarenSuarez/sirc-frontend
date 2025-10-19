@@ -8,5 +8,5 @@ export const PANELES_ROUTES: Routes = [
   { path: 'admin', component: PanelAdminComponent },
   { path: 'referente', component: PanelReferenteComponent },
   { path: 'contador', component: PanelContadorComponent },
-  { path: 'ventas', component: PanelVentasComponent },
+  { path: 'asesor', component: PanelVentasComponent },
 ];

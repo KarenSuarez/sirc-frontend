@@ -1,26 +1,271 @@
-<div class="card codigo-card">
-  <p><strong>¿Quieres referir a un próximo cliente con sus datos?</strong></p>
-    <button class="btn primary" (click)="abrirModal()">Agregar</button>
-
-  <h4>Tu código y enlace de referidos</h4>
-  <p class="codigo">{{ usuario.codigo }}</p>
-  <input type="text" [value]="usuario.link" readonly />
-  <button class="btn link" (click)="copiarLink()">Copiar link</button>
-</div>
-<!-- Formulario ventana emergente -->
-<div class="modal" *ngIf="mostrarModal">
-  <div class="modal-content">
-    <h3>¿Cuáles son los datos de tu referido?</h3>
-
-    <label for="nit">Su NIT o CC</label>
-    <input id="nit" type="text" [(ngModel)]="nuevoReferido.nit" />
-
-    <label for="correo">Su correo de contacto</label>
-    <input id="correo" type="email" [(ngModel)]="nuevoReferido.correo" />
-
-    <div class="modal-actions">
-      <button class="btn primary" (click)="guardarReferido()">Agregar</button>
-      <button class="btn secondary" (click)="cerrarModal()">Cancelar</button>
+<div class="crear-container">
+  <div class="crear-header">
+    <div class="header-content">
+      <h1>Agregar Nuevo Referido</h1>
+      <p>Completa la información del referido para agregarlo a tu lista</p>
     </div>
   </div>
+
+  <nz-card class="crear-card" [nzBordered]="false">
+    <nz-alert
+      *ngIf="errorMessage"
+      [nzMessage]="errorMessage"
+      nzType="error"
+      nzCloseable
+      nzShowIcon
+      (nzOnClose)="clearError()"
+      class="error-alert">
+    </nz-alert>
+
+    <nz-spin [nzSpinning]="isLoading" nzTip="Guardando referido...">
+      <form nz-form [formGroup]="referidoForm" (ngSubmit)="onSubmit()" class="crear-form">
+
+        <!-- Información Personal -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i nz-icon nzType="user"></i>
+            Información Personal
+          </h3>
+
+          <div class="form-row">
+            <nz-form-item class="form-item-half">
+              <nz-form-label nzRequired>Nombres</nz-form-label>
+              <nz-form-control [nzErrorTip]="firstNameErrorTemplate">
+                <input
+                  nz-input
+                  formControlName="firstName"
+                  placeholder="Ingresa los nombres"
+                  id="firstName"
+                  autocomplete="given-name"
+                  nzSize="large"
+                  class="crear-input">
+
+                <ng-template #firstNameErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    Los nombres son requeridos
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('minlength')">
+                    Los nombres deben tener al menos 2 caracteres
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="form-item-half">
+              <nz-form-label nzRequired>Apellidos</nz-form-label>
+              <nz-form-control [nzErrorTip]="lastNameErrorTemplate">
+                <input
+                  nz-input
+                  formControlName="lastName"
+                  placeholder="Ingresa los apellidos"
+                  id="lastName"
+                  autocomplete="family-name"
+                  nzSize="large"
+                  class="crear-input">
+
+                <ng-template #lastNameErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    Los apellidos son requeridos
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('minlength')">
+                    Los apellidos deben tener al menos 2 caracteres
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div class="form-row">
+            <nz-form-item class="form-item-half">
+              <nz-form-label nzRequired>Tipo de Documento</nz-form-label>
+              <nz-form-control [nzErrorTip]="identityTypeErrorTemplate">
+                <nz-select
+                  formControlName="identityType"
+                  nzPlaceHolder="Selecciona el tipo"
+                  nzSize="large"
+                  class="crear-select">
+                  <nz-option
+                    *ngFor="let type of identityTypes"
+                    [nzValue]="type.value"
+                    [nzLabel]="type.label">
+                  </nz-option>
+                </nz-select>
+
+                <ng-template #identityTypeErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    Selecciona el tipo de documento
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="form-item-half">
+              <nz-form-label nzRequired>Número de Documento</nz-form-label>
+              <nz-form-control [nzErrorTip]="identityNumberErrorTemplate">
+                <input
+                  nz-input
+                  formControlName="identityNumber"
+                  placeholder="Número de documento"
+                  id="identityNumber"
+                  autocomplete="off"
+                  nzSize="large"
+                  class="crear-input">
+
+                <ng-template #identityNumberErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    El número de documento es requerido
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('pattern')">
+                    Formato de documento no válido
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <!-- Información de Contacto -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i nz-icon nzType="contacts"></i>
+            Información de Contacto
+          </h3>
+
+          <div class="form-row">
+            <nz-form-item class="form-item-half">
+              <nz-form-label nzRequired>Correo Electrónico</nz-form-label>
+              <nz-form-control [nzErrorTip]="emailErrorTemplate">
+                <input
+                  nz-input
+                  formControlName="email"
+                  placeholder="correo@ejemplo.com"
+                  id="email"
+                  autocomplete="email"
+                  type="email"
+                  nzSize="large"
+                  class="crear-input">
+
+                <ng-template #emailErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    El correo electrónico es requerido
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('email')">
+                    Ingresa un correo electrónico válido
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="form-item-half">
+              <nz-form-label nzRequired>Teléfono</nz-form-label>
+              <nz-form-control [nzErrorTip]="phoneErrorTemplate">
+                <input
+                  nz-input
+                  formControlName="phone"
+                  placeholder="3001234567"
+                  id="phone"
+                  autocomplete="tel"
+                  type="tel"
+                  nzSize="large"
+                  class="crear-input">
+
+                <ng-template #phoneErrorTemplate let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    El teléfono es requerido
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('pattern')">
+                    El teléfono debe tener 10 dígitos
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <!-- Información Laboral (Opcional) -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i nz-icon nzType="bank"></i>
+            Información Laboral
+            <span class="optional-label">(Opcional)</span>
+          </h3>
+
+          <div class="form-row">
+            <nz-form-item class="form-item-half">
+              <nz-form-label>Empresa</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="empresa"
+                  placeholder="Nombre de la empresa"
+                  id="empresa"
+                  nzSize="large"
+                  class="crear-input">
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="form-item-half">
+              <nz-form-label>Cargo</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="cargo"
+                  placeholder="Cargo o posición"
+                  id="cargo"
+                  nzSize="large"
+                  class="crear-input">
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i nz-icon nzType="file-text"></i>
+            Observaciones
+            <span class="optional-label">(Opcional)</span>
+          </h3>
+
+          <nz-form-item>
+            <nz-form-label>Notas adicionales</nz-form-label>
+            <nz-form-control>
+              <textarea
+                nz-input
+                formControlName="observaciones"
+                placeholder="Información adicional sobre el referido..."
+                class="crear-textarea">
+              </textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+          <button
+            nz-button
+            nzType="default"
+            nzSize="large"
+            (click)="cancelar()"
+            [disabled]="isLoading"
+            class="cancel-btn">
+            <i nz-icon nzType="close"></i>
+            Cancelar
+          </button>
+
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="large"
+            [nzLoading]="isLoading"
+            [disabled]="!referidoForm.valid || isLoading"
+            class="submit-btn"
+            type="submit">
+            <i nz-icon nzType="save"></i>
+            Guardar Referido
+          </button>
+        </div>
+      </form>
+    </nz-spin>
+  </nz-card>
 </div>

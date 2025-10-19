@@ -1,1 +1,118 @@
-<p>panel-referente works!</p>
+<div class="dashboard-container" *ngIf="usuario">
+  <div class="dashboard-header">
+    <h1>¡Bienvenido, {{ usuario.nombre }}!</h1>
+    <p>Dashboard de Referente</p>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="estadisticas-section">
+    <nz-card class="estadisticas-card" [nzBordered]="false">
+      <div class="estadisticas-content">
+        <div class="avatar-section">
+          <nz-avatar
+            [nzSize]="80"
+            [nzSrc]="usuario.avatar"
+            [nzText]="usuario.nombre.charAt(0).toUpperCase()">
+          </nz-avatar>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <nz-statistic
+              [nzValue]="usuario.puntos || 0"
+              nzTitle="Puntos">
+            </nz-statistic>
+          </div>
+          <div class="stat-item">
+            <nz-statistic
+              [nzValue]="usuario.referidos || 0"
+              nzTitle="Referidos">
+            </nz-statistic>
+          </div>
+          <div class="stat-item">
+            <nz-statistic
+              [nzValue]="usuario.creditos || 0"
+              nzTitle="Créditos"
+              nzPrefix="$">
+            </nz-statistic>
+          </div>
+          <div class="stat-item">
+            <div class="categoria-display">
+              <span class="categoria-letra">{{ usuario.categoria || 'N/A' }}</span>
+              <span class="categoria-label">Categoría</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Información y Código de Referidos -->
+  <div class="info-section">
+    <div class="info-grid">
+      <!-- Información Personal -->
+      <nz-card nzTitle="Tu Información" class="info-card" [nzExtra]="extraTemplate">
+        <div class="user-info">
+          <div class="info-item">
+            <strong>Nombre completo:</strong>
+            <span>{{ usuario.nombre }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Correo:</strong>
+            <span>{{ usuario.correo }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Documento:</strong>
+            <span>{{ usuario.tipoDoc }} {{ usuario.documento }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Teléfono:</strong>
+            <span>{{ usuario.telefono }}</span>
+          </div>
+        </div>
+
+        <ng-template #extraTemplate>
+          <button nz-button nzType="link" (click)="navigateToProfile()">
+            <i nz-icon nzType="edit"></i> Editar
+          </button>
+        </ng-template>
+      </nz-card>
+
+      <!-- Código de Referidos -->
+      <nz-card nzTitle="Tu Código de Referidos" class="referidos-card" *ngIf="usuario.codigo">
+        <div class="referidos-content">
+          <div class="codigo-section">
+            <label>Código de Referido:</label>
+            <div class="codigo-display">
+              <span class="codigo">{{ usuario.codigo }}</span>
+              <button nz-button nzType="default" (click)="copiarCodigo()">
+                <i nz-icon nzType="copy"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="link-section" *ngIf="usuario.link">
+            <label>Enlace de Referido:</label>
+            <nz-input-group nzSuffix="suffixTemplate">
+              <input
+                nz-input
+                [value]="usuario.link"
+                readonly
+                class="link-input">
+              <ng-template #suffixTemplate>
+                <button nz-button nzType="link" (click)="copiarLink()">
+                  <i nz-icon nzType="copy"></i>
+                </button>
+              </ng-template>
+            </nz-input-group>
+          </div>
+
+          <div class="referidos-note">
+            <i nz-icon nzType="info-circle"></i>
+            ¡Comparte tu código y agrega a tu próximo referido!
+          </div>
+        </div>
+      </nz-card>
+    </div>
+  </div>
+</div>

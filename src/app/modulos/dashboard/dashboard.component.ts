@@ -73,3 +73,4 @@ export class DashboardComponent implements OnInit {
     return titles[this.usuario.rol] || 'Dashboard';
   }
 }
+

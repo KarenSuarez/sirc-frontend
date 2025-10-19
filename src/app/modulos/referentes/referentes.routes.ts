@@ -4,7 +4,7 @@ import { ListaComponent } from './lista/lista.component';
 import { PerfilComponent } from './perfil/perfil.component';
 
 export const REFERENTES_ROUTES: Routes = [
-  { path: 'Crear', component: CrearComponent },
-  { path: 'Lista', component: ListaComponent },
-  { path: 'Perfil', component: PerfilComponent },
+  { path: 'crear', component: CrearComponent },
+  { path: 'lista', component: ListaComponent },
+  { path: 'perfil', component: PerfilComponent },
 ];

@@ -22,3 +22,4 @@ export interface Estadisticas {
   creditos: number;
   categoria: string;
 }
+
