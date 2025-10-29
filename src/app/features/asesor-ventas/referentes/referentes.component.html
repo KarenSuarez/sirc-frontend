@@ -1,0 +1,334 @@
+<div class="referentes-container">
+  <div class="referentes-header">
+    <div class="header-content">
+      <h1>Gestión de Referentes</h1>
+      <p>Supervisa el desempeño y actividad de los referentes</p>
+    </div>
+    <div class="header-actions">
+      <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
+        <input
+          type="text"
+          nz-input
+          placeholder="Buscar referente..."
+          [(ngModel)]="searchText"
+          (ngModelChange)="filtrarReferentes()" />
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="search"></i>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Estadísticas generales -->
+  <div class="estadisticas-section">
+    <nz-card [nzBordered]="false" class="estadisticas-card">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon referentes">
+            <i nz-icon nzType="team"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Referentes</div>
+            <div class="stat-value">{{ referentes.length }}</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon referidos">
+            <i nz-icon nzType="usergroup-add"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Referidos</div>
+            <div class="stat-value">{{ calcularTotalReferidos() }}</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon conversiones">
+            <i nz-icon nzType="check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Conversiones</div>
+            <div class="stat-value">{{ calcularTotalConversiones() }}</div>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon comisiones">
+            <i nz-icon nzType="dollar"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Comisiones Totales</div>
+            <div class="stat-value">{{ calcularTotalComisiones() | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-section">
+    <nz-segmented
+      [nzOptions]="opcionesFiltro"
+      [(ngModel)]="filtroActual"
+      (ngModelChange)="aplicarFiltroRapido()">
+    </nz-segmented>
+
+    <nz-select
+      [(ngModel)]="ordenarPor"
+      (ngModelChange)="ordenarReferentes()"
+      class="ordenar-select">
+      <nz-option nzValue="nombre" nzLabel="Ordenar por Nombre"></nz-option>
+      <nz-option nzValue="referidos" nzLabel="Más Referidos"></nz-option>
+      <nz-option nzValue="conversiones" nzLabel="Más Conversiones"></nz-option>
+      <nz-option nzValue="comisiones" nzLabel="Mayores Comisiones"></nz-option>
+      <nz-option nzValue="nivel" nzLabel="Mayor Nivel"></nz-option>
+    </nz-select>
+  </div>
+
+  <!-- Tabla de referentes -->
+  <div class="tabla-section">
+    <nz-card [nzBordered]="false" class="tabla-card">
+      <div class="referentes-grid">
+        <div
+          *ngFor="let referente of referentesFiltrados"
+          class="referente-card"
+          (click)="verDetalleReferente(referente)">
+
+          <!-- Header de la card -->
+          <div class="referente-header">
+            <div class="referente-avatar">
+              {{ referente.nombre.charAt(0).toUpperCase() }}{{ referente.apellido.charAt(0).toUpperCase() }}
+            </div>
+            <div class="referente-info">
+              <div class="referente-nombre">{{ referente.nombre }} {{ referente.apellido }}</div>
+              <div class="referente-codigo">{{ referente.codigo }}</div>
+            </div>
+            <nz-tag [nzColor]="getNivelColor(referente.nivel)" class="nivel-tag">
+              {{ referente.nivel }}
+            </nz-tag>
+          </div>
+
+          <!-- Contacto -->
+          <div class="referente-contacto">
+            <div class="contacto-item">
+              <i nz-icon nzType="mail"></i>
+              <span>{{ referente.correo }}</span>
+            </div>
+            <div class="contacto-item">
+              <i nz-icon nzType="phone"></i>
+              <span>{{ referente.telefono }}</span>
+            </div>
+          </div>
+
+          <nz-divider></nz-divider>
+
+          <!-- Métricas -->
+          <div class="referente-metricas">
+            <div class="metrica-item">
+              <div class="metrica-icon">
+                <i nz-icon nzType="usergroup-add"></i>
+              </div>
+              <div class="metrica-content">
+                <div class="metrica-label">Referidos</div>
+                <div class="metrica-valor">{{ referente.totalReferidos }}</div>
+              </div>
+            </div>
+
+            <div class="metrica-item">
+              <div class="metrica-icon success">
+                <i nz-icon nzType="check-circle"></i>
+              </div>
+              <div class="metrica-content">
+                <div class="metrica-label">Activos</div>
+                <div class="metrica-valor success">{{ referente.referidosActivos }}</div>
+              </div>
+            </div>
+
+            <div class="metrica-item">
+              <div class="metrica-icon warning">
+                <i nz-icon nzType="clock-circle"></i>
+              </div>
+              <div class="metrica-content">
+                <div class="metrica-label">Pendientes</div>
+                <div class="metrica-valor warning">{{ referente.referidosPendientes }}</div>
+              </div>
+            </div>
+          </div>
+
+          <nz-divider></nz-divider>
+
+          <!-- Información financiera -->
+          <div class="referente-financiero">
+            <div class="financiero-item">
+              <div class="financiero-label">
+                <i nz-icon nzType="trophy"></i>
+                Puntos
+              </div>
+              <div class="financiero-valor puntos">{{ referente.puntos }}</div>
+            </div>
+
+            <div class="financiero-item">
+              <div class="financiero-label">
+                <i nz-icon nzType="dollar"></i>
+                Comisiones
+              </div>
+              <div class="financiero-valor comision">
+                {{ referente.comisionesGeneradas | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </div>
+            </div>
+
+            <div class="financiero-item">
+              <div class="financiero-label">
+                <i nz-icon nzType="wallet"></i>
+                Disponible
+              </div>
+              <div class="financiero-valor disponible">
+                {{ referente.saldoDisponible | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasa de conversión -->
+          <div class="conversion-section">
+            <div class="conversion-header">
+              <span>Tasa de Conversión</span>
+              <strong>{{ calcularTasaConversion(referente) }}%</strong>
+            </div>
+            <nz-progress
+              [nzPercent]="calcularTasaConversion(referente)"
+              [nzStatus]="getProgressStatus(calcularTasaConversion(referente))"
+              [nzShowInfo]="false"
+              [nzStrokeColor]="getProgressColor(calcularTasaConversion(referente))">
+            </nz-progress>
+          </div>
+
+          <!-- Footer con acciones -->
+          <div class="referente-footer">
+            <button
+              nz-button
+              nzType="text"
+              nzSize="small"
+              (click)="verReferidos($event, referente)">
+              <i nz-icon nzType="eye"></i>
+              Ver Referidos
+            </button>
+            <button
+              nz-button
+              nzType="text"
+              nzSize="small"
+              (click)="contactarReferente($event, referente)">
+              <i nz-icon nzType="message"></i>
+              Contactar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="referentesFiltrados.length === 0 && !loading">
+        <i nz-icon nzType="team" class="empty-icon"></i>
+        <h3>No se encontraron referentes</h3>
+        <p *ngIf="searchText">Intenta ajustar los filtros de búsqueda</p>
+        <p *ngIf="!searchText">Aún no hay referentes registrados</p>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" *ngIf="loading">
+        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+        <p>Cargando referentes...</p>
+      </div>
+    </nz-card>
+  </div>
+</div>
+
+<!-- Modal de Detalle del Referente -->
+<nz-modal
+  [(nzVisible)]="modalDetalleVisible"
+  nzTitle="Detalle del Referente"
+  [nzFooter]="null"
+  nzWidth="800px"
+  (nzOnCancel)="cerrarModalDetalle()">
+
+  <div *nzModalContent>
+    <div *ngIf="referenteSeleccionado" class="modal-detalle">
+      <!-- Información personal -->
+      <nz-descriptions nzBordered [nzColumn]="2" class="detalle-descriptions">
+        <nz-descriptions-item nzTitle="Nombre Completo" [nzSpan]="2">
+          {{ referenteSeleccionado.nombre }} {{ referenteSeleccionado.apellido }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Código">
+          {{ referenteSeleccionado.codigo }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Nivel">
+          <nz-tag [nzColor]="getNivelColor(referenteSeleccionado.nivel)">
+            {{ referenteSeleccionado.nivel }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Correo Electrónico" [nzSpan]="2">
+          {{ referenteSeleccionado.correo }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Teléfono">
+          {{ referenteSeleccionado.telefono }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Fecha de Registro">
+          {{ formatearFecha(referenteSeleccionado.fechaRegistro) }}
+        </nz-descriptions-item>
+      </nz-descriptions>
+
+      <!-- Métricas detalladas -->
+      <div class="modal-metricas">
+        <h4>Métricas de Desempeño</h4>
+        <div class="metricas-grid">
+          <nz-statistic
+            [nzValue]="referenteSeleccionado.totalReferidos"
+            nzTitle="Total Referidos">
+            <ng-template #nzPrefix>
+              <i nz-icon nzType="usergroup-add"></i>
+            </ng-template>
+          </nz-statistic>
+
+          <nz-statistic
+            [nzValue]="referenteSeleccionado.referidosActivos"
+            nzTitle="Referidos Activos"
+            [nzValueStyle]="{ color: '#52c41a' }">
+            <ng-template #nzPrefix>
+              <i nz-icon nzType="check-circle"></i>
+            </ng-template>
+          </nz-statistic>
+
+          <nz-statistic
+            [nzValue]="referenteSeleccionado.puntos"
+            nzTitle="Puntos Acumulados">
+            <ng-template #nzPrefix>
+              <i nz-icon nzType="trophy"></i>
+            </ng-template>
+          </nz-statistic>
+
+          <nz-statistic
+            [nzValue]="referenteSeleccionado.comisionesGeneradas"
+            [nzPrefix]="'$'"
+            nzTitle="Comisiones Generadas"
+            [nzValueStyle]="{ color: '#4A90E2' }">
+          </nz-statistic>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="modal-acciones">
+        <button nz-button nzType="default" (click)="verReferidosDetalle()">
+          <i nz-icon nzType="eye"></i>
+          Ver Todos los Referidos
+        </button>
+        <button nz-button nzType="default" (click)="enviarEmailDetalle()">
+          <i nz-icon nzType="mail"></i>
+          Enviar Email
+        </button>
+        <button nz-button nzType="default" (click)="llamarReferenteDetalle()">
+          <i nz-icon nzType="phone"></i>
+          Llamar
+        </button>
+      </div>
+    </div>
+  </div>
+</nz-modal>

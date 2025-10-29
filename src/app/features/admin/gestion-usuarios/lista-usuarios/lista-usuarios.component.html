@@ -1,0 +1,213 @@
+<div class="usuarios-container">
+  <div class="usuarios-header">
+    <div class="header-content">
+      <h1>Gestión de Usuarios</h1>
+      <p>Administra todos los usuarios del sistema</p>
+    </div>
+    <div class="header-actions">
+      <button nz-button nzType="primary" nzSize="large" [routerLink]="['/admin/usuarios/nuevo']">
+        <i nz-icon nzType="plus"></i>
+        Nuevo Usuario
+      </button>
+    </div>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="stats-section">
+    <nz-card [nzBordered]="false" class="stats-card">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon total">
+            <i nz-icon nzType="team"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.total }}</span>
+            <span class="stat-label">Total Usuarios</span>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon activos">
+            <i nz-icon nzType="check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.activos }}</span>
+            <span class="stat-label">Usuarios Activos</span>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon referentes">
+            <i nz-icon nzType="user"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.referentes }}</span>
+            <span class="stat-label">Referentes</span>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon admin">
+            <i nz-icon nzType="crown"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.administradores }}</span>
+            <span class="stat-label">Administradores</span>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Filtros y Búsqueda -->
+  <nz-card [nzBordered]="false" class="filtros-card">
+    <div class="filtros-row">
+      <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
+        <input
+          type="text"
+          nz-input
+          placeholder="Buscar por nombre, email o documento..."
+          [(ngModel)]="searchText"
+          (ngModelChange)="filtrarUsuarios()" />
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="search"></i>
+      </ng-template>
+
+      <nz-select
+        [(ngModel)]="filtroRol"
+        (ngModelChange)="filtrarUsuarios()"
+        nzPlaceHolder="Filtrar por rol"
+        class="filtro-select">
+        <nz-option nzValue="todos" nzLabel="Todos los roles"></nz-option>
+        <nz-option nzValue="admin" nzLabel="Administrador"></nz-option>
+        <nz-option nzValue="gerente_ventas" nzLabel="Gerente de Ventas"></nz-option>
+        <nz-option nzValue="asesor_ventas" nzLabel="Asesor de Ventas"></nz-option>
+        <nz-option nzValue="contador" nzLabel="Contador"></nz-option>
+        <nz-option nzValue="referente" nzLabel="Referente"></nz-option>
+      </nz-select>
+
+      <nz-select
+        [(ngModel)]="filtroEstado"
+        (ngModelChange)="filtrarUsuarios()"
+        nzPlaceHolder="Filtrar por estado"
+        class="filtro-select">
+        <nz-option nzValue="todos" nzLabel="Todos los estados"></nz-option>
+        <nz-option nzValue="activo" nzLabel="Activos"></nz-option>
+        <nz-option nzValue="inactivo" nzLabel="Inactivos"></nz-option>
+      </nz-select>
+    </div>
+  </nz-card>
+
+  <!-- Tabla de Usuarios -->
+  <nz-card [nzBordered]="false" class="tabla-card">
+    <nz-table
+      #usuariosTable
+      [nzData]="usuariosFiltrados"
+      [nzLoading]="loading"
+      nzSize="middle"
+      [nzPageSize]="10">
+
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Documento</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Fecha Registro</th>
+          <th nzWidth="180px">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let usuario of usuariosTable.data">
+          <td>
+            <div class="usuario-info">
+              <div class="usuario-avatar">
+                {{ usuario.nombre.charAt(0).toUpperCase() }}{{ usuario.apellido.charAt(0).toUpperCase() }}
+              </div>
+              <div class="usuario-datos">
+                <span class="usuario-nombre">{{ usuario.nombre }} {{ usuario.apellido }}</span>
+                <span class="usuario-id">ID: {{ usuario.id }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="documento">{{ usuario.documento }}</span>
+          </td>
+          <td>
+            <span class="email">{{ usuario.correo }}</span>
+          </td>
+          <td>
+            <span class="telefono">{{ usuario.telefono }}</span>
+          </td>
+          <td>
+            <nz-tag [nzColor]="getRolColor(usuario.rol)">
+              {{ getRolTexto(usuario.rol) }}
+            </nz-tag>
+          </td>
+          <td>
+            <nz-switch
+              [(ngModel)]="usuario.activo"
+              (ngModelChange)="cambiarEstadoUsuario(usuario)"
+              [nzCheckedChildren]="checkedTemplate"
+              [nzUnCheckedChildren]="unCheckedTemplate">
+            </nz-switch>
+            <ng-template #checkedTemplate><i nz-icon nzType="check"></i></ng-template>
+            <ng-template #unCheckedTemplate><i nz-icon nzType="close"></i></ng-template>
+          </td>
+          <td>
+            <span class="fecha">{{ formatearFecha(usuario.fechaRegistro) }}</span>
+          </td>
+          <td>
+            <nz-space nzSize="small">
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="text"
+                nzSize="small"
+                [routerLink]="['/admin/usuarios', usuario.id]"
+                nz-tooltip="Ver detalle">
+                <i nz-icon nzType="eye"></i>
+              </button>
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="text"
+                nzSize="small"
+                [routerLink]="['/admin/usuarios', usuario.id, 'editar']"
+                nz-tooltip="Editar">
+                <i nz-icon nzType="edit"></i>
+              </button>
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="text"
+                nzDanger
+                nzSize="small"
+                (click)="eliminarUsuario(usuario)"
+                nz-tooltip="Eliminar">
+                <i nz-icon nzType="delete"></i>
+              </button>
+            </nz-space>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+    <div class="tabla-empty" *ngIf="!loading && usuariosFiltrados.length === 0">
+      <div class="empty-content">
+        <i nz-icon nzType="inbox" class="empty-icon"></i>
+        <h3>No se encontraron usuarios</h3>
+        <p *ngIf="searchText || filtroRol !== 'todos' || filtroEstado !== 'todos'">
+          Intenta ajustar los filtros de búsqueda
+        </p>
+        <p *ngIf="!searchText && filtroRol === 'todos' && filtroEstado === 'todos'">
+          No hay usuarios registrados en el sistema
+        </p>
+      </div>
+    </div>
+  </nz-card>
+</div>

@@ -1,0 +1,181 @@
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.dashboard-header p {
+  font-size: 18px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* KPIs */
+.kpis-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.kpi-card {
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-light) !important;
+  border: none !important;
+  transition: transform 0.3s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.kpi-card.pendientes {
+  border-left: 4px solid #faad14;
+}
+
+.kpi-card.procesados {
+  border-left: 4px solid #52c41a;
+}
+
+.kpi-card.monto {
+  border-left: 4px solid #4A90E2;
+}
+
+.kpi-card.total {
+  border-left: 4px solid #722ed1;
+}
+
+/* Acciones Grid */
+.acciones-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dashboard-card {
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-light) !important;
+  border: none !important;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-content p {
+  color: var(--text-light);
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.alert-pendientes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(250, 173, 20, 0.1);
+  border-left: 3px solid #faad14;
+  border-radius: var(--border-radius);
+  color: #faad14;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.alert-pendientes i {
+  font-size: 16px;
+}
+
+/* Tabla de últimas solicitudes */
+.ultimas-card {
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-light) !important;
+  border: none !important;
+}
+
+::ng-deep .ultimas-card .ant-table {
+  background: transparent;
+}
+
+::ng-deep .ultimas-card .ant-table-thead > tr > th {
+  background: #f8f9fa !important;
+  border-bottom: 2px solid #e9ecef !important;
+  font-weight: 600 !important;
+  color: var(--text-dark) !important;
+  font-size: 13px !important;
+}
+
+::ng-deep .ultimas-card .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+::ng-deep .ultimas-card .ant-table-tbody > tr:hover > td {
+  background: rgba(74, 144, 226, 0.05) !important;
+}
+
+.ver-todos {
+  text-align: center;
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .kpis-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .kpis-section {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .acciones-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpis-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+:root {
+  --primary-color: #4A90E2;
+  --text-dark: #2c3e50;
+  --text-light: #7f8c8d;
+  --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

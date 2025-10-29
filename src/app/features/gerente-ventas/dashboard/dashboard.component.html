@@ -1,0 +1,103 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>¡Bienvenido!</h1>
+    <p>Panel de control y gestión del sistema de referidos</p>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Configuración del Sistema -->
+    <nz-card nzTitle="Configuración del Sistema" class="dashboard-card">
+      <div class="card-content">
+        <p>Administra planes, niveles e insignias</p>
+        <nz-space nzDirection="vertical" class="actions-space">
+          <button *nzSpaceItem nz-button nzType="default" nzBlock [routerLink]="['/gerente/configuracion/planes']">
+            <i nz-icon nzType="file-text"></i>
+            Gestionar Planes
+          </button>
+          <button *nzSpaceItem nz-button nzType="default" nzBlock [routerLink]="['/gerente/configuracion/niveles']">
+            <i nz-icon nzType="trophy"></i>
+            Gestionar Niveles
+          </button>
+          <button *nzSpaceItem nz-button nzType="default" nzBlock [routerLink]="['/gerente/configuracion/insignias']">
+            <i nz-icon nzType="star"></i>
+            Gestionar Insignias
+          </button>
+          <button *nzSpaceItem nz-button nzType="primary" nzBlock [routerLink]="['/gerente/configuracion']">
+            <i nz-icon nzType="setting"></i>
+            Ver Todas las Opciones
+          </button>
+        </nz-space>
+      </div>
+    </nz-card>
+
+    <!-- Analíticas y Reportes -->
+    <nz-card nzTitle="Analíticas y Reportes" class="dashboard-card">
+      <div class="card-content">
+        <p>Consulta métricas y estadísticas de ventas</p>
+        <div class="stats-preview">
+          <div class="stat-preview-item">
+            <span class="stat-preview-label">Referidos este mes</span>
+            <span class="stat-preview-value">{{ estadisticas.referidosMes }}</span>
+          </div>
+          <div class="stat-preview-item">
+            <span class="stat-preview-label">Conversiones</span>
+            <span class="stat-preview-value success">{{ estadisticas.conversiones }}</span>
+          </div>
+          <div class="stat-preview-item">
+            <span class="stat-preview-label">Tasa de conversión</span>
+            <span class="stat-preview-value primary">{{ estadisticas.tasaConversion }}%</span>
+          </div>
+        </div>
+        <button nz-button nzType="primary" nzBlock [routerLink]="['/gerente/analiticas']">
+          <i nz-icon nzType="bar-chart"></i>
+          Ver Analíticas Completas
+        </button>
+      </div>
+    </nz-card>
+
+    <!-- Resumen Rápido -->
+    <nz-card nzTitle="Resumen del Sistema" class="dashboard-card summary-card">
+      <div class="summary-content">
+        <div class="summary-item">
+          <div class="summary-icon referentes">
+            <i nz-icon nzType="team"></i>
+          </div>
+          <div class="summary-data">
+            <span class="summary-value">{{ resumen.totalReferentes }}</span>
+            <span class="summary-label">Referentes Activos</span>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <div class="summary-icon referidos">
+            <i nz-icon nzType="usergroup-add"></i>
+          </div>
+          <div class="summary-data">
+            <span class="summary-value">{{ resumen.totalReferidos }}</span>
+            <span class="summary-label">Total Referidos</span>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <div class="summary-icon planes">
+            <i nz-icon nzType="file-text"></i>
+          </div>
+          <div class="summary-data">
+            <span class="summary-value">{{ resumen.planesActivos }}</span>
+            <span class="summary-label">Planes Activos</span>
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <div class="summary-icon comisiones">
+            <i nz-icon nzType="dollar"></i>
+          </div>
+          <div class="summary-data">
+            <span class="summary-value">{{ resumen.comisionesTotales | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="summary-label">Comisiones Pagadas</span>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+</div>

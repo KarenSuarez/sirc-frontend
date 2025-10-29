@@ -1,0 +1,283 @@
+<div class="configuracion-container">
+  <div class="configuracion-header">
+    <button nz-button nzType="text" [routerLink]="['/gerente/dashboard']" class="btn-volver">
+      <i nz-icon nzType="arrow-left"></i>
+      Volver al Dashboard
+    </button>
+    <h1>Configuración de Niveles</h1>
+    <p>Gestiona los niveles de gamificación y sus beneficios</p>
+  </div>
+
+  <nz-card [nzBordered]="false" class="configuracion-card">
+    <div class="acciones-header">
+      <div class="info-banner">
+        <i nz-icon nzType="info-circle"></i>
+        <span>Los niveles se asignan automáticamente según los puntos acumulados por cada referente</span>
+      </div>
+      <button nz-button nzType="primary" (click)="mostrarModalCrear()">
+        <i nz-icon nzType="plus"></i>
+        Nuevo Nivel
+      </button>
+    </div>
+
+    <div class="niveles-grid">
+      <div
+        *ngFor="let nivel of niveles; let i = index"
+        class="nivel-card"
+        [class.nivel-destacado]="i === 0">
+
+        <div class="nivel-header">
+          <div class="nivel-badge" [style.background-color]="nivel.color">
+            <i nz-icon [nzType]="nivel.icono"></i>
+          </div>
+          <div class="nivel-info">
+            <h3>{{ nivel.nombre }}</h3>
+            <span class="nivel-orden">Nivel {{ nivel.orden }}</span>
+          </div>
+        </div>
+
+        <nz-divider></nz-divider>
+
+        <div class="nivel-requisito">
+          <div class="requisito-item">
+            <i nz-icon nzType="trophy"></i>
+            <div class="requisito-content">
+              <span class="requisito-label">Puntos Mínimos</span>
+              <span class="requisito-valor">{{ nivel.puntosMinimos }}</span>
+            </div>
+          </div>
+
+          <div class="requisito-item">
+            <i nz-icon nzType="rise"></i>
+            <div class="requisito-content">
+              <span class="requisito-label">Bonificación Extra</span>
+              <span class="requisito-valor bonus">+{{ nivel.bonificacionExtra }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="nivel-descripcion">
+          <p>{{ nivel.descripcion }}</p>
+        </div>
+
+        <div class="nivel-beneficios" *ngIf="nivel.beneficios && nivel.beneficios.length > 0">
+          <h4>Beneficios:</h4>
+          <ul>
+            <li *ngFor="let beneficio of nivel.beneficios">
+              <i nz-icon nzType="check-circle"></i>
+              {{ beneficio }}
+            </li>
+          </ul>
+        </div>
+
+        <nz-divider></nz-divider>
+
+        <div class="nivel-acciones">
+          <button nz-button nzType="text" (click)="editarNivel(nivel)">
+            <i nz-icon nzType="edit"></i>
+            Editar
+          </button>
+          <button nz-button nzType="text" nzDanger (click)="eliminarNivel(nivel)">
+            <i nz-icon nzType="delete"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="niveles.length === 0 && !loading">
+      <i nz-icon nzType="trophy" class="empty-icon"></i>
+      <h3>No hay niveles configurados</h3>
+      <p>Crea el primer nivel para comenzar</p>
+      <button nz-button nzType="primary" (click)="mostrarModalCrear()">
+        <i nz-icon nzType="plus"></i>
+        Crear Primer Nivel
+      </button>
+    </div>
+  </nz-card>
+</div>
+
+<!-- Modal Crear/Editar Nivel -->
+<nz-modal
+  [(nzVisible)]="modalVisible"
+  [nzTitle]="modoEdicion ? 'Editar Nivel' : 'Crear Nuevo Nivel'"
+  [nzFooter]="null"
+  nzWidth="700px"
+  (nzOnCancel)="cerrarModal()">
+
+  <div *nzModalContent>
+    <form nz-form [formGroup]="nivelForm" (ngSubmit)="guardarNivel()">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="16">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzRequired nzFor="nombre">
+              Nombre del Nivel
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa el nombre del nivel">
+              <input
+                nz-input
+                formControlName="nombre"
+                id="nombre"
+                placeholder="Ej: Oro, Platino, Diamante" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzSpan]="8">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzRequired nzFor="orden">
+              Orden
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa el orden">
+              <nz-input-number
+                formControlName="orden"
+                id="orden"
+                [nzMin]="1"
+                class="full-width">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="descripcion">
+          Descripción
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <textarea
+            nz-input
+            formControlName="descripcion"
+            id="descripcion"
+            placeholder="Describe el nivel y sus características"
+            [nzAutosize]="{ minRows: 2, maxRows: 4 }">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzRequired nzFor="puntosMinimos">
+              Puntos Mínimos
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa los puntos mínimos">
+              <nz-input-number
+                formControlName="puntosMinimos"
+                id="puntosMinimos"
+                [nzMin]="0"
+                [nzStep]="50"
+                class="full-width">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzRequired nzFor="bonificacionExtra">
+              Bonificación Extra (%)
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa la bonificación">
+              <nz-input-number
+                formControlName="bonificacionExtra"
+                id="bonificacionExtra"
+                [nzMin]="0"
+                [nzMax]="100"
+                [nzStep]="1"
+                [nzFormatter]="formatterPercent"
+                [nzParser]="parserPercent"
+                class="full-width">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="icono">
+              Ícono
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <nz-select formControlName="icono" id="icono">
+                <nz-option
+                  *ngFor="let icon of iconosDisponibles"
+                  [nzValue]="icon.value"
+                  [nzLabel]="icon.label">
+                  <i nz-icon [nzType]="icon.value"></i>
+                  {{ icon.label }}
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="color">
+              Color
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <input
+                nz-input
+                type="color"
+                formControlName="color"
+                id="color"
+                class="color-input" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Beneficios -->
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="beneficio">
+          Beneficios del Nivel
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <div class="beneficios-input">
+            <input
+              nz-input
+              [(ngModel)]="nuevoBeneficio"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Escribe un beneficio y presiona Agregar"
+              (keyup.enter)="agregarBeneficio()" />
+            <button
+              nz-button
+              nzType="primary"
+              type="button"
+              (click)="agregarBeneficio()">
+              <i nz-icon nzType="plus"></i>
+              Agregar
+            </button>
+          </div>
+
+          <div class="beneficios-lista" *ngIf="beneficiosTemp.length > 0">
+            <nz-tag
+              *ngFor="let beneficio of beneficiosTemp; let i = index"
+              nzMode="closeable"
+              (nzOnClose)="eliminarBeneficio(i)">
+              {{ beneficio }}
+            </nz-tag>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item class="form-actions">
+        <button nz-button nzType="default" type="button" (click)="cerrarModal()">
+          Cancelar
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          type="submit"
+          [nzLoading]="guardando"
+          [disabled]="!nivelForm.valid">
+          {{ modoEdicion ? 'Actualizar' : 'Crear' }} Nivel
+        </button>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-modal>
