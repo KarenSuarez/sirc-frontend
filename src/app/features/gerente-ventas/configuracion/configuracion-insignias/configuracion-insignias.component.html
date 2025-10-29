@@ -1,0 +1,318 @@
+<div class="configuracion-container">
+  <div class="configuracion-header">
+    <button nz-button nzType="text" [routerLink]="['/gerente/configuracion']" class="btn-volver">
+      <i nz-icon nzType="arrow-left"></i>
+      Volver a Configuración
+    </button>
+    <h1>Configuración de Insignias</h1>
+    <p>Crea y gestiona insignias para reconocer logros especiales</p>
+  </div>
+
+  <nz-card [nzBordered]="false" class="configuracion-card">
+    <div class="acciones-header">
+      <div class="info-banner">
+        <i nz-icon nzType="info-circle"></i>
+        <span>Las insignias se otorgan automáticamente cuando los referentes cumplen los criterios establecidos</span>
+      </div>
+      <button nz-button nzType="primary" (click)="mostrarModalCrear()">
+        <i nz-icon nzType="plus"></i>
+        Nueva Insignia
+      </button>
+    </div>
+
+    <div class="insignias-grid">
+      <div
+        *ngFor="let insignia of insignias"
+        class="insignia-card"
+        [class.insignia-destacada]="insignia.destacada">
+
+        <div class="insignia-header">
+          <div class="insignia-badge" [style.background]="insignia.color">
+            <i nz-icon [nzType]="insignia.icono" class="insignia-icon"></i>
+          </div>
+          <div class="insignia-estado">
+            <nz-switch
+              [(ngModel)]="insignia.activa"
+              (ngModelChange)="cambiarEstadoInsignia(insignia)"
+              nzSize="small">
+            </nz-switch>
+          </div>
+        </div>
+
+        <div class="insignia-contenido">
+          <h3>{{ insignia.nombre }}</h3>
+          <p class="insignia-descripcion">{{ insignia.descripcion }}</p>
+
+          <nz-divider></nz-divider>
+
+          <div class="insignia-criterios">
+            <h4>Criterios de Obtención:</h4>
+            <div class="criterio-item" *ngFor="let criterio of insignia.criterios">
+              <i nz-icon nzType="check-circle"></i>
+              <span>{{ criterio }}</span>
+            </div>
+          </div>
+
+          <div class="insignia-recompensa" *ngIf="insignia.recompensa">
+            <div class="recompensa-icon">
+              <i nz-icon nzType="gift"></i>
+            </div>
+            <div class="recompensa-content">
+              <span class="recompensa-label">Recompensa:</span>
+              <span class="recompensa-valor">{{ insignia.recompensa }}</span>
+            </div>
+          </div>
+
+          <div class="insignia-stats">
+            <div class="stat-item">
+              <i nz-icon nzType="user"></i>
+              <span>{{ insignia.usuariosObtenidos }} referentes la tienen</span>
+            </div>
+            <div class="stat-item">
+              <i nz-icon nzType="fire"></i>
+              <span>Rareza: {{ insignia.rareza }}</span>
+            </div>
+          </div>
+        </div>
+
+        <nz-divider></nz-divider>
+
+        <div class="insignia-acciones">
+          <button nz-button nzType="text" (click)="editarInsignia(insignia)">
+            <i nz-icon nzType="edit"></i>
+            Editar
+          </button>
+          <button nz-button nzType="text" (click)="verDetalles(insignia)">
+            <i nz-icon nzType="eye"></i>
+            Ver Detalles
+          </button>
+          <button nz-button nzType="text" nzDanger (click)="eliminarInsignia(insignia)">
+            <i nz-icon nzType="delete"></i>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="insignias.length === 0 && !loading">
+      <i nz-icon nzType="star" class="empty-icon"></i>
+      <h3>No hay insignias configuradas</h3>
+      <p>Crea la primera insignia para comenzar a reconocer logros</p>
+      <button nz-button nzType="primary" (click)="mostrarModalCrear()">
+        <i nz-icon nzType="plus"></i>
+        Crear Primera Insignia
+      </button>
+    </div>
+  </nz-card>
+</div>
+
+<!-- Modal Crear/Editar Insignia -->
+<!-- Modal Crear/Editar Insignia -->
+<nz-modal
+  [(nzVisible)]="modalVisible"
+  [nzTitle]="modoEdicion ? 'Editar Insignia' : 'Crear Nueva Insignia'"
+  [nzFooter]="null"
+  nzWidth="700px"
+  (nzOnCancel)="cerrarModal()">
+
+  <div *nzModalContent>
+    <form nz-form [formGroup]="insigniaForm" (ngSubmit)="guardarInsignia()">
+
+      <!-- Información Básica -->
+      <h3 style="margin-bottom: 16px; color: #2c3e50;">Información Básica</h3>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzRequired nzFor="nombre">
+          Nombre de la Insignia
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa el nombre de la insignia">
+          <input
+            nz-input
+            formControlName="nombre"
+            id="nombre"
+            placeholder="Ej: Primer Referido, Vendedor del Mes" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="descripcion">
+          Descripción
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <textarea
+            nz-input
+            formControlName="descripcion"
+            id="descripcion"
+            placeholder="Describe qué representa esta insignia"
+            [nzAutosize]="{ minRows: 3, maxRows: 5 }">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="icono">
+              Ícono
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <nz-select
+                formControlName="icono"
+                id="icono"
+                nzShowSearch
+                class="icon-select">
+                <nz-option
+                  *ngFor="let icon of iconosDisponibles"
+                  [nzValue]="icon.value"
+                  [nzLabel]="icon.label">
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="color">
+              Color
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <div class="color-selector">
+                <input
+                  nz-input
+                  type="color"
+                  formControlName="color"
+                  id="color"
+                  class="color-input" />
+                <div
+                  class="color-preview"
+                  [style.background]="insigniaForm.get('color')?.value">
+                  <i nz-icon [nzType]="insigniaForm.get('icono')?.value || 'star'"></i>
+                </div>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="rareza">
+          Rareza
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <nz-select formControlName="rareza" id="rareza">
+            <nz-option nzValue="Común" nzLabel="Común"></nz-option>
+            <nz-option nzValue="Poco Común" nzLabel="Poco Común"></nz-option>
+            <nz-option nzValue="Rara" nzLabel="Rara"></nz-option>
+            <nz-option nzValue="Épica" nzLabel="Épica"></nz-option>
+            <nz-option nzValue="Legendaria" nzLabel="Legendaria"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-divider></nz-divider>
+
+      <!-- Criterios de Obtención -->
+      <h3 style="margin-bottom: 16px; color: #2c3e50;">Criterios de Obtención</h3>
+
+      <nz-alert
+        nzType="info"
+        nzMessage="Define los requisitos que debe cumplir un referente para obtener esta insignia"
+        nzShowIcon
+        [nzCloseable]="false"
+        style="margin-bottom: 16px;">
+      </nz-alert>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="criterioTexto">
+          Agregar Criterios
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <div class="criterios-input">
+            <input
+              nz-input
+              [(ngModel)]="nuevoCriterio"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Ej: Registrar al menos 5 referidos"
+              (keyup.enter)="agregarCriterio()" />
+            <button
+              nz-button
+              nzType="primary"
+              type="button"
+              (click)="agregarCriterio()">
+              <i nz-icon nzType="plus"></i>
+              Agregar
+            </button>
+          </div>
+
+          <div class="criterios-lista" *ngIf="criteriosTemp.length > 0">
+            <nz-tag
+              *ngFor="let criterio of criteriosTemp; let i = index"
+              nzMode="closeable"
+              (nzOnClose)="eliminarCriterio(i)"
+              class="criterio-tag">
+              {{ criterio }}
+            </nz-tag>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-divider></nz-divider>
+
+      <!-- Recompensas -->
+      <h3 style="margin-bottom: 16px; color: #2c3e50;">Recompensas</h3>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="descripcionRecompensa">
+          Descripción de la Recompensa
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <textarea
+            nz-input
+            formControlName="descripcionRecompensa"
+            placeholder="Ej: 100 puntos extra, Bono de $50,000, etc."
+            [nzAutosize]="{ minRows: 2, maxRows: 4 }">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24">
+          <label nz-checkbox formControlName="destacada">
+            Marcar como insignia destacada
+          </label>
+        </nz-form-label>
+      </nz-form-item>
+
+      <!-- Vista previa -->
+      <nz-divider nzText="Vista Previa"></nz-divider>
+
+      <div class="insignia-preview">
+        <div class="preview-badge" [style.background]="insigniaForm.get('color')?.value || '#4A90E2'">
+          <i nz-icon [nzType]="insigniaForm.get('icono')?.value || 'star'" class="preview-icon"></i>
+        </div>
+        <div class="preview-info">
+          <h4>{{ insigniaForm.get('nombre')?.value || 'Nombre de la Insignia' }}</h4>
+          <p>{{ insigniaForm.get('descripcion')?.value || 'Descripción de la insignia' }}</p>
+          <nz-tag [nzColor]="getRarezaColor(insigniaForm.get('rareza')?.value)">
+            {{ insigniaForm.get('rareza')?.value || 'Común' }}
+          </nz-tag>
+        </div>
+      </div>
+
+      <nz-form-item class="form-actions">
+        <button nz-button nzType="default" type="button" (click)="cerrarModal()">
+          Cancelar
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          type="submit"
+          [nzLoading]="guardando"
+          [disabled]="!insigniaForm.valid || criteriosTemp.length === 0">
+          {{ modoEdicion ? 'Actualizar' : 'Crear' }} Insignia
+        </button>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-modal>

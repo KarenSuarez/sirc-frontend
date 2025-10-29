@@ -1,0 +1,266 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>¡Bienvenido, Administrador!</h1>
+    <p>Panel de Control y Administración del Sistema</p>
+  </div>
+
+  <!-- KPIs Principales -->
+  <div class="kpis-section">
+    <nz-card [nzBordered]="false" class="kpi-card usuarios">
+      <nz-statistic
+        [nzValue]="estadisticas.totalUsuarios"
+        nzTitle="Total Usuarios">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="team"></i>
+        </ng-template>
+      </nz-statistic>
+      <div class="kpi-extra">
+        <span class="kpi-trend up">+12 este mes</span>
+      </div>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card activos">
+      <nz-statistic
+        [nzValue]="estadisticas.usuariosActivos"
+        nzTitle="Usuarios Activos">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="check-circle"></i>
+        </ng-template>
+      </nz-statistic>
+      <div class="kpi-extra">
+        <span class="kpi-trend up">+5 esta semana</span>
+      </div>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card referentes">
+      <nz-statistic
+        [nzValue]="estadisticas.totalReferentes"
+        nzTitle="Referentes">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="user"></i>
+        </ng-template>
+      </nz-statistic>
+      <div class="kpi-extra">
+        <span class="kpi-trend up">+8 este mes</span>
+      </div>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card ingresos">
+      <nz-statistic
+        [nzValue]="estadisticas.ingresosTotal"
+        [nzPrefix]="'$'"
+        nzTitle="Ingresos Totales">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="dollar"></i>
+        </ng-template>
+      </nz-statistic>
+      <div class="kpi-extra">
+        <span class="kpi-trend up">+15% vs mes anterior</span>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Accesos Rápidos -->
+  <div class="accesos-section">
+    <h2 class="section-title">Accesos Rápidos</h2>
+
+    <div class="accesos-grid">
+      <nz-card [nzBordered]="false" class="acceso-card usuarios-card">
+        <div class="acceso-icon">
+          <i nz-icon nzType="team"></i>
+        </div>
+        <h3>Gestión de Usuarios</h3>
+        <p>Administra todos los usuarios del sistema</p>
+        <div class="acceso-stats">
+          <div class="stat">
+            <span class="value">{{ estadisticas.totalUsuarios }}</span>
+            <span class="label">Total</span>
+          </div>
+          <div class="stat">
+            <span class="value">{{ estadisticas.usuariosActivos }}</span>
+            <span class="label">Activos</span>
+          </div>
+        </div>
+        <button nz-button nzType="primary" nzBlock [routerLink]="['/admin/usuarios']">
+          <i nz-icon nzType="setting"></i>
+          Gestionar Usuarios
+        </button>
+      </nz-card>
+
+      <nz-card [nzBordered]="false" class="acceso-card configuracion-card">
+        <div class="acceso-icon">
+          <i nz-icon nzType="control"></i>
+        </div>
+        <h3>Configuración del Sistema</h3>
+        <p>Ajusta parámetros y configuraciones generales</p>
+        <div class="acceso-features">
+          <div class="feature">
+            <i nz-icon nzType="check"></i>
+            <span>Parámetros generales</span>
+          </div>
+          <div class="feature">
+            <i nz-icon nzType="check"></i>
+            <span>Notificaciones</span>
+          </div>
+          <div class="feature">
+            <i nz-icon nzType="check"></i>
+            <span>Permisos y roles</span>
+          </div>
+        </div>
+        <button nz-button nzType="primary" nzBlock>
+          <i nz-icon nzType="setting"></i>
+          Configurar Sistema
+        </button>
+      </nz-card>
+
+      <nz-card [nzBordered]="false" class="acceso-card reportes-card">
+        <div class="acceso-icon">
+          <i nz-icon nzType="bar-chart"></i>
+        </div>
+        <h3>Reportes Generales</h3>
+        <p>Consulta métricas y estadísticas del sistema</p>
+        <div class="acceso-features">
+          <div class="feature">
+            <i nz-icon nzType="check"></i>
+            <span>Dashboard analítico</span>
+          </div>
+          <div class="feature">
+            <i nz-icon nzType="check"></i>
+            <span>Exportar datos</span>
+          </div>
+          <div class="feature">
+            <i nz-icon nzType="check"></i>
+            <span>Auditoría</span>
+          </div>
+        </div>
+        <button nz-button nzType="primary" nzBlock>
+          <i nz-icon nzType="bar-chart"></i>
+          Ver Reportes
+        </button>
+      </nz-card>
+    </div>
+  </div>
+
+  <!-- Distribución de Usuarios -->
+  <div class="distribucion-section">
+    <nz-card nzTitle="Distribución de Usuarios por Rol" [nzBordered]="false" class="distribucion-card">
+      <div class="distribucion-content">
+        <div class="chart-container">
+          <div class="donut-chart">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#e9ecef" stroke-width="10"/>
+              <circle
+                *ngFor="let seg of chartSegments; let i = index"
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                [attr.stroke]="seg.color"
+                stroke-width="10"
+                [attr.stroke-dasharray]="seg.dashArray"
+                [attr.stroke-dashoffset]="seg.offset"
+                [style.transform]="'rotate(-90deg)'"
+                [style.transform-origin]="'50% 50%'"/>
+            </svg>
+            <div class="chart-center">
+              <span class="center-value">{{ estadisticas.totalUsuarios }}</span>
+              <span class="center-label">Usuarios</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-legend">
+          <div class="legend-item" *ngFor="let rol of distribucionRoles">
+            <div class="legend-color" [style.background]="rol.color"></div>
+            <div class="legend-content">
+              <span class="legend-label">{{ rol.nombre }}</span>
+              <div class="legend-values">
+                <span class="legend-count">{{ rol.cantidad }}</span>
+                <span class="legend-percent">{{ rol.porcentaje }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Actividad Reciente del Sistema -->
+  <div class="actividad-section">
+    <nz-card nzTitle="Actividad Reciente del Sistema" [nzBordered]="false" class="actividad-card">
+      <nz-table
+        #actividadTable
+        [nzData]="actividadReciente"
+        [nzShowPagination]="false"
+        nzSize="small">
+
+        <thead>
+          <tr>
+            <th>Fecha/Hora</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Detalles</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let actividad of actividadTable.data">
+            <td>
+              <span class="fecha-hora">{{ formatearFecha(actividad.fecha) }}</span>
+            </td>
+            <td>
+              <div class="usuario-actividad">
+                <div class="usuario-avatar-small">
+                  {{ actividad.usuario.charAt(0).toUpperCase() }}
+                </div>
+                <span>{{ actividad.usuario }}</span>
+              </div>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getAccionColor(actividad.tipo)">
+                {{ actividad.accion }}
+              </nz-tag>
+            </td>
+            <td>{{ actividad.detalles }}</td>
+            <td>
+              <i
+                nz-icon
+                [nzType]="actividad.exitoso ? 'check-circle' : 'close-circle'"
+                [style.color]="actividad.exitoso ? '#52c41a' : '#ff4d4f'">
+              </i>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-card>
+  </div>
+
+  <!-- Últimos Usuarios Registrados -->
+  <div class="ultimos-usuarios-section">
+    <nz-card nzTitle="Últimos Usuarios Registrados" [nzBordered]="false" class="ultimos-card">
+      <div class="usuarios-list">
+        <div *ngFor="let usuario of ultimosUsuarios" class="usuario-item">
+          <div class="usuario-avatar">
+            {{ usuario.nombre.charAt(0).toUpperCase() }}{{ usuario.apellido.charAt(0).toUpperCase() }}
+          </div>
+          <div class="usuario-info">
+            <span class="usuario-nombre">{{ usuario.nombre }} {{ usuario.apellido }}</span>
+            <span class="usuario-email">{{ usuario.correo }}</span>
+          </div>
+          <div class="usuario-meta">
+            <nz-tag [nzColor]="getRolColor(usuario.rol)">{{ getRolTexto(usuario.rol) }}</nz-tag>
+            <span class="usuario-fecha">{{ formatearFechaRelativa(usuario.fechaRegistro) }}</span>
+          </div>
+          <button
+            nz-button
+            nzType="text"
+            nzSize="small"
+            [routerLink]="['/admin/usuarios', usuario.id]">
+            <i nz-icon nzType="eye"></i>
+          </button>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+export enum EstadoRetiro {
+  PENDIENTE = 'PENDIENTE',
+  APROBADO = 'APROBADO',
+  RECHAZADO = 'RECHAZADO',
+  PAGADO = 'PAGADO',
+}

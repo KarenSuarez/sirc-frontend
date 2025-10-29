@@ -1,0 +1,261 @@
+<div class="analiticas-container">
+  <div class="analiticas-header">
+    <div class="header-content">
+      <h1>Analíticas y Reportes</h1>
+      <p>Métricas y estadísticas del sistema de referidos</p>
+    </div>
+    <div class="header-actions">
+      <nz-range-picker
+        [(ngModel)]="rangoFechas"
+        (ngModelChange)="cambiarRangoFechas()"
+        nzFormat="dd/MM/yyyy"
+        class="date-picker">
+      </nz-range-picker>
+      <button nz-button nzType="default" (click)="exportarReporte()">
+        <i nz-icon nzType="download"></i>
+        Exportar Reporte
+      </button>
+    </div>
+  </div>
+
+  <!-- KPIs Principales -->
+  <div class="kpis-section">
+    <nz-card [nzBordered]="false" class="kpi-card primary">
+      <nz-statistic
+        [nzValue]="kpis.totalReferidos"
+        nzTitle="Total Referidos">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="usergroup-add"></i>
+        </ng-template>
+        <ng-template #nzSuffix>
+          <span class="kpi-trend positive" *ngIf="kpis.referidosTendencia > 0">
+            <i nz-icon nzType="arrow-up"></i>
+            {{ kpis.referidosTendencia }}%
+          </span>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card success">
+      <nz-statistic
+        [nzValue]="kpis.tasaConversion"
+        [nzSuffix]="'%'"
+        nzTitle="Tasa de Conversión">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="rise"></i>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card warning">
+      <nz-statistic
+        [nzValue]="kpis.comisionesTotales"
+        [nzPrefix]="'$'"
+        nzTitle="Comisiones Generadas">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="dollar"></i>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card info">
+      <nz-statistic
+        [nzValue]="kpis.referentesActivos"
+        nzTitle="Referentes Activos">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="team"></i>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="graficos-section">
+    <!-- Gráfico de Referidos por Mes -->
+    <nz-card nzTitle="Referidos por Mes" [nzBordered]="false" class="grafico-card">
+      <div class="grafico-container">
+        <div class="grafico-placeholder" *ngIf="!cargandoGraficos">
+          <div class="chart-bars">
+            <div
+              *ngFor="let mes of datosReferidosMes"
+              class="chart-bar"
+              [style.height.%]="(mes.valor / maxReferidosMes) * 100">
+              <span class="bar-value">{{ mes.valor }}</span>
+            </div>
+          </div>
+          <div class="chart-labels">
+            <span *ngFor="let mes of datosReferidosMes">{{ mes.mes }}</span>
+          </div>
+        </div>
+        <div class="loading-state" *ngIf="cargandoGraficos">
+          <nz-spin nzSimple></nz-spin>
+        </div>
+      </div>
+    </nz-card>
+
+    <!-- Distribución por Estado -->
+    <nz-card nzTitle="Distribución por Estado" [nzBordered]="false" class="grafico-card">
+      <div class="estados-grid">
+        <div
+          *ngFor="let estado of estadosDistribucion"
+          class="estado-item"
+          [class.estado-activo]="estado.destacado">
+          <div class="estado-icon" [style.background-color]="estado.color">
+            <i nz-icon [nzType]="estado.icono"></i>
+          </div>
+          <div class="estado-info">
+            <span class="estado-label">{{ estado.nombre }}</span>
+            <div class="estado-valores">
+              <span class="estado-cantidad">{{ estado.cantidad }}</span>
+              <span class="estado-porcentaje">{{ estado.porcentaje }}%</span>
+            </div>
+          </div>
+          <div class="estado-barra">
+            <div class="barra-progreso" [style.width.%]="estado.porcentaje" [style.background-color]="estado.color"></div>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Planes y Referentes Top -->
+  <div class="detalles-section">
+    <!-- Planes Más Vendidos -->
+    <nz-card nzTitle="Planes Más Vendidos" [nzBordered]="false" class="detalles-card">
+      <div class="planes-ranking">
+        <div *ngFor="let plan of planesTop; let i = index" class="plan-ranking-item">
+          <div class="ranking-position">
+            <span class="position-number" [class.top-three]="i < 3">#{{ i + 1 }}</span>
+          </div>
+          <div class="plan-ranking-info">
+            <div class="plan-header-rank">
+              <span class="plan-nombre-rank">{{ plan.nombre }}</span>
+              <span class="plan-ventas">{{ plan.ventas }} ventas</span>
+            </div>
+            <nz-progress
+              [nzPercent]="plan.porcentaje"
+              [nzShowInfo]="false"
+              [nzStrokeColor]="plan.color">
+            </nz-progress>
+          </div>
+          <div class="plan-valor-rank">
+            {{ plan.ingresos | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state-small" *ngIf="planesTop.length === 0">
+        <i nz-icon nzType="pie-chart"></i>
+        <p>No hay datos disponibles</p>
+      </div>
+    </nz-card>
+
+    <!-- Top Referentes -->
+    <nz-card nzTitle="Top Referentes del Mes" [nzBordered]="false" class="detalles-card">
+      <div class="referentes-ranking">
+        <div *ngFor="let referente of referentesTop; let i = index" class="referente-ranking-item">
+          <div class="ranking-medal" *ngIf="i < 3">
+            <i
+              nz-icon
+              [nzType]="getMedalIcon(i)"
+              [style.color]="getMedalColor(i)">
+            </i>
+          </div>
+          <div class="ranking-position" *ngIf="i >= 3">
+            <span class="position-number">#{{ i + 1 }}</span>
+          </div>
+          <div class="referente-avatar-rank">
+            {{ referente.iniciales }}
+          </div>
+          <div class="referente-ranking-info">
+            <span class="referente-nombre-rank">{{ referente.nombre }}</span>
+            <div class="referente-stats">
+              <span class="stat-item">
+                <i nz-icon nzType="usergroup-add"></i>
+                {{ referente.referidos }}
+              </span>
+              <span class="stat-item">
+                <i nz-icon nzType="check-circle"></i>
+                {{ referente.conversiones }}
+              </span>
+            </div>
+          </div>
+          <nz-tag [nzColor]="referente.nivelColor" class="nivel-tag-rank">
+            {{ referente.nivel }}
+          </nz-tag>
+        </div>
+      </div>
+
+      <div class="empty-state-small" *ngIf="referentesTop.length === 0">
+        <i nz-icon nzType="team"></i>
+        <p>No hay datos disponibles</p>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Tabla de Resumen -->
+  <nz-card nzTitle="Resumen Detallado" [nzBordered]="false" class="tabla-card">
+    <nz-table
+      #resumenTable
+      [nzData]="datosResumen"
+      [nzLoading]="cargandoTabla"
+      nzSize="small"
+      [nzPageSize]="10">
+
+      <thead>
+        <tr>
+          <th>Periodo</th>
+          <th>Referidos</th>
+          <th>Conversiones</th>
+          <th>Tasa Conv.</th>
+          <th>Comisiones</th>
+          <th>Promedio por Ref.</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of resumenTable.data">
+          <td>{{ item.periodo }}</td>
+          <td>
+            <span class="table-value">{{ item.referidos }}</span>
+          </td>
+          <td>
+            <span class="table-value success">{{ item.conversiones }}</span>
+          </td>
+          <td>
+            <nz-progress
+              [nzPercent]="item.tasaConversion"
+              [nzStrokeWidth]="8"
+              [nzFormat]="percentFormat"
+              [nzStrokeColor]="getProgressColorByValue(item.tasaConversion)">
+            </nz-progress>
+          </td>
+          <td>
+            <span class="table-value primary">
+              {{ item.comisiones | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </span>
+          </td>
+          <td>
+            <span class="table-value">
+              {{ item.promedioReferido | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+
+  <!-- Insights -->
+  <nz-card nzTitle="Insights y Recomendaciones" [nzBordered]="false" class="insights-card">
+    <div class="insights-grid">
+      <nz-alert
+        *ngFor="let insight of insights"
+        [nzType]="insight.tipo"
+        [nzMessage]="insight.titulo"
+        [nzDescription]="insight.descripcion"
+        nzShowIcon
+        [nzCloseable]="false">
+      </nz-alert>
+    </div>
+  </nz-card>
+</div>

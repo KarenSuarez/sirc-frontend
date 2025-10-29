@@ -1,0 +1,492 @@
+.referentes-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.referentes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 24px;
+}
+
+.header-content h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.header-content p {
+  font-size: 16px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.search-input {
+  width: 350px;
+}
+
+/* Estadísticas generales */
+.estadisticas-section {
+  margin-bottom: 24px;
+}
+
+.estadisticas-card {
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-light) !important;
+  border: none !important;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stat-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: var(--border-radius);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.stat-icon.referentes {
+  background: rgba(74, 144, 226, 0.1);
+  color: #4A90E2;
+}
+
+.stat-icon.referidos {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.stat-icon.conversiones {
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+}
+
+.stat-icon.comisiones {
+  background: rgba(250, 140, 22, 0.1);
+  color: #fa8c16;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Filtros */
+.filtros-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ordenar-select {
+  min-width: 220px;
+}
+
+/* Grid de referentes */
+.tabla-card {
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-light) !important;
+  border: none !important;
+}
+
+.referentes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 24px;
+}
+
+.referente-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.referente-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary-color);
+}
+
+/* Header del referente */
+.referente-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.referente-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), #357ABD);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.referente-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.referente-nombre {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.referente-codigo {
+  font-size: 12px;
+  color: var(--text-light);
+  font-family: 'Courier New', monospace;
+}
+
+.nivel-tag {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+/* Contacto */
+.referente-contacto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.contacto-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+.contacto-item i {
+  color: var(--text-light);
+  width: 14px;
+}
+
+/* Métricas */
+.referente-metricas {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metrica-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: var(--border-radius);
+}
+
+.metrica-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(74, 144, 226, 0.1);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.metrica-icon.success {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.metrica-icon.warning {
+  background: rgba(250, 173, 20, 0.1);
+  color: #faad14;
+}
+
+.metrica-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.metrica-label {
+  font-size: 11px;
+  color: var(--text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metrica-valor {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.metrica-valor.success {
+  color: #52c41a;
+}
+
+.metrica-valor.warning {
+  color: #faad14;
+}
+
+/* Información financiera */
+.referente-financiero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.financiero-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.financiero-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.financiero-valor {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.financiero-valor.puntos {
+  color: #FF9800;
+}
+
+.financiero-valor.comision {
+  color: var(--primary-color);
+}
+
+.financiero-valor.disponible {
+  color: #52c41a;
+}
+
+/* Conversión */
+.conversion-section {
+  margin-bottom: 16px;
+}
+
+.conversion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.conversion-header strong {
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+/* Footer */
+.referente-footer {
+  display: flex;
+  gap: 8px;
+}
+
+.referente-footer button {
+  flex: 1;
+  font-size: 12px;
+}
+
+/* Estados vacío y loading */
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-state p {
+  color: var(--text-light);
+  font-size: 16px;
+}
+
+/* Modal de detalle */
+.modal-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.detalle-descriptions {
+  margin-bottom: 24px;
+}
+
+.modal-metricas h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.modal-acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .referentes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .referentes-container {
+    padding: 16px;
+  }
+
+  .referentes-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .referentes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ordenar-select {
+    width: 100%;
+  }
+
+  .metricas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-acciones {
+    flex-direction: column;
+  }
+
+  .modal-acciones button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .referente-metricas {
+    flex-direction: column;
+  }
+}
+
+/* Variables CSS */
+:root {
+  --primary-color: #4A90E2;
+  --text-dark: #2c3e50;
+  --text-light: #7f8c8d;
+  --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

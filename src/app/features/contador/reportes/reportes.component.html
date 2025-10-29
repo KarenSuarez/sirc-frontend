@@ -1,0 +1,192 @@
+<div class="reportes-container">
+  <div class="reportes-header">
+    <h1>Reportes Financieros</h1>
+    <p>Consulta y descarga reportes detallados de pagos y comisiones</p>
+  </div>
+
+  <!-- Filtros de Fecha -->
+  <nz-card [nzBordered]="false" class="filtros-card">
+    <div class="filtros-row">
+      <div class="filtro-fecha">
+        <label>Rango de Fechas:</label>
+        <nz-range-picker
+          [(ngModel)]="rangoFechas"
+          (ngModelChange)="cambiarRangoFechas()"
+          nzFormat="dd/MM/yyyy"
+          class="date-picker">
+        </nz-range-picker>
+      </div>
+
+      <div class="filtro-acciones">
+        <button nz-button nzType="default" (click)="exportarExcel()">
+          <i nz-icon nzType="file-excel"></i>
+          Exportar Excel
+        </button>
+        <button nz-button nzType="default" (click)="exportarPDF()">
+          <i nz-icon nzType="file-pdf"></i>
+          Exportar PDF
+        </button>
+      </div>
+    </div>
+  </nz-card>
+
+  <!-- Resumen Financiero -->
+  <div class="resumen-section">
+    <nz-card nzTitle="Resumen del Periodo" [nzBordered]="false" class="resumen-card">
+      <div class="resumen-grid">
+        <div class="resumen-item">
+          <div class="resumen-icon pagado">
+            <i nz-icon nzType="check-circle"></i>
+          </div>
+          <div class="resumen-content">
+            <span class="resumen-label">Total Pagado</span>
+            <span class="resumen-value">{{ resumen.totalPagado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="resumen-detalle">{{ resumen.cantidadPagos }} pagos realizados</span>
+          </div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-icon pendiente">
+            <i nz-icon nzType="clock-circle"></i>
+          </div>
+          <div class="resumen-content">
+            <span class="resumen-label">Pendiente de Pago</span>
+            <span class="resumen-value">{{ resumen.totalPendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="resumen-detalle">{{ resumen.cantidadPendientes }} solicitudes</span>
+          </div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-icon comisiones">
+            <i nz-icon nzType="dollar"></i>
+          </div>
+          <div class="resumen-content">
+            <span class="resumen-label">Comisiones Generadas</span>
+            <span class="resumen-value">{{ resumen.comisionesGeneradas | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="resumen-detalle">Todas las comisiones</span>
+          </div>
+        </div>
+
+        <div class="resumen-item">
+          <div class="resumen-icon promedio">
+            <i nz-icon nzType="bar-chart"></i>
+          </div>
+          <div class="resumen-content">
+            <span class="resumen-label">Promedio por Pago</span>
+            <span class="resumen-value">{{ resumen.promedioPago | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="resumen-detalle">Valor promedio</span>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="graficos-section">
+    <!-- Pagos por Mes -->
+    <nz-card nzTitle="Pagos por Mes" [nzBordered]="false" class="grafico-card">
+      <div class="grafico-container">
+        <div class="chart-bars">
+          <div
+            *ngFor="let mes of pagosPorMes"
+            class="chart-bar"
+            [style.height.%]="(mes.monto / maxPagoMes) * 100">
+            <span class="bar-value">{{ mes.monto / 1000000 | number:'1.0-0' }}M</span>
+          </div>
+        </div>
+        <div class="chart-labels">
+          <span *ngFor="let mes of pagosPorMes">{{ mes.mes }}</span>
+        </div>
+      </div>
+    </nz-card>
+
+    <!-- Distribución por Referente -->
+    <nz-card nzTitle="Top 5 Referentes - Comisiones" [nzBordered]="false" class="grafico-card">
+      <div class="top-referentes">
+        <div *ngFor="let ref of topReferentes; let i = index" class="referente-item">
+          <div class="referente-posicion">
+            <span class="posicion-number" [class.top-three]="i < 3">#{{ i + 1 }}</span>
+          </div>
+          <div class="referente-info-report">
+            <span class="referente-nombre-report">{{ ref.nombre }}</span>
+            <nz-progress
+              [nzPercent]="ref.porcentaje"
+              [nzShowInfo]="false"
+              [nzStrokeColor]="'#4A90E2'">
+            </nz-progress>
+          </div>
+          <div class="referente-monto">
+            {{ ref.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Tabla Detallada -->
+  <nz-card nzTitle="Detalle de Pagos" [nzBordered]="false" class="tabla-card">
+    <nz-table
+      #pagosTable
+      [nzData]="pagosDetalle"
+      [nzLoading]="loading"
+      nzSize="small"
+      [nzPageSize]="10">
+
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>ID Retiro</th>
+          <th>Referente</th>
+          <th>Monto Pagado</th>
+          <th>Método</th>
+          <th>Procesado Por</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let pago of pagosTable.data">
+          <td>{{ formatearFecha(pago.fecha) }}</td>
+          <td>
+            <span class="pago-id">{{ pago.retiroId }}</span>
+          </td>
+          <td>{{ pago.referenteNombre }}</td>
+          <td>
+            <strong class="monto-pago">{{ pago.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+          </td>
+          <td>{{ pago.metodo }}</td>
+          <td>{{ pago.procesadoPor }}</td>
+          <td>
+            <nz-tag [nzColor]="getEstadoColor(pago.estado)">
+              {{ getEstadoTexto(pago.estado) }}
+            </nz-tag>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+
+  <!-- Resumen por Método de Pago -->
+  <nz-card nzTitle="Resumen por Método de Pago" [nzBordered]="false" class="metodos-card">
+    <div class="metodos-grid">
+      <div *ngFor="let metodo of resumenMetodos" class="metodo-item">
+        <div class="metodo-header">
+          <div class="metodo-icon">
+            <i nz-icon [nzType]="metodo.icono"></i>
+          </div>
+          <span class="metodo-nombre">{{ metodo.nombre }}</span>
+        </div>
+        <div class="metodo-stats">
+          <div class="metodo-stat">
+            <span class="stat-label">Transacciones</span>
+            <span class="stat-value">{{ metodo.cantidad }}</span>
+          </div>
+          <div class="metodo-stat">
+            <span class="stat-label">Monto Total</span>
+            <span class="stat-value primary">{{ metodo.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nz-card>
+</div>

@@ -1,0 +1,211 @@
+<div class="configuracion-container">
+  <div class="configuracion-header">
+    <button nz-button nzType="text" [routerLink]="['/gerente/dashboard']" class="btn-volver">
+      <i nz-icon nzType="arrow-left"></i>
+      Volver al Dashboard
+    </button>
+    <h1>Configuración del Sistema</h1>
+    <p>Administra todos los aspectos del sistema de referidos</p>
+  </div>
+
+  <!-- Resumen de configuración actual -->
+  <div class="resumen-section">
+    <nz-card [nzBordered]="false" class="resumen-card">
+      <div class="resumen-stats">
+        <div class="stat-box">
+          <div class="stat-icon planes">
+            <i nz-icon nzType="file-text"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.planesActivos }}</span>
+            <span class="stat-label">Planes Activos</span>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon niveles">
+            <i nz-icon nzType="trophy"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.nivelesConfigurados }}</span>
+            <span class="stat-label">Niveles Configurados</span>
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-icon insignias">
+            <i nz-icon nzType="star"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.insigniasDisponibles }}</span>
+            <span class="stat-label">Insignias Disponibles</span>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Grid de opciones de configuración -->
+  <div class="opciones-grid">
+    <!-- Planes -->
+    <nz-card [nzBordered]="false" class="opcion-card planes-card">
+      <div class="card-icon-header">
+        <div class="card-icon planes">
+          <i nz-icon nzType="file-text"></i>
+        </div>
+        <nz-tag nzColor="blue">{{ estadisticas.planesActivos }} activos</nz-tag>
+      </div>
+
+      <h3>Gestión de Planes</h3>
+      <p>Configura los planes disponibles, valores, comisiones y puntos otorgados por cada uno.</p>
+
+      <ul class="features-list">
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Crear y editar planes
+        </li>
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Configurar valores y comisiones
+        </li>
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Asignar puntos de gamificación
+        </li>
+      </ul>
+
+      <button
+        nz-button
+        nzType="primary"
+        nzBlock
+        nzSize="large"
+        [routerLink]="['/gerente/configuracion/planes']"
+        class="config-btn">
+        <i nz-icon nzType="setting"></i>
+        Configurar Planes
+      </button>
+    </nz-card>
+
+    <!-- Niveles -->
+    <nz-card [nzBordered]="false" class="opcion-card niveles-card">
+      <div class="card-icon-header">
+        <div class="card-icon niveles">
+          <i nz-icon nzType="trophy"></i>
+        </div>
+        <nz-tag nzColor="gold">{{ estadisticas.nivelesConfigurados }} niveles</nz-tag>
+      </div>
+
+      <h3>Sistema de Niveles</h3>
+      <p>Establece los niveles de gamificación, requisitos de puntos y bonificaciones adicionales.</p>
+
+      <ul class="features-list">
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Crear niveles personalizados
+        </li>
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Definir requisitos de puntos
+        </li>
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Configurar bonificaciones
+        </li>
+      </ul>
+
+      <button
+        nz-button
+        nzType="primary"
+        nzBlock
+        nzSize="large"
+        [routerLink]="['/gerente/configuracion/niveles']"
+        class="config-btn">
+        <i nz-icon nzType="setting"></i>
+        Configurar Niveles
+      </button>
+    </nz-card>
+
+    <!-- Insignias -->
+    <nz-card [nzBordered]="false" class="opcion-card insignias-card">
+      <div class="card-icon-header">
+        <div class="card-icon insignias">
+          <i nz-icon nzType="star"></i>
+        </div>
+        <nz-tag nzColor="purple">{{ estadisticas.insigniasDisponibles }} insignias</nz-tag>
+      </div>
+
+      <h3>Insignias y Logros</h3>
+      <p>Crea insignias especiales para reconocer logros y motivar a los referentes.</p>
+
+      <ul class="features-list">
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Diseñar insignias únicas
+        </li>
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Establecer criterios de obtención
+        </li>
+        <li>
+          <i nz-icon nzType="check-circle"></i>
+          Asignar recompensas especiales
+        </li>
+      </ul>
+
+      <button
+        nz-button
+        nzType="primary"
+        nzBlock
+        nzSize="large"
+        [routerLink]="['/gerente/configuracion/insignias']"
+        class="config-btn">
+        <i nz-icon nzType="setting"></i>
+        Configurar Insignias
+      </button>
+    </nz-card>
+  </div>
+
+  <!-- Alertas y recomendaciones -->
+  <div class="alertas-section">
+    <nz-card nzTitle="Recomendaciones del Sistema" [nzBordered]="false" class="alertas-card">
+      <nz-alert
+        *ngFor="let alerta of alertas"
+        [nzType]="alerta.tipo"
+        [nzMessage]="alerta.titulo"
+        [nzDescription]="alerta.descripcion"
+        [nzShowIcon]="true"
+        [nzCloseable]="true"
+        class="alerta-item">
+      </nz-alert>
+
+      <div class="empty-alertas" *ngIf="alertas.length === 0">
+        <i nz-icon nzType="check-circle" class="check-icon"></i>
+        <p>Todo está configurado correctamente. No hay recomendaciones por el momento.</p>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Acciones rápidas -->
+  <div class="acciones-rapidas">
+    <nz-card nzTitle="Acciones Rápidas" [nzBordered]="false" class="acciones-card">
+      <div class="acciones-grid">
+        <button nz-button nzType="default" (click)="resetearGamificacion()">
+          <i nz-icon nzType="reload"></i>
+          Reiniciar Gamificación
+        </button>
+        <button nz-button nzType="default" (click)="exportarConfiguracion()">
+          <i nz-icon nzType="download"></i>
+          Exportar Configuración
+        </button>
+        <button nz-button nzType="default" (click)="importarConfiguracion()">
+          <i nz-icon nzType="upload"></i>
+          Importar Configuración
+        </button>
+        <button nz-button nzType="default" (click)="verHistorialCambios()">
+          <i nz-icon nzType="history"></i>
+          Historial de Cambios
+        </button>
+      </div>
+    </nz-card>
+  </div>
+</div>

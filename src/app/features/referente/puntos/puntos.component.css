@@ -1,0 +1,261 @@
+.gamificacion-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.page-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  color: #8c8c8c;
+  font-size: 16px;
+}
+
+/* Nivel Actual */
+.nivel-actual-card {
+  margin-bottom: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nivel-display {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.nivel-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nivel-info h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.nivel-info p {
+  color: #8c8c8c;
+  margin: 0 0 12px 0;
+}
+
+.progreso-section {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.progreso-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.puntos-faltantes {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.siguiente-nivel-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: #595959;
+  font-size: 14px;
+}
+
+/* Niveles Grid */
+.niveles-card {
+  margin-bottom: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.niveles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.nivel-item {
+  text-align: center;
+  padding: 24px;
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.nivel-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nivel-actual {
+  border-color: #1890ff;
+  background: #e6f7ff;
+}
+
+.nivel-bloqueado {
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
+.nivel-badge {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nivel-item h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.nivel-puntos {
+  color: #595959;
+  font-size: 14px;
+  margin: 0 0 8px 0;
+}
+
+.nivel-beneficio {
+  color: #8c8c8c;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Logros */
+.logros-card {
+  margin-bottom: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logros-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.logros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.logro-item {
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s;
+}
+
+.logro-desbloqueado {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.logro-bloqueado {
+  opacity: 0.6;
+}
+
+.logro-icon {
+  margin-bottom: 12px;
+}
+
+.logro-item h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.logro-item p {
+  font-size: 13px;
+  color: #8c8c8c;
+  margin: 0;
+}
+
+.logro-fecha {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #52c41a;
+  font-weight: 500;
+}
+
+/* Info Card */
+.info-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.info-item h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.info-item p {
+  font-size: 14px;
+  color: #595959;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gamificacion-container {
+    padding: 16px;
+  }
+
+  .nivel-display {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .niveles-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .logros-grid {
+    grid-template-columns: 1fr;
+  }
+}

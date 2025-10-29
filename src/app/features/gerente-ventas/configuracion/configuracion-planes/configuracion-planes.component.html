@@ -1,0 +1,273 @@
+<div class="configuracion-container">
+  <div class="configuracion-header">
+    <button nz-button nzType="text" [routerLink]="['/gerente/dashboard']" class="btn-volver">
+      <i nz-icon nzType="arrow-left"></i>
+      Volver al Dashboard
+    </button>
+    <h1>Configuración de Planes</h1>
+    <p>Gestiona los planes disponibles para los clientes</p>
+  </div>
+
+  <nz-card [nzBordered]="false" class="configuracion-card">
+    <div class="acciones-header">
+      <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
+        <input
+          type="text"
+          nz-input
+          placeholder="Buscar plan..."
+          [(ngModel)]="searchText"
+          (ngModelChange)="filtrarPlanes()" />
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="search"></i>
+      </ng-template>
+
+      <button nz-button nzType="primary" (click)="mostrarModalCrear()">
+        <i nz-icon nzType="plus"></i>
+        Nuevo Plan
+      </button>
+    </div>
+
+    <nz-table
+      #planesTable
+      [nzData]="planesFiltrados"
+      [nzLoading]="loading"
+      nzSize="middle"
+      class="planes-table">
+
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Descripción</th>
+          <th>Valor Mensual</th>
+          <th>Comisión</th>
+          <th>Puntos</th>
+          <th>Estado</th>
+          <th nzWidth="150px">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let plan of planesTable.data">
+          <td>
+            <div class="plan-info">
+              <div class="plan-icon" [style.background-color]="plan.color">
+                <i nz-icon [nzType]="plan.icono"></i>
+              </div>
+              <span class="plan-nombre">{{ plan.nombre }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="plan-descripcion">{{ plan.descripcion }}</span>
+          </td>
+          <td>
+            <span class="plan-valor">{{ plan.valor | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </td>
+          <td>
+            <span class="comision-badge">{{ plan.comisionPorcentaje }}%</span>
+            <span class="comision-valor">{{ calcularComision(plan.valor, plan.comisionPorcentaje) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </td>
+          <td>
+            <span class="puntos-badge">
+              <i nz-icon nzType="trophy"></i>
+              {{ plan.puntos }}
+            </span>
+          </td>
+          <td>
+            <nz-switch
+              [(ngModel)]="plan.activo"
+              (ngModelChange)="cambiarEstadoPlan(plan)"
+              [nzCheckedChildren]="checkedTemplate"
+              [nzUnCheckedChildren]="unCheckedTemplate">
+            </nz-switch>
+            <ng-template #checkedTemplate><i nz-icon nzType="check"></i></ng-template>
+            <ng-template #unCheckedTemplate><i nz-icon nzType="close"></i></ng-template>
+          </td>
+          <td>
+            <nz-space nzSize="small">
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="text"
+                nzSize="small"
+                (click)="editarPlan(plan)"
+                nz-tooltip="Editar">
+                <i nz-icon nzType="edit"></i>
+              </button>
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="text"
+                nzDanger
+                nzSize="small"
+                (click)="eliminarPlan(plan)"
+                nz-tooltip="Eliminar">
+                <i nz-icon nzType="delete"></i>
+              </button>
+            </nz-space>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<!-- Modal Crear/Editar Plan -->
+<nz-modal
+  [(nzVisible)]="modalVisible"
+  [nzTitle]="modoEdicion ? 'Editar Plan' : 'Crear Nuevo Plan'"
+  [nzFooter]="null"
+  nzWidth="700px"
+  (nzOnCancel)="cerrarModal()">
+
+  <div *nzModalContent>
+    <form nz-form [formGroup]="planForm" (ngSubmit)="guardarPlan()">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzRequired nzFor="nombre">
+          Nombre del Plan
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa el nombre del plan">
+          <input
+            nz-input
+            formControlName="nombre"
+            id="nombre"
+            placeholder="Ej: Plan Profesional" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzFor="descripcion">
+          Descripción
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24">
+          <textarea
+            nz-input
+            formControlName="descripcion"
+            id="descripcion"
+            placeholder="Describe las características del plan"
+            [nzAutosize]="{ minRows: 3, maxRows: 5 }">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzRequired nzFor="valor">
+              Valor Mensual (COP)
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa el valor del plan">
+              <nz-input-number
+                formControlName="valor"
+                id="valor"
+                [nzMin]="0"
+                [nzStep]="1000"
+                [nzFormatter]="formatterCurrency"
+                [nzParser]="parserCurrency"
+                class="full-width">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzRequired nzFor="comisionPorcentaje">
+              Comisión (%)
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa el porcentaje de comisión">
+              <nz-input-number
+                formControlName="comisionPorcentaje"
+                id="comisionPorcentaje"
+                [nzMin]="0"
+                [nzMax]="100"
+                [nzStep]="1"
+                [nzFormatter]="formatterPercent"
+                [nzParser]="parserPercent"
+                class="full-width">
+              </nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzRequired nzFor="puntos">
+          Puntos Otorgados
+        </nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Ingresa los puntos que otorga este plan">
+          <nz-input-number
+            formControlName="puntos"
+            id="puntos"
+            [nzMin]="0"
+            [nzStep]="10"
+            class="full-width">
+          </nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="icono">
+              Ícono
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <nz-select formControlName="icono" id="icono">
+                <nz-option
+                  *ngFor="let icon of iconosDisponibles"
+                  [nzValue]="icon.value"
+                  [nzLabel]="icon.label">
+                  <i nz-icon [nzType]="icon.value"></i>
+                  {{ icon.label }}
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="color">
+              Color
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <input
+                nz-input
+                type="color"
+                formControlName="color"
+                id="color"
+                class="color-input" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Vista previa de comisión -->
+      <nz-alert
+        *ngIf="planForm.get('valor')?.value && planForm.get('comisionPorcentaje')?.value"
+        nzType="info"
+        nzShowIcon
+        class="comision-preview">
+        <div class="preview-content">
+          <strong>Vista Previa:</strong>
+          <span>Comisión por venta: {{ calcularComision(planForm.get('valor')?.value, planForm.get('comisionPorcentaje')?.value) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+      </nz-alert>
+
+      <nz-form-item class="form-actions">
+        <button nz-button nzType="default" type="button" (click)="cerrarModal()">
+          Cancelar
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          type="submit"
+          [nzLoading]="guardando"
+          [disabled]="!planForm.valid">
+          {{ modoEdicion ? 'Actualizar' : 'Crear' }} Plan
+        </button>
+      </nz-form-item>
+    </form>
+  </div>
+</nz-modal>

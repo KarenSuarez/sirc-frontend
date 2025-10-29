@@ -1,0 +1,51 @@
+<nav class="navbar">
+  <div class="navbar-left">
+    <div class="brand">
+      <img src="assets/images/logo/clarisa-plano.png" alt="Clarisa Logo" class="brand-logo">
+    </div>
+  </div>
+
+  <div class="navbar-center">
+    <ul class="nav-menu">
+      <li *ngFor="let item of getFilteredMenuItems()">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-link">
+          <span class="nav-icon">
+            <i nz-icon [nzType]="item.icon" nzTheme="outline"></i>
+          </span>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="navbar-right" *ngIf="usuario">
+    <div class="user-info" *ngIf="usuario.rol === 'referente'">
+      <span class="points-badge">🏆 {{ usuario.puntos || 0 }}</span>
+    </div>
+
+    <div class="user-profile" (click)="toggleUserMenu()">
+      <div class="user-avatar">
+        {{ usuario.nombre.charAt(0).toUpperCase() + usuario.apellido.charAt(0).toUpperCase() }}
+      </div>
+      <div class="user-details">
+        <span class="user-name">{{ usuario.nombre }} {{ usuario.apellido }}</span>
+        <span class="user-role">{{ getRoleDisplayName(usuario.rol) }}</span>
+      </div>
+      <span class="dropdown-arrow">▼</span>
+
+      <div class="user-dropdown" *ngIf="showUserMenu">
+        <a [routerLink]="['/auth/perfil']" class="dropdown-item">
+          <i nz-icon nzType="user" nzTheme="outline"></i> Mi Perfil
+        </a>
+        <hr>
+        <button (click)="logout()" class="dropdown-item logout-btn">
+          <i nz-icon nzType="logout" nzTheme="outline"></i> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+

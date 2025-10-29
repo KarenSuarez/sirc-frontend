@@ -1,0 +1,201 @@
+.configuracion-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.configuracion-header {
+  margin-bottom: 32px;
+}
+
+.btn-volver {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-light);
+  padding: 0;
+  height: auto;
+}
+
+.btn-volver:hover {
+  color: var(--primary-color);
+}
+
+.configuracion-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.configuracion-header p {
+  font-size: 16px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.configuracion-card {
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-light) !important;
+  border: none !important;
+}
+
+.acciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.search-input {
+  width: 350px;
+}
+
+/* Tabla */
+.planes-table {
+  background: transparent;
+}
+
+::ng-deep .planes-table .ant-table {
+  background: transparent;
+}
+
+::ng-deep .planes-table .ant-table-thead > tr > th {
+  background: #f8f9fa !important;
+  border-bottom: 2px solid #e9ecef !important;
+  font-weight: 600 !important;
+  color: var(--text-dark) !important;
+  font-size: 14px !important;
+  padding: 16px 12px !important;
+}
+
+::ng-deep .planes-table .ant-table-tbody > tr > td {
+  padding: 16px 12px !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  vertical-align: middle !important;
+}
+
+::ng-deep .planes-table .ant-table-tbody > tr:hover > td {
+  background: rgba(74, 144, 226, 0.05) !important;
+}
+
+/* Plan Info */
+.plan-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.plan-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+}
+
+.plan-nombre {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.plan-descripcion {
+  font-size: 13px;
+  color: var(--text-light);
+  line-height: 1.4;
+}
+
+.plan-valor {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Comisión */
+.comision-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+.comision-valor {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+/* Puntos */
+.puntos-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(255, 152, 0, 0.1);
+  color: #FF9800;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Modal */
+.full-width {
+  width: 100%;
+}
+
+.color-input {
+  height: 40px;
+  cursor: pointer;
+}
+
+.comision-preview {
+  margin-top: 16px;
+}
+
+.preview-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .configuracion-container {
+    padding: 16px;
+  }
+
+  .acciones-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .configuracion-header h1 {
+    font-size: 24px;
+  }
+}
+
+:root {
+  --primary-color: #4A90E2;
+  --text-dark: #2c3e50;
+  --text-light: #7f8c8d;
+  --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

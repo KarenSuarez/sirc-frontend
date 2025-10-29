@@ -1,81 +1,68 @@
 import { Routes } from '@angular/router';
+import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
+import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // Redirección inicial
   { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
 
-  // Rutas de autenticación (sin navbar)
   {
     path: 'auth',
-    loadChildren: () =>
-      import('./modulos/auth/auth.routes').then((m) => m.AUTH_ROUTES),
-  },
-
-  // Dashboard principal (con navbar)
-  {
-    path: 'dashboard',
-    loadChildren: () =>
-      import('./modulos/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
-  },
-
-  // Rutas principales del sistema (con navbar)
-  {
-    path: 'referentes',
-    loadChildren: () =>
-      import('./modulos/referentes/referentes.routes').then(
-        (m) => m.REFERENTES_ROUTES
-      ),
-  },
-    {
-    path: 'referidos',
-    loadChildren: () =>
-      import('./modulos/referidos/referidos.routes').then(
-        (m) => m.REFERIDOS_ROUTES
-      ),
+    component: AuthLayoutComponent,
+    children: [
+      {
+        path: '',
+        loadChildren: () =>
+          import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
+      },
+    ],
   },
 
   {
-    path: 'referidos',
-    loadChildren: () =>
-      import('./modulos/referidos/referidos.routes').then(
-        (m) => m.REFERIDOS_ROUTES
-      ),
+    path: '',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'referente',
+        loadChildren: () =>
+          import('./features/referente/referente.routes').then(
+            (m) => m.REFERENTE_ROUTES
+          ),
+      },
+
+      {
+        path: 'asesor',
+        loadChildren: () =>
+          import('./features/asesor-ventas/asesor-ventas.routes').then(
+            (m) => m.ASESOR_VENTAS_ROUTES
+          ),
+      },
+
+      {
+        path: 'gerente',
+        loadChildren: () =>
+          import('./features/gerente-ventas/gerente-ventas.routes').then(
+            (m) => m.GERENTE_VENTAS_ROUTES
+          ),
+      },
+
+      {
+        path: 'contador',
+        loadChildren: () =>
+          import('./features/contador/contador.routes').then(
+            (m) => m.CONTADOR_ROUTES
+          ),
+      },
+
+      {
+        path: 'admin',
+        loadChildren: () =>
+          import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+      },
+    ],
   },
 
-//  {
-//    path: 'recompensas',
-//    loadChildren: () =>
-//      import('./modulos/recompensas/recompensas.routes').then(
-//        (m) => m.RECOMPENSAS_ROUTES
-//      ),
-//  },
-
-  {
-    path: 'gamificacion',
-    loadChildren: () =>
-      import('./modulos/gamificacion/gamificacion.routes').then(
-        (m) => m.GAMIFICACION_ROUTES
-      ),
-  },
-
-  {
-    path: 'reportes',
-    loadChildren: () =>
-      import('./modulos/reportes/reportes.routes').then(
-        (m) => m.REPORTES_ROUTES
-      ),
-  },
-
-//  {
-//    path: 'pagos',
-//    loadChildren: () =>
-//      import('./modulos/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
-//  },
-
-  {
-    path: 'paneles',
-    loadChildren: () =>
-      import('./modulos/paneles/paneles.routes').then((m) => m.PANELES_ROUTES),
-  },
-
+  // Ruta 404
+  { path: '**', redirectTo: '/auth/login' },
 ];

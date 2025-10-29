@@ -1,0 +1,38 @@
+<div class="dashboard-container" *ngIf="usuario">
+  <div class="dashboard-header">
+    <h1>¡Bienvenido, {{ usuario.nombre }}!</h1>
+    <p>Dashboard de Asesor de Ventas</p>
+  </div>
+
+  <div class="asesor-grid">
+    <nz-card nzTitle="Gestión de Referentes" class="dashboard-card">
+      <div class="card-content">
+        <p>Administra y supervisa a los referentes activos</p>
+        <button nz-button nzType="primary" [routerLink]="['/referentes/lista']">
+          <i nz-icon nzType="team"></i>
+          Ver Referentes
+        </button>
+      </div>
+    </nz-card>
+
+    <nz-card nzTitle="Gestión de Referidos" class="dashboard-card">
+      <div class="card-content">
+        <p>Revisa el estado y progreso de los referidos</p>
+        <button nz-button nzType="primary" [routerLink]="['/referidos/lista']">
+          <i nz-icon nzType="usergroup-add"></i>
+          Ver Referidos
+        </button>
+      </div>
+    </nz-card>
+
+    <nz-card nzTitle="Reportes" class="dashboard-card">
+      <div class="card-content">
+        <p>Consulta métricas y estadísticas de ventas</p>
+        <button nz-button nzType="primary" [routerLink]="['/reportes']">
+          <i nz-icon nzType="bar-chart"></i>
+          Ver Reportes
+        </button>
+      </div>
+    </nz-card>
+  </div>
+</div>

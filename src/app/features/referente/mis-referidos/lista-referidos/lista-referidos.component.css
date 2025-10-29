@@ -1,0 +1,340 @@
+.lista-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.lista-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  gap: 24px;
+}
+
+.header-content h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 8px 0;
+}
+
+.header-content p {
+  font-size: 16px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.header-actions {
+  flex-shrink: 0;
+}
+
+.crear-btn {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  border-radius: var(--border-radius) !important;
+  height: 44px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  padding: 0 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.crear-btn:hover {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.tabla-card {
+  border-radius: 16px !important;
+  box-shadow: var(--shadow-light) !important;
+  border: none !important;
+  overflow: hidden;
+}
+
+.referidos-table {
+  background: transparent;
+}
+
+::ng-deep .referidos-table .ant-table {
+  background: transparent;
+}
+
+::ng-deep .referidos-table .ant-table-thead > tr > th {
+  background: #f8f9fa !important;
+  border-bottom: 2px solid #e9ecef !important;
+  font-weight: 600 !important;
+  color: var(--text-dark) !important;
+  font-size: 14px !important;
+  padding: 16px 12px !important;
+}
+
+::ng-deep .referidos-table .ant-table-tbody > tr > td {
+  padding: 16px 12px !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  vertical-align: top !important;
+}
+
+::ng-deep .referidos-table .ant-table-tbody > tr:hover > td {
+  background: rgba(74, 144, 226, 0.05) !important;
+}
+
+/* Estilos para la información del referido */
+.referido-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.referido-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.referido-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.referido-nombre {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.referido-codigo {
+  font-size: 12px;
+  color: var(--text-light);
+  font-family: 'Courier New', monospace;
+}
+
+/* Estilos para información de contacto */
+.contacto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contacto-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+.contacto-item i {
+  color: var(--text-light);
+  font-size: 12px;
+  width: 14px;
+}
+
+/* Estilos para documento */
+.documento-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tipo-doc {
+  font-size: 11px;
+  color: var(--text-light);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.numero-doc {
+  font-size: 13px;
+  color: var(--text-dark);
+  font-family: 'Courier New', monospace;
+}
+
+/* Estilos para fechas */
+.fechas-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fecha-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dark);
+}
+
+.fecha-item i {
+  color: var(--text-light);
+  font-size: 11px;
+  width: 12px;
+}
+
+/* Estilos para puntos */
+.puntos-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #FF9800;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.puntos-info i {
+  color: #FF9800;
+}
+
+.sin-puntos {
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+/* Estilos para acciones */
+::ng-deep .ant-btn-text {
+  color: var(--text-light) !important;
+  padding: 4px !important;
+  height: auto !important;
+  border-radius: var(--border-radius) !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .ant-btn-text:hover {
+  color: var(--primary-color) !important;
+  background: rgba(74, 144, 226, 0.1) !important;
+}
+
+::ng-deep .menu-danger {
+  color: var(--danger-color) !important;
+}
+
+::ng-deep .menu-danger:hover {
+  background: rgba(255, 77, 79, 0.1) !important;
+}
+
+/* Estado vacío */
+.tabla-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: var(--text-light);
+}
+
+.empty-content h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.empty-content p {
+  font-size: 16px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .lista-container {
+    max-width: 100%;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .lista-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .header-content h1 {
+    font-size: 24px;
+  }
+
+  .crear-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .referido-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .contacto-info,
+  .fechas-info {
+    gap: 4px;
+  }
+
+  .contacto-item,
+  .fecha-item {
+    font-size: 12px;
+  }
+
+  ::ng-deep .referidos-table .ant-table-thead > tr > th,
+  ::ng-deep .referidos-table .ant-table-tbody > tr > td {
+    padding: 12px 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .lista-container {
+    padding: 16px;
+  }
+
+  .empty-content {
+    padding: 40px 20px;
+  }
+
+  .empty-icon {
+    font-size: 36px;
+  }
+
+  .empty-content h3 {
+    font-size: 18px;
+  }
+
+  .empty-content p {
+    font-size: 14px;
+  }
+}
+
+/* Variables CSS si no están definidas */
+:root {
+  --primary-color: #4A90E2;
+  --primary-dark: #357ABD;
+  --text-dark: #2c3e50;
+  --text-light: #7f8c8d;
+  --white: #ffffff;
+  --danger-color: #ff4d4f;
+  --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+}

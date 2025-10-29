@@ -1,0 +1,245 @@
+<div class="crear-usuario-container">
+  <div class="crear-usuario-header">
+    <button nz-button nzType="text" [routerLink]="['/admin/usuarios']" class="btn-volver">
+      <i nz-icon nzType="arrow-left"></i>
+      Volver a la lista
+    </button>
+    <h1>Crear Nuevo Usuario</h1>
+    <p>Completa el formulario para registrar un nuevo usuario en el sistema</p>
+  </div>
+
+  <nz-card [nzBordered]="false" class="formulario-card">
+    <form nz-form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
+
+      <!-- Información Personal -->
+      <div class="form-section">
+        <h3>Información Personal</h3>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="nombre">
+                Nombre
+              </nz-form-label>
+              <nz-form-control [nzSpan]="24" nzErrorTip="Por favor ingresa el nombre">
+                <input
+                  nz-input
+                  formControlName="nombre"
+                  id="nombre"
+                  placeholder="Nombre del usuario" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="apellido">
+                Apellido
+              </nz-form-label>
+              <nz-form-control [nzSpan]="24" nzErrorTip="Por favor ingresa el apellido">
+                <input
+                  nz-input
+                  formControlName="apellido"
+                  id="apellido"
+                  placeholder="Apellido del usuario" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="documento">
+                Documento de Identidad
+              </nz-form-label>
+              <nz-form-control [nzSpan]="24" nzErrorTip="Por favor ingresa el documento">
+                <input
+                  nz-input
+                  formControlName="documento"
+                  id="documento"
+                  placeholder="Número de documento" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="telefono">
+                Teléfono
+              </nz-form-label>
+              <nz-form-control [nzSpan]="24" nzErrorTip="Por favor ingresa el teléfono">
+                <input
+                  nz-input
+                  formControlName="telefono"
+                  id="telefono"
+                  placeholder="Número de teléfono" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <nz-divider></nz-divider>
+
+      <!-- Información de Cuenta -->
+      <div class="form-section">
+        <h3>Información de Cuenta</h3>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired nzFor="correo">
+            Correo Electrónico
+          </nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Por favor ingresa un correo válido">
+            <input
+              nz-input
+              formControlName="correo"
+              id="correo"
+              type="email"
+              placeholder="correo@ejemplo.com" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="contrasena">
+                Contraseña
+              </nz-form-label>
+              <nz-form-control [nzSpan]="24" nzErrorTip="La contraseña debe tener al menos 6 caracteres">
+                <nz-input-group [nzSuffix]="suffixTemplate">
+                  <input
+                    [type]="passwordVisible ? 'text' : 'password'"
+                    nz-input
+                    formControlName="contrasena"
+                    id="contrasena"
+                    placeholder="Contraseña" />
+                </nz-input-group>
+                <ng-template #suffixTemplate>
+                  <i
+                    nz-icon
+                    [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+                    (click)="passwordVisible = !passwordVisible"
+                    style="cursor: pointer;">
+                  </i>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="confirmarContrasena">
+                Confirmar Contraseña
+              </nz-form-label>
+              <nz-form-control [nzSpan]="24" [nzErrorTip]="errorTplConfirm">
+                <nz-input-group [nzSuffix]="suffixTemplate2">
+                  <input
+                    [type]="confirmPasswordVisible ? 'text' : 'password'"
+                    nz-input
+                    formControlName="confirmarContrasena"
+                    id="confirmarContrasena"
+                    placeholder="Confirmar contraseña" />
+                </nz-input-group>
+                <ng-template #suffixTemplate2>
+                  <i
+                    nz-icon
+                    [nzType]="confirmPasswordVisible ? 'eye-invisible' : 'eye'"
+                    (click)="confirmPasswordVisible = !confirmPasswordVisible"
+                    style="cursor: pointer;">
+                  </i>
+                </ng-template>
+                <ng-template #errorTplConfirm let-control>
+                  <ng-container *ngIf="control.hasError('required')">
+                    Por favor confirma la contraseña
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('mismatch')">
+                    Las contraseñas no coinciden
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired nzFor="rol">
+            Rol del Usuario
+          </nz-form-label>
+          <nz-form-control [nzSpan]="24" nzErrorTip="Por favor selecciona un rol">
+            <nz-select formControlName="rol" id="rol" nzPlaceHolder="Selecciona el rol">
+              <nz-option nzValue="admin" nzLabel="Administrador"></nz-option>
+              <nz-option nzValue="gerente_ventas" nzLabel="Gerente de Ventas"></nz-option>
+              <nz-option nzValue="asesor_ventas" nzLabel="Asesor de Ventas"></nz-option>
+              <nz-option nzValue="contador" nzLabel="Contador"></nz-option>
+              <nz-option nzValue="referente" nzLabel="Referente"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-alert
+          *ngIf="usuarioForm.get('rol')?.value"
+          [nzType]="'info'"
+          [nzMessage]="getRolDescripcion(usuarioForm.get('rol')?.value)"
+          nzShowIcon
+          [nzCloseable]="false"
+          class="rol-info">
+        </nz-alert>
+      </div>
+
+      <nz-divider></nz-divider>
+
+      <!-- Información Adicional para Referentes -->
+      <div class="form-section" *ngIf="usuarioForm.get('rol')?.value === 'referente'">
+        <h3>Información de Referente</h3>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzFor="asesorAsignado">
+            Asesor Asignado
+          </nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <nz-select formControlName="asesorAsignado" nzPlaceHolder="Selecciona un asesor (opcional)">
+              <nz-option *ngFor="let asesor of asesoresDisponibles" [nzValue]="asesor.id" [nzLabel]="asesor.nombre"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">
+            <label nz-checkbox formControlName="generarCodigo">
+              Generar código de referido automáticamente
+            </label>
+          </nz-form-label>
+        </nz-form-item>
+      </div>
+
+      <!-- Estado -->
+      <div class="form-section">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">
+            <label nz-checkbox formControlName="activo">
+              Usuario activo
+            </label>
+          </nz-form-label>
+          <span class="form-hint">Los usuarios inactivos no podrán acceder al sistema</span>
+        </nz-form-item>
+      </div>
+
+      <!-- Acciones -->
+      <nz-form-item class="form-actions">
+        <button nz-button nzType="default" type="button" [routerLink]="['/admin/usuarios']">
+          Cancelar
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          type="submit"
+          [nzLoading]="guardando"
+          [disabled]="!usuarioForm.valid">
+          <i nz-icon nzType="save"></i>
+          Crear Usuario
+        </button>
+      </nz-form-item>
+    </form>
+  </nz-card>
+</div>

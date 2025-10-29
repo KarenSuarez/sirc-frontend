@@ -1,0 +1,129 @@
+<div class="dashboard-container" *ngIf="usuario">
+  <div class="dashboard-header">
+    <h1>¡Bienvenido, {{ usuario.nombre }}!</h1>
+    <p>Panel de Control Financiero</p>
+  </div>
+
+  <!-- KPIs Principales -->
+  <div class="kpis-section">
+    <nz-card [nzBordered]="false" class="kpi-card pendientes">
+      <nz-statistic
+        [nzValue]="estadisticas.retirosPendientes"
+        nzTitle="Retiros Pendientes">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="clock-circle"></i>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card procesados">
+      <nz-statistic
+        [nzValue]="estadisticas.retirosHoy"
+        nzTitle="Procesados Hoy">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="check-circle"></i>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card monto">
+      <nz-statistic
+        [nzValue]="estadisticas.montoMes"
+        [nzPrefix]="'$'"
+        nzTitle="Pagado Este Mes">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="dollar"></i>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+
+    <nz-card [nzBordered]="false" class="kpi-card total">
+      <nz-statistic
+        [nzValue]="estadisticas.totalRetiros"
+        nzTitle="Total de Retiros">
+        <ng-template #nzPrefix>
+          <i nz-icon nzType="file-text"></i>
+        </ng-template>
+      </nz-statistic>
+    </nz-card>
+  </div>
+
+  <!-- Acciones Rápidas -->
+  <div class="acciones-grid">
+    <nz-card nzTitle="Gestión de Retiros" class="dashboard-card">
+      <div class="card-content">
+        <p>Procesa y aprueba solicitudes de retiro de los referentes</p>
+        <div class="alert-pendientes" *ngIf="estadisticas.retirosPendientes > 0">
+          <i nz-icon nzType="exclamation-circle"></i>
+          <span>Tienes {{ estadisticas.retirosPendientes }} solicitudes pendientes</span>
+        </div>
+        <button nz-button nzType="primary" nzBlock [routerLink]="['/contador/retiros']">
+          <i nz-icon nzType="file-text"></i>
+          Gestionar Retiros
+        </button>
+      </div>
+    </nz-card>
+
+    <nz-card nzTitle="Reportes Financieros" class="dashboard-card">
+      <div class="card-content">
+        <p>Consulta reportes detallados de pagos y comisiones</p>
+        <button nz-button nzType="primary" nzBlock [routerLink]="['/contador/reportes']">
+          <i nz-icon nzType="bar-chart"></i>
+          Ver Reportes
+        </button>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Últimas Solicitudes -->
+  <nz-card nzTitle="Últimas Solicitudes de Retiro" [nzBordered]="false" class="ultimas-card">
+    <nz-table
+      #ultimasTable
+      [nzData]="ultimasSolicitudes"
+      [nzPageSize]="5"
+      [nzShowPagination]="false"
+      nzSize="small">
+
+      <thead>
+        <tr>
+          <th>Referente</th>
+          <th>Monto</th>
+          <th>Fecha Solicitud</th>
+          <th>Estado</th>
+          <th nzWidth="120px">Acción</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let solicitud of ultimasTable.data">
+          <td>{{ solicitud.referenteNombre }}</td>
+          <td>
+            <strong>{{ solicitud.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+          </td>
+          <td>{{ formatearFecha(solicitud.fechaSolicitud) }}</td>
+          <td>
+            <nz-tag [nzColor]="getEstadoColor(solicitud.estado)">
+              {{ getEstadoTexto(solicitud.estado) }}
+            </nz-tag>
+          </td>
+          <td>
+            <button
+              nz-button
+              nzType="link"
+              nzSize="small"
+              [routerLink]="['/contador/retiros']"
+              [queryParams]="{id: solicitud.id}">
+              Ver Detalle
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+
+    <div class="ver-todos" *ngIf="estadisticas.retirosPendientes > 5">
+      <button nz-button nzType="link" [routerLink]="['/contador/retiros']">
+        Ver todas las solicitudes ({{ estadisticas.retirosPendientes }})
+      </button>
+    </div>
+  </nz-card>
+</div>
