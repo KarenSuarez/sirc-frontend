@@ -331,3 +331,113 @@
 .perfil-container {
   animation: fadeIn 0.5s ease-out;
 }
+
+/* === Bordes redondeados en todos los campos editables del perfil === */
+
+::ng-deep .ant-input,
+::ng-deep .ant-input-affix-wrapper,
+::ng-deep .ant-select-selector,
+::ng-deep .ant-picker {
+  border-radius: 8px !important;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+/* Hover y focus uniformes */
+::ng-deep .ant-input:hover,
+::ng-deep .ant-input-affix-wrapper:hover,
+::ng-deep .ant-select-selector:hover,
+::ng-deep .ant-picker:hover {
+  border-color: #1677ff !important;
+}
+
+::ng-deep .ant-input:focus,
+::ng-deep .ant-input-affix-wrapper-focused,
+::ng-deep .ant-select-focused .ant-select-selector,
+::ng-deep .ant-picker-focused {
+  border-color: #1677ff !important;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15);
+}
+
+::ng-deep .ant-input[disabled],
+::ng-deep .ant-select-disabled .ant-select-selector,
+::ng-deep .ant-picker-disabled {
+  background-color: #f5f5f5 !important;
+  border-radius: 12px !important;
+  border: 1px solid #ddd !important;
+  cursor: not-allowed !important;
+}
+
+::ng-deep .ant-select-selector,
+::ng-deep .ant-picker {
+  padding: 4px 11px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+}
+/* === Bordes redondeados y estilo coherente para los botones === */
+
+::ng-deep .ant-btn {
+  border-radius: 5px ;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Tamaños consistentes */
+::ng-deep .ant-btn-lg {
+  border-radius: 5px ;
+  padding: 8px 20px ;
+}
+
+::ng-deep .ant-btn-sm {
+  border-radius: 5px ;
+  padding: 4px 12px ;
+}
+
+/* Botones primarios (azul) */
+::ng-deep .ant-btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+::ng-deep .ant-btn-primary:hover,
+::ng-deep .ant-btn-primary:focus {
+  background-color: #1a73e8 !important;
+  border-color: #1a73e8 !important;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.25);
+}
+
+/* Botones por defecto (grises) */
+::ng-deep .ant-btn-default {
+  background-color: #fff !important;
+  border-color: #d9d9d9 !important;
+  color: var(--text-dark) !important;
+}
+
+::ng-deep .ant-btn-default:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Botones deshabilitados */
+::ng-deep .ant-btn[disabled],
+::ng-deep .ant-btn-disabled {
+  background-color: #f5f5f5 !important;
+  color: #bfbfbf;
+  border-color: #d9d9d9 !important;
+  border-radius: 5px !important;
+  cursor: not-allowed !important;
+}
+
+/* Botones tipo enlace (link buttons) */
+::ng-deep .ant-btn-link {
+  border-radius: 5px !important;
+  color: var(--primary-color) !important;
+  padding: 0 4px !important;
+}
+
+::ng-deep .ant-btn-link:hover {
+  text-decoration: underline;
+}
+

@@ -4,9 +4,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
-
 
 
 .register-content {
@@ -21,8 +20,8 @@
 }
 
 .register-card-wrapper {
-  flex: 0 0 650px;
-  max-width: 650px;
+  flex: 0 0 750px;
+  max-width: 1000px;
   width: 100%;
 }
 
@@ -32,6 +31,8 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 100%;
+  overflow : hidden;
 }
 
 .register-card ::ng-deep .ant-card-body {
