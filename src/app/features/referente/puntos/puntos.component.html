@@ -25,13 +25,13 @@
         <span class="puntos-faltantes">Faltan {{ puntosParaSiguienteNivel }} puntos</span>
       </div>
       <nz-progress
-        [nzPercent]="progresoNivel"
+        [nzPercent]="progresoNivel | number:'1.0-2'"
         [nzStrokeColor]="siguienteNivel.color"
         nzSize="small">
       </nz-progress>
       <div class="siguiente-nivel-info">
         <i nz-icon [nzType]="siguienteNivel.icon"></i>
-        <span>Próximo: {{ siguienteNivel.nombre }} - {{ siguienteNivel.beneficio }}</span>
+        <span>Próximo: {{ siguienteNivel.nombre }} -> {{ siguienteNivel.beneficio }}</span>
       </div>
     </div>
 
