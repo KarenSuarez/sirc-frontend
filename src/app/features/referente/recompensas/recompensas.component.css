@@ -47,3 +47,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Redondear el botón "Solicitar Retiro" */
+::ng-deep .stat-card .ant-btn-primary {
+  border-radius: 5px !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Efecto hover coherente */
+::ng-deep .stat-card .ant-btn-primary:hover {
+  transform: translateY(-1px);
+  background-color: var(--primary-dark, #1a73e8) !important;
+  border-color: var(--primary-dark, #1a73e8) !important;
+}

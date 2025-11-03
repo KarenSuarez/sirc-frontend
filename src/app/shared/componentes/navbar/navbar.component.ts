@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { Usuario } from '../../../core/models/usuario.interface';
+
 
 interface MenuItem {
   label: string;
@@ -165,7 +166,7 @@ export class NavbarComponent implements OnInit {
     return roleRoutes[this.usuario.rol] || '/dashboard';
   }
 
-  private getProfileRoute(): string {
+   getProfileRoute(): string {
     if (!this.usuario) return '/perfil';
 
     const roleRoutes: { [key: string]: string } = {
@@ -198,4 +199,14 @@ export class NavbarComponent implements OnInit {
     };
     return roles[rol as keyof typeof roles] || rol;
   }
+
+    @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const clickedInside = target.closest('.user-profile');
+    if (!clickedInside) {
+      this.showUserMenu = false;
+    }
+  }
+
 }

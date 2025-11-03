@@ -99,6 +99,7 @@ export class PerfilBaseComponent implements OnInit {
       if (usuario) {
         this.usuario = usuario;
         this.populateForm();
+        this.perfilForm.disable();
       }
     });
   }

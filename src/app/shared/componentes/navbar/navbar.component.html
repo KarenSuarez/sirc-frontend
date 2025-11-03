@@ -37,7 +37,7 @@
       <span class="dropdown-arrow">▼</span>
 
       <div class="user-dropdown" *ngIf="showUserMenu">
-        <a [routerLink]="['/auth/perfil']" class="dropdown-item">
+        <a [routerLink]="[getProfileRoute()]" class="dropdown-item">
           <i nz-icon nzType="user" nzTheme="outline"></i> Mi Perfil
         </a>
         <hr>
