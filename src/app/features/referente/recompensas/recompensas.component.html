@@ -1,147 +1,286 @@
 <div class="recompensas-container">
-  <div class="page-header">
-    <h1>💰 Mis Recompensas Monetarias</h1>
-    <p>Gestiona tus comisiones y solicita retiros</p>
-  </div>
+  <nz-spin [nzSpinning]="cargando" nzTip="Cargando datos...">
 
-  <!-- Estadísticas -->
-  <div class="stats-section">
-    <nz-card class="stat-card">
-      <nz-statistic
-        [nzValue]="saldoDisponible"
-        nzTitle="Saldo Disponible"
-        nzPrefix="$"
-        [nzValueStyle]="{ color: '#3f8600' }">
-      </nz-statistic>
-      <button nz-button nzType="primary" nzSize="large" (click)="showRetiroModal()" style="margin-top: 16px;">
+    <div class="stats-section">
+  <nz-card class="stat-card stat-card-saldo">
+    <div class="stat-card-content">
+      <div class="stat-icon-wrapper stat-saldo">
+        <i nz-icon nzType="wallet" nzTheme="outline"></i>
+      </div>
+
+      <div class="stat-info">
+        <nz-statistic
+          [nzValue]="saldoDisponible"
+          nzTitle="Saldo Disponible"
+          nzPrefix="$"
+          [nzValueStyle]="{ color: 'var(--success-color)' }"
+        >
+        </nz-statistic>
+      </div>
+
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="default"
+        (click)="showRetiroModal()"
+        [disabled]="saldoDisponible < 50000"
+        class="stat-button"
+      >
         <i nz-icon nzType="wallet"></i>
-        Solicitar Retiro
+        <span class="stat-button-text">Solicitar</span>
       </button>
-    </nz-card>
-
-    <nz-card class="stat-card">
-      <nz-statistic
-        [nzValue]="totalPendiente"
-        nzTitle="En Proceso"
-        nzPrefix="$"
-        [nzValueStyle]="{ color: '#faad14' }">
-      </nz-statistic>
-    </nz-card>
-
-    <nz-card class="stat-card">
-      <nz-statistic
-        [nzValue]="totalPagado"
-        nzTitle="Total Pagado"
-        nzPrefix="$"
-        [nzValueStyle]="{ color: '#52c41a' }">
-      </nz-statistic>
-    </nz-card>
-  </div>
-
-  <!-- Historial de Recompensas -->
-  <nz-card nzTitle="Historial de Recompensas" class="table-card">
-    <nz-table #recompensasTable [nzData]="recompensas" [nzPageSize]="10">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Referido</th>
-          <th>Plan</th>
-          <th>Monto</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of recompensasTable.data">
-          <td>{{ item.fecha }}</td>
-          <td>{{ item.referidoNombre }}</td>
-          <td>{{ item.plan }}</td>
-          <td>{{ item.monto | currency:'':'symbol':'1.0-0' }}</td>
-          <td>
-            <nz-tag [nzColor]="getEstadoColor(item.estado)">
-              {{ item.estado | uppercase }}
-            </nz-tag>
-          </td>
-        </tr>
-      </tbody>
-    </nz-table>
+    </div>
   </nz-card>
 
-  <!-- Solicitudes de Retiro -->
-  <nz-card nzTitle="Mis Solicitudes de Retiro" class="table-card">
-    <nz-table #retirosTable [nzData]="solicitudesRetiro" [nzPageSize]="5">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Monto</th>
-          <th>Método</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of retirosTable.data">
-          <td>{{ item.fecha }}</td>
-          <td>{{ item.monto | currency:'':'symbol':'1.0-0' }}</td>
-          <td>{{ item.metodo }}</td>
-          <td>
-            <nz-tag [nzColor]="getEstadoColor(item.estado)">
-              {{ item.estado | uppercase }}
-            </nz-tag>
-          </td>
-        </tr>
-      </tbody>
-    </nz-table>
+  <nz-card class="stat-card stat-card-pendiente">
+    <div class="stat-card-content">
+      <div class="stat-icon-wrapper stat-pendiente">
+        <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+      </div>
+
+      <div class="stat-info">
+        <nz-statistic
+          [nzValue]="totalPendiente"
+          nzTitle="Comisiones Pendientes"
+          nzPrefix="$"
+          [nzValueStyle]="{ color: 'var(--warning-color)' }"
+        >
+        </nz-statistic>
+      </div>
+    </div>
   </nz-card>
 
-  <!-- Modal de Solicitud de Retiro -->
+  <nz-card class="stat-card stat-card-pagado">
+    <div class="stat-card-content">
+      <div class="stat-icon-wrapper stat-pagado">
+        <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+      </div>
+
+      <div class="stat-info">
+        <nz-statistic
+          [nzValue]="totalPagado"
+          nzTitle="Total Pagado"
+          nzPrefix="$"
+          [nzValueStyle]="{ color: 'var(--primary-color)' }"
+        >
+        </nz-statistic>
+      </div>
+    </div>
+  </nz-card>
+</div>
+
+    <nz-card nzTitle="Historial de Comisiones" class="table-card">
+      <nz-table
+        #comisionesTable
+        [nzData]="recompensas"
+        [nzPageSize]="10"
+        [nzLoading]="cargando"
+        nzSize="small">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Referido</th>
+            <th>Plan</th>
+            <th>Monto</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of comisionesTable.data">
+            <td>{{ item.fecha }}</td>
+            <td>{{ item.referidoNombre }}</td>
+            <td>{{ item.plan }}</td>
+            <td class="monto-cell">${{ item.monto | number:'1.0-0' }}</td>
+            <td>
+              <nz-tag [nzColor]="getEstadoColor(item.estado)">
+                {{ getEstadoTexto(item.estado) }}
+              </nz-tag>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+
+      <nz-empty
+        *ngIf="!cargando && recompensas.length === 0"
+        nzNotFoundContent="No tienes comisiones generadas aún"
+        [nzNotFoundImage]="'simple'">
+      </nz-empty>
+    </nz-card>
+
+    <nz-divider></nz-divider>
+
+    <nz-card nzTitle="Solicitudes de Retiro" class="table-card" [nzExtra]="extraTemplate">
+      <nz-table
+        #retirosTable
+        [nzData]="solicitudesRetiro"
+        [nzPageSize]="10"
+        nzSize="small">
+        <thead>
+          <tr>
+            <th>Fecha Solicitud</th>
+            <th>Monto</th>
+            <th>Método</th>
+            <th>Estado</th>
+            <th>Fecha Procesamiento</th>
+            <th>Detalles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let solicitud of retirosTable.data">
+            <td>
+              <div class="fecha-info">
+                <i nz-icon nzType="calendar"></i>
+                {{ formatearFecha(solicitud.fecha_solicitud) }}
+              </div>
+            </td>
+
+            <td class="monto-cell">
+              ${{ solicitud.monto_solicitado | number:'1.0-0' }}
+            </td>
+
+            <td>
+              <nz-tag [nzColor]="solicitud.metodo_retiro === 'retiro' ? 'blue' : 'purple'">
+                {{ solicitud.metodo_retiro === 'retiro' ? 'Transferencia' : 'Bono de Pago' }}
+              </nz-tag>
+            </td>
+
+            <td>
+              <nz-tag [nzColor]="getEstadoColor(solicitud.estado_solicitud)">
+                {{ getEstadoTexto(solicitud.estado_solicitud) }}
+              </nz-tag>
+            </td>
+
+            <td>
+              <div *ngIf="solicitud.fecha_procesamiento; else sinProcesar" class="fecha-info">
+                <i nz-icon nzType="check-circle" style="color: green;"></i>
+                {{ formatearFecha(solicitud.fecha_procesamiento) }}
+              </div>
+              <ng-template #sinProcesar>
+                <span class="sin-procesar">-</span>
+              </ng-template>
+            </td>
+
+            <td>
+              <div *ngIf="solicitud.banco_destino; else sinDatos" class="detalles-banco">
+                <div><strong>Banco:</strong> {{ solicitud.banco_destino }}</div>
+                <div><strong>Cuenta:</strong> {{ solicitud.cuenta_destino }}</div>
+              </div>
+              <ng-template #sinDatos>
+                <span class="sin-datos">Bono aplicado</span>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+
+      <nz-empty
+        *ngIf="solicitudesRetiro.length === 0"
+        nzNotFoundContent="No has solicitado retiros aún"
+        [nzNotFoundImage]="'simple'">
+        <div nz-empty-footer>
+          <button nz-button nzType="primary" (click)="showRetiroModal()" [disabled]="saldoDisponible < 50000">
+            <i nz-icon nzType="plus"></i>
+            Solicitar Primer Retiro
+          </button>
+        </div>
+      </nz-empty>
+
+      <ng-template #extraTemplate>
+        <button nz-button nzType="primary" nzSize="small" (click)="showRetiroModal()" [disabled]="saldoDisponible < 50000" [style.backgroundColor]="'var(--primary-dark)'">
+          <i nz-icon nzType="plus"></i>
+          Nueva Solicitud
+        </button>
+      </ng-template>
+    </nz-card>
+
+  </nz-spin>
+
   <nz-modal
     [(nzVisible)]="isModalVisible"
     nzTitle="Solicitar Retiro"
+    nzWidth="600px"
     (nzOnCancel)="handleCancel()"
     (nzOnOk)="handleOk()"
-    [nzOkText]="'Solicitar'"
-    [nzCancelText]="'Cancelar'">
+    [nzOkText]="'Solicitar Retiro'"
+    [nzCancelText]="'Cancelar'"
+    [nzOkDisabled]="!retiroForm.valid"
+    [nzOkLoading]="procesandoRetiro">
     <ng-container *nzModalContent>
-      <form nz-form [formGroup]="retiroForm">
-        <nz-form-item>
-          <nz-form-label nzRequired>Monto a retirar</nz-form-label>
-          <nz-form-control nzErrorTip="Ingrese un monto válido (mínimo $50.000)">
-            <nz-input-group nzPrefix="$">
-              <input nz-input formControlName="monto" type="number" placeholder="50000">
-            </nz-input-group>
-          </nz-form-control>
-        </nz-form-item>
+      <nz-alert
+        nzType="info"
+        [nzMessage]="'Saldo disponible: $' + (saldoDisponible | number:'1.0-0')"
+        nzShowIcon
+        style="margin-bottom: 16px;">
+      </nz-alert>
 
+      <form nz-form [formGroup]="retiroForm" nzLayout="vertical">
         <nz-form-item>
-          <nz-form-label nzRequired>Método de retiro</nz-form-label>
+          <nz-form-label nzRequired>Método de Retiro</nz-form-label>
           <nz-form-control>
-            <nz-select formControlName="metodo" (ngModelChange)="onMetodoChange($event)">
-              <nz-option nzValue="transferencia" nzLabel="Transferencia Bancaria"></nz-option>
-              <nz-option nzValue="bono" nzLabel="Bono de Descuento en Plan"></nz-option>
+            <nz-select
+              formControlName="metodo_retiro"
+              nzPlaceHolder="Selecciona el método"
+              (ngModelChange)="onMetodoChange($event)">
+              <nz-option nzValue="retiro" nzLabel="Transferencia Bancaria"></nz-option>
+              <nz-option nzValue="bono_pago" nzLabel="Bono de Descuento en Plan"></nz-option>
             </nz-select>
           </nz-form-control>
         </nz-form-item>
 
-        <div *ngIf="retiroForm.get('metodo')?.value === 'transferencia'">
+        <nz-form-item>
+          <nz-form-label nzRequired>Monto a Retirar</nz-form-label>
+          <nz-form-control [nzErrorTip]="montoErrorTemplate">
+            <nz-input-group nzPrefix="$">
+              <input
+                nz-input
+                formControlName="monto_solicitado"
+                type="number"
+                placeholder="50000"
+                min="50000"
+                [max]="saldoDisponible">
+            </nz-input-group>
+
+            <ng-template #montoErrorTemplate let-control>
+              <ng-container *ngIf="control.hasError('required')">
+                El monto es requerido
+              </ng-container>
+              <ng-container *ngIf="control.hasError('min')">
+                El monto mínimo es $50.000
+              </ng-container>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+
+        <div *ngIf="retiroForm.get('metodo_retiro')?.value === 'retiro'" class="datos-bancarios">
+          <nz-divider nzText="Datos Bancarios" nzOrientation="left"></nz-divider>
+
           <nz-form-item>
             <nz-form-label nzRequired>Banco</nz-form-label>
-            <nz-form-control>
-              <input nz-input formControlName="banco" placeholder="Nombre del banco">
+            <nz-form-control nzErrorTip="El banco es requerido">
+              <input
+                nz-input
+                formControlName="banco_destino"
+                placeholder="Ej: Bancolombia, Davivienda, etc.">
             </nz-form-control>
           </nz-form-item>
 
           <nz-form-item>
-            <nz-form-label nzRequired>Número de cuenta</nz-form-label>
-            <nz-form-control>
-              <input nz-input formControlName="numeroCuenta" placeholder="1234567890">
+            <nz-form-label nzRequired>Número de Cuenta</nz-form-label>
+            <nz-form-control nzErrorTip="El número de cuenta es requerido">
+              <input
+                nz-input
+                formControlName="cuenta_destino"
+                placeholder="Número de cuenta o LLAVE">
             </nz-form-control>
           </nz-form-item>
         </div>
 
         <nz-alert
-          nzType="info"
-          nzMessage="Información"
-          nzDescription="Las solicitudes son procesadas en un máximo de 3 días hábiles."
-          nzShowIcon>
+          nzType="warning"
+          nzMessage="Tiempo de procesamiento"
+          nzDescription="Las solicitudes son procesadas en un máximo de 3 días hábiles. Recibirás una notificación cuando sea aprobada."
+          nzShowIcon
+          nzCloseable>
         </nz-alert>
       </form>
     </ng-container>

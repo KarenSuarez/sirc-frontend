@@ -54,7 +54,7 @@
   border-radius: 16px !important;
   box-shadow: var(--shadow-light) !important;
   border: none !important;
-  overflow: hidden;
+  background: white !important;
 }
 
 .referidos-table {
@@ -92,17 +92,18 @@
 }
 
 .referido-avatar {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--primary-color);
   color: var(--white);
+  font-size: 18px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 16px;
-  flex-shrink: 0;
+  box-shadow: var(--shadow-light);
+  transition: all 0.3s ease;
 }
 
 .referido-datos {
@@ -139,10 +140,10 @@
   color: var(--text-dark);
 }
 
-.contacto-item i {
-  color: var(--text-light);
-  font-size: 12px;
-  width: 14px;
+.contacto-item i,
+.fecha-item i {
+  font-size: 14px;
+  color: var(--primary-color);
 }
 
 /* Estilos para documento */
@@ -180,12 +181,6 @@
   color: var(--text-dark);
 }
 
-.fecha-item i {
-  color: var(--text-light);
-  font-size: 11px;
-  width: 12px;
-}
-
 /* Estilos para puntos */
 .puntos-info {
   display: flex;
@@ -205,6 +200,70 @@
   font-size: 14px;
 }
 
+/* Botón expandir */
+.expand-btn {
+  padding: 0 !important;
+  width: 24px;
+  height: 24px;
+  min-width: auto;
+  transition: transform 0.3s ease;
+}
+
+.expand-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Fila de detalle */
+.detalle-row {
+  background-color: #fafafa;
+}
+
+.detalle-cell {
+  padding: 0 !important;
+}
+
+.detalle-container {
+  padding: 24px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Descriptions dentro del detalle */
+.detalle-container nz-descriptions {
+  margin-bottom: 16px;
+}
+
+/* Plan detalle */
+.plan-detalle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-precio {
+  font-weight: 600;
+  color: #1890ff;
+}
+
+/* Acciones del detalle */
+.detalle-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
 /* Estilos para acciones */
 ::ng-deep .ant-btn-text {
   color: var(--text-light) !important;
@@ -215,8 +274,8 @@
 }
 
 ::ng-deep .ant-btn-text:hover {
+  background: rgba(19, 106, 169, 0.1) !important;
   color: var(--primary-color) !important;
-  background: rgba(74, 144, 226, 0.1) !important;
 }
 
 ::ng-deep .menu-danger {

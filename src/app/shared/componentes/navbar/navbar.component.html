@@ -22,17 +22,17 @@
   </div>
 
   <div class="navbar-right" *ngIf="usuario">
-    <div class="user-info" *ngIf="usuario.rol === 'referente'">
-      <span class="points-badge">🏆 {{ usuario.puntos || 0 }}</span>
+    <div class="user-info" *ngIf="esReferente && puntosReferente > 0">
+      <span class="points-badge">🏆 {{ puntosReferente }}</span>
     </div>
 
     <div class="user-profile" (click)="toggleUserMenu()">
       <div class="user-avatar">
-        {{ usuario.nombre.charAt(0).toUpperCase() + usuario.apellido.charAt(0).toUpperCase() }}
+        {{ iniciales }}
       </div>
       <div class="user-details">
-        <span class="user-name">{{ usuario.nombre }} {{ usuario.apellido }}</span>
-        <span class="user-role">{{ getRoleDisplayName(usuario.rol) }}</span>
+        <span class="user-name">{{ nombreCompleto }}</span>
+        <span class="user-role">{{ rolDisplay }}</span>
       </div>
       <span class="dropdown-arrow">▼</span>
 
@@ -48,4 +48,3 @@
     </div>
   </div>
 </nav>
-

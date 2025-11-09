@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -9,26 +11,13 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { UsuarioService } from '../../../../core/services/usuario.service';
-import { Usuario } from '../../../../core/models/usuario.interface';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 
-interface Referido {
-  id: string;
-  nombre: string;
-  correo: string;
-  telefono: string;
-  tipoDoc: string;
-  documento: string;
-  estado: 'pendiente' | 'contactado' | 'activo' | 'rechazado';
-  fechaRegistro: Date;
-  fechaContacto?: Date;
-  referenteCodigo: string;
-  puntos?: number;
-}
+import { ReferidoService } from '../../../../core/services/referido.service';
+import { Referido } from '../../../../core/models/referido.interface';
 
 @Component({
   selector: 'app-lista-referidos',
@@ -45,125 +34,121 @@ interface Referido {
     NzDropDownModule,
     NzMenuModule,
     NzModalModule,
-    NzMessageModule
+    NzToolTipModule,
+    NzDescriptionsModule,
   ],
   templateUrl: './lista-referidos.component.html',
-  styleUrl: './lista-referidos.component.css'
+  styleUrl: './lista-referidos.component.css',
 })
-export class ListaReferidosComponent implements OnInit {
-  usuario: Usuario | null = null;
+export class ListaReferidosComponent implements OnInit, OnDestroy {
   referidos: Referido[] = [];
   loading = true;
+  expandedReferidoId: number | null = null;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
     private message: NzMessageService,
     private modal: NzModalService,
-    private usuarioService: UsuarioService
+    private referidoService: ReferidoService
   ) {}
 
   ngOnInit() {
-    this.usuarioService.usuario$.subscribe(usuario => {
-      this.usuario = usuario;
-      if (usuario) {
-        this.cargarReferidos();
-      }
-    });
+    this.cargarReferidos();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   cargarReferidos() {
     this.loading = true;
-    // Simulación de datos - aquí iría la llamada al servicio
-    setTimeout(() => {
-      this.referidos = [
-        {
-          id: '1',
-          nombre: 'Juan Pérez García',
-          correo: 'juan.perez@email.com',
-          telefono: '3001234567',
-          tipoDoc: 'CC',
-          documento: '12345678',
-          estado: 'activo',
-          fechaRegistro: new Date('2024-01-15'),
-          fechaContacto: new Date('2024-01-16'),
-          referenteCodigo: this.usuario?.codigo || '',
-          puntos: 150
+
+    this.referidoService
+      .listar()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (referidos) => {
+          this.referidos = referidos;
+          this.loading = false;
         },
-        {
-          id: '2',
-          nombre: 'María López Rodríguez',
-          correo: 'maria.lopez@email.com',
-          telefono: '3009876543',
-          tipoDoc: 'CC',
-          documento: '87654321',
-          estado: 'contactado',
-          fechaRegistro: new Date('2024-01-20'),
-          fechaContacto: new Date('2024-01-21'),
-          referenteCodigo: this.usuario?.codigo || ''
+        error: (error) => {
+          console.error('Error al cargar referidos:', error);
+          this.message.error('Error al cargar referidos');
+          this.loading = false;
         },
-        {
-          id: '3',
-          nombre: 'Carlos Ramírez Santos',
-          correo: 'carlos.ramirez@email.com',
-          telefono: '3005551234',
-          tipoDoc: 'CC',
-          documento: '11223344',
-          estado: 'pendiente',
-          fechaRegistro: new Date('2024-01-25'),
-          referenteCodigo: this.usuario?.codigo || ''
-        }
-      ];
-      this.loading = false;
-    }, 1000);
+      });
   }
 
   crearReferido() {
     this.router.navigate(['referente/referidos/nuevo']);
   }
 
-  verDetalle(referido: Referido) {
-    this.message.info(`Ver detalles de ${referido.nombre}`);
+  toggleDetalle(referido: Referido) {
+    if (this.expandedReferidoId === referido.id_referido) {
+      this.expandedReferidoId = null;
+    } else {
+      this.expandedReferidoId = referido.id_referido;
+    }
+  }
+
+  isExpanded(referido: Referido): boolean {
+    return this.expandedReferidoId === referido.id_referido;
   }
 
   eliminarReferido(referido: Referido) {
+    if (referido.estado_referido !== 'pendiente') {
+      this.message.warning(
+        'Solo se pueden eliminar referidos en estado pendiente'
+      );
+      return;
+    }
+
     this.modal.confirm({
       nzTitle: '¿Eliminar referido?',
-      nzContent: `¿Estás seguro de eliminar a ${referido.nombre}? Esta acción no se puede deshacer.`,
+      nzContent: `¿Estás seguro de eliminar a ${referido.nombre_referido} ${referido.apellido_referido}? Esta acción no se puede deshacer.`,
       nzOkText: 'Sí, eliminar',
       nzCancelText: 'Cancelar',
       nzOkDanger: true,
       nzOnOk: () => {
-        this.referidos = this.referidos.filter(r => r.id !== referido.id);
-        this.message.success('Referido eliminado correctamente');
-      }
+        this.message.info('Función de eliminación en desarrollo');
+      },
     });
   }
 
   getEstadoColor(estado: string): string {
-    const colores = {
-      'pendiente': 'orange',
-      'contactado': 'blue',
-      'activo': 'green',
-      'rechazado': 'red'
+    const colores: Record<string, string> = {
+      pendiente: 'orange',
+      contactado: 'blue',
+      activo: 'green',
+      no_interesado: 'red',
+      inactivo: 'default',
     };
-    return colores[estado as keyof typeof colores] || 'default';
+    return colores[estado] || 'default';
   }
 
   getEstadoTexto(estado: string): string {
-    const textos = {
-      'pendiente': 'Pendiente',
-      'contactado': 'Contactado',
-      'activo': 'Activo',
-      'rechazado': 'Rechazado'
+    const textos: Record<string, string> = {
+      pendiente: 'Pendiente',
+      contactado: 'Contactado',
+      activo: 'Activo',
+      no_interesado: 'No Interesado',
+      inactivo: 'Inactivo',
     };
-    return textos[estado as keyof typeof textos] || estado;
+    return textos[estado] || estado;
   }
 
-  formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-CO', {
+  formatearFecha(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-CO', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
+  }
+
+  getIniciales(nombre: string, apellido: string): string {
+    return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
   }
 }

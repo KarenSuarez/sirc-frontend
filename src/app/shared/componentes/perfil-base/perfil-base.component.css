@@ -1,11 +1,13 @@
 .perfil-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .perfil-header {
   margin-bottom: 32px;
+  text-align: center;
 }
 
 .back-button {
@@ -16,6 +18,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: color 0.3s ease;
 }
 
 .back-button:hover {
@@ -35,18 +38,24 @@
   margin: 0;
 }
 
+/* User Info Card */
 .user-info-card {
   margin-bottom: 32px;
   border-radius: 16px !important;
-  box-shadow: var(--shadow-medium) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   border: none !important;
+  background: white !important;
+}
+
+.user-info-card ::ng-deep .ant-card-body {
+  padding: 32px !important;
 }
 
 .user-header {
   display: flex;
   align-items: center;
   gap: 32px;
-  padding: 16px;
+  flex-wrap: wrap;
 }
 
 .avatar-section {
@@ -57,20 +66,35 @@
 }
 
 .user-avatar {
-  border: 4px solid var(--primary-color);
+  background: var(--primary-color) !important;
+  border: 4px solid var(--primary-color) !important;
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
 .avatar-upload {
-  font-size: 12px !important;
   color: var(--text-light) !important;
+  font-size: 12px !important;
+  padding: 0 !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: color 0.3s ease;
+}
+
+.avatar-upload:hover {
+  color: var(--primary-color) !important;
 }
 
 .user-details {
   flex: 1;
+  min-width: 250px;
 }
 
 .user-details h2 {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--text-dark);
   margin: 0 0 8px 0;
@@ -87,36 +111,43 @@
   font-size: 14px;
   color: var(--text-light);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .user-stats {
   display: flex;
   gap: 24px;
+  padding: 16px 24px;
+  background: rgba(74, 144, 226, 0.08);
+  border-radius: 12px;
+  flex-wrap: wrap;
 }
 
 .stat-item {
-  text-align: center;
-  padding: 16px;
-  background: rgba(74, 144, 226, 0.1);
-  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   min-width: 80px;
+  text-align: center;
 }
 
 .stat-value {
-  display: block;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--primary-color);
   line-height: 1;
 }
 
 .stat-label {
-  display: block;
   font-size: 12px;
   color: var(--text-light);
-  margin-top: 4px;
+  font-weight: 600;
 }
 
+/* Perfil Grid */
 .perfil-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -127,37 +158,146 @@
 .referral-card,
 .security-card {
   border-radius: 16px !important;
-  box-shadow: var(--shadow-light) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   border: none !important;
 }
 
+.form-card ::ng-deep .ant-card-head,
+.referral-card ::ng-deep .ant-card-head,
+.security-card ::ng-deep .ant-card-head {
+  background: white;
+  color: var(--text-dark);
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 16px 16px 0 0;
+  padding: 1px 24px;
+}
+
+.form-card ::ng-deep .ant-card-head-title,
+.referral-card ::ng-deep .ant-card-head-title,
+.security-card ::ng-deep .ant-card-head-title {
+  color: var(--text-dark);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.form-card ::ng-deep .ant-card-extra button,
+.referral-card ::ng-deep .ant-card-extra button,
+.security-card ::ng-deep .ant-card-extra button {
+  color: var(--primary-color);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  height: auto;
+  transition: color 0.3s ease;
+}
+
+.form-card ::ng-deep .ant-card-extra button:hover {
+  color: var(--primary-dark);
+}
+
+.form-card ::ng-deep .ant-card-body,
+.referral-card ::ng-deep .ant-card-body,
+.security-card ::ng-deep .ant-card-body {
+  padding: 24px;
+}
+
+/* Form Styles */
 .perfil-form {
-  margin-top: 16px;
+  width: 100%;
 }
 
 .form-row {
   display: flex;
   gap: 16px;
-  margin-bottom: 16px;
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .form-item-full {
   flex: 1;
+  margin-bottom: 16px !important;
 }
 
 .form-item-half {
   flex: 1;
+  margin-bottom: 16px !important;
+}
+
+::ng-deep .perfil-form .ant-form-item-label > label {
+  font-weight: 600 !important;
+  color: var(--text-dark) !important;
+  font-size: 14px !important;
+}
+
+::ng-deep .perfil-form .ant-form-item-label > label.ant-form-item-required::before {
+  color: #ff4d4f !important;
+}
+
+::ng-deep .perfil-form .ant-input {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .perfil-form .ant-input:hover {
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .perfil-form .ant-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+}
+
+::ng-deep .perfil-form .ant-input:disabled {
+  background-color: #f5f5f5 !important;
+  color: #999 !important;
+  cursor: not-allowed !important;
 }
 
 .form-actions {
   display: flex;
-  gap: 12px;
   justify-content: flex-end;
+  gap: 12px;
   margin-top: 24px;
-  padding-top: 16px;
+  padding-top: 24px;
   border-top: 1px solid #f0f0f0;
 }
 
+.form-actions button {
+  height: 40px !important;
+  padding: 0 24px !important;
+  font-weight: 600 !important;
+  border-radius: var(--border-radius) !important;
+  transition: all 0.3s ease !important;
+}
+
+::ng-deep .perfil-form .ant-btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .perfil-form .ant-btn-primary:hover {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+::ng-deep .perfil-form .ant-btn-default {
+  border-color: #d9d9d9 !important;
+  color: var(--text-dark) !important;
+}
+
+::ng-deep .perfil-form .ant-btn-default:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Referral Card */
 .referral-content {
   display: flex;
   flex-direction: column;
@@ -179,28 +319,48 @@
 .code-display,
 .link-display {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
 }
 
 .code-value {
   font-family: 'Courier New', monospace;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   color: var(--primary-color);
   background: rgba(74, 144, 226, 0.1);
-  padding: 8px 12px;
+  padding: 12px 16px;
   border-radius: var(--border-radius);
   flex: 1;
+  text-align: center;
 }
 
 .link-input {
+  flex: 1;
   font-family: 'Courier New', monospace !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 12px 16px !important;
 }
 
-.link-display {
-  flex: 1;
+.code-display button,
+.link-display button {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: var(--border-radius) !important;
+  transition: all 0.3s ease !important;
+}
+
+.code-display button:hover,
+.link-display button:hover {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
 }
 
 .referral-note {
@@ -208,25 +368,105 @@
   align-items: center;
   gap: 8px;
   color: var(--text-light);
-  font-size: 14px;
+  font-size: 13px;
   background: #f8f9fa;
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: var(--border-radius);
+  margin-top: 8px;
+}
+
+.referral-note i {
+  color: var(--primary-color);
+}
+
+/* Security Card */
+.security-card {
+  /* Por defecto ocupa toda la fila cuando hay código de referidos */
+  grid-column: 1 / -1;
+}
+
+/* Cuando no hay código de referidos, la seguridad va a la columna derecha */
+.perfil-grid:not(:has(.referral-card)) .security-card {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .security-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .change-password-btn {
-  align-self: flex-start;
+  width: fit-content;
+  height: 40px !important;
+  padding: 0 24px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border-radius: var(--border-radius) !important;
+  transition: all 0.3s ease !important;
+  border-color: #d9d9d9 !important;
+  color: var(--text-dark) !important;
+}
+
+.change-password-btn:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
 }
 
 .password-form {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 8px;
   border-top: 1px solid #f0f0f0;
-  padding-top: 16px;
+  padding-top: 24px;
+}
+
+::ng-deep .password-form .ant-divider {
+  margin: 16px 0 !important;
+}
+
+::ng-deep .password-form .ant-divider-inner-text {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+::ng-deep .password-form .ant-form-item {
+  margin-bottom: 16px !important;
+}
+
+::ng-deep .password-form .ant-input-affix-wrapper {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 12px 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Input sin wrapper (contraseña actual sin ícono de ojo) */
+::ng-deep .password-form .ant-form-item-control-input-content > .ant-input {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 12px 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Input dentro del wrapper NO debe tener padding extra */
+::ng-deep .password-form .ant-input-affix-wrapper .ant-input {
+  padding: 0 !important;
+  border: none !important;
+}
+
+::ng-deep .password-form .ant-input-affix-wrapper:hover,
+::ng-deep .password-form .ant-form-item-control-input-content > .ant-input:hover {
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .password-form .ant-input-affix-wrapper-focused,
+::ng-deep .password-form .ant-form-item-control-input-content > .ant-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
 }
 
 .password-toggle {
@@ -242,19 +482,40 @@
 .password-form-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
 }
 
+.password-form-actions button {
+  height: 40px !important;
+  padding: 0 24px !important;
+  font-weight: 600 !important;
+  border-radius: var(--border-radius) !important;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.password-form-actions button:hover {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+/* Error States */
 ::ng-deep .ant-form-item-has-error .ant-input,
-::ng-deep .ant-form-item-has-error .ant-select-selector {
-  border-color: var(--danger-color) !important;
+::ng-deep .ant-form-item-has-error .ant-select-selector,
+::ng-deep .ant-form-item-has-error .ant-input-affix-wrapper {
+  border-color: #ff4d4f !important;
 }
 
 ::ng-deep .ant-form-item-has-error .ant-input:focus,
-::ng-deep .ant-form-item-has-error .ant-select-focused .ant-select-selector {
-  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
+::ng-deep .ant-form-item-has-error .ant-input-affix-wrapper-focused {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
 }
 
+/* Responsive */
 @media (max-width: 1024px) {
   .perfil-grid {
     grid-template-columns: 1fr;
@@ -262,11 +523,16 @@
 
   .user-header {
     flex-direction: column;
+    align-items: center;
     text-align: center;
-    gap: 24px;
+  }
+
+  .user-details {
+    text-align: center;
   }
 
   .user-stats {
+    width: 100%;
     justify-content: center;
   }
 }
@@ -276,51 +542,126 @@
     padding: 16px;
   }
 
+  .perfil-header h1 {
+    font-size: 24px;
+  }
+
+  .user-info-card ::ng-deep .ant-card-body {
+    padding: 20px !important;
+  }
+
+  .user-header {
+    gap: 24px;
+  }
+
+  .user-details h2 {
+    font-size: 22px;
+  }
+
+  .user-stats {
+    gap: 16px;
+  }
+
+  .stat-item {
+    min-width: 60px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
   .form-row {
     flex-direction: column;
     gap: 0;
   }
 
-  .user-header {
-    padding: 8px;
-  }
-
-  .user-stats {
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .stat-item {
-    padding: 12px;
-    min-width: 60px;
-  }
-
-  .stat-value {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .perfil-header h1 {
-    font-size: 24px;
+  .form-item-half {
+    width: 100%;
   }
 
   .form-actions {
-    flex-direction: column;
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100% !important;
+  }
+
+  .change-password-btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .password-form {
+    max-width: 100%;
   }
 
   .code-display,
   .link-display {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+  }
+
+  .code-display button,
+  .link-display button {
+    width: 100%;
   }
 }
 
-@keyframes fadeIn {
+@media (max-width: 480px) {
+  .perfil-container {
+    padding: 12px;
+  }
+
+  .perfil-header h1 {
+    font-size: 22px;
+  }
+
+  .user-avatar {
+    width: 64px !important;
+    height: 64px !important;
+    font-size: 24px !important;
+  }
+
+  .user-details h2 {
+    font-size: 20px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .code-value {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+
+  .form-card ::ng-deep .ant-card-body,
+  .referral-card ::ng-deep .ant-card-body,
+  .security-card ::ng-deep .ant-card-body {
+    padding: 16px;
+  }
+}
+
+/* Variables CSS */
+:root {
+  --primary-color: #4A90E2;
+  --primary-dark: #357ABD;
+  --text-dark: #2c3e50;
+  --text-light: #7f8c8d;
+  --white: #ffffff;
+  --danger-color: #ff4d4f;
+  --success-color: #52c41a;
+  --border-radius: 8px;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -328,8 +669,32 @@
   }
 }
 
-.perfil-container {
-  animation: fadeIn 0.5s ease-out;
+.user-info-card,
+.form-card,
+.referral-card,
+.security-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.form-card {
+  animation-delay: 0.1s;
+}
+
+.referral-card {
+  animation-delay: 0.2s;
+}
+
+.security-card {
+  animation-delay: 0.3s;
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* === Bordes redondeados en todos los campos editables del perfil === */

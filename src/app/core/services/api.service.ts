@@ -1,83 +1,82 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface ApiOptions {
+  headers?: HttpHeaders | { [header: string]: string | string[] };
+  params?: HttpParams | { [param: string]: string | string[] };
+}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = environment.apiUrl;
-
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('accessToken');
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+  get<T>(url: string, options?: ApiOptions): Observable<T> {
+    return this.http.get<T>(url, options);
+  }
+
+  post<T>(url: string, body: any, options?: ApiOptions): Observable<T> {
+    return this.http.post<T>(url, body, options);
+  }
+
+  put<T>(url: string, body: any, options?: ApiOptions): Observable<T> {
+    return this.http.put<T>(url, body, options);
+  }
+
+  patch<T>(url: string, body: any, options?: ApiOptions): Observable<T> {
+    return this.http.patch<T>(url, body, options);
+  }
+
+  delete<T>(url: string, options?: ApiOptions): Observable<T> {
+    return this.http.delete<T>(url, options);
+  }
+
+  buildParams(params: { [key: string]: any }): HttpParams {
+    let httpParams = new HttpParams();
+
+    Object.keys(params).forEach((key) => {
+      const value = params[key];
+      if (value !== null && value !== undefined && value !== '') {
+        httpParams = httpParams.set(key, String(value));
+      }
     });
 
-    if (token) {
-      headers = headers.set('x-access-token', token);
-    }
-
-    return headers;
+    return httpParams;
   }
 
-  get<T>(endpoint: string, params?: any): Observable<T> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        if (params[key] !== null && params[key] !== undefined) {
-          httpParams = httpParams.set(key, params[key]);
-        }
-      });
-    }
+  buildHeaders(headers: { [key: string]: string }): HttpHeaders {
+    let httpHeaders = new HttpHeaders();
 
-    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, {
-      headers: this.getHeaders(),
-      params: httpParams
-    }).pipe(
-      catchError(this.handleError)
-    );
+    Object.keys(headers).forEach((key) => {
+      httpHeaders = httpHeaders.set(key, headers[key]);
+    });
+
+    return httpHeaders;
   }
 
-  post<T>(endpoint: string, data: any): Observable<T> {
-    return this.http.post<T>(`${this.baseUrl}/${endpoint}`, data, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
-    );
+  downloadBlob(url: string, options?: ApiOptions): Observable<Blob> {
+    return this.http.get(url, {
+      ...options,
+      responseType: 'blob',
+    });
   }
 
-  put<T>(endpoint: string, data: any): Observable<T> {
-    return this.http.put<T>(`${this.baseUrl}/${endpoint}`, data, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
-    );
+  downloadArrayBuffer(
+    url: string,
+    options?: ApiOptions
+  ): Observable<ArrayBuffer> {
+    return this.http.get(url, {
+      ...options,
+      responseType: 'arraybuffer',
+    });
   }
 
-  delete<T>(endpoint: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}/${endpoint}`, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  private handleError(error: any): Observable<never> {
-    console.error('API Error:', error);
-
-    let errorMessage = 'Ha ocurrido un error inesperado';
-
-    if (error.error?.message) {
-      errorMessage = error.error.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    return throwError(() => new Error(errorMessage));
+  getText(url: string, options?: ApiOptions): Observable<string> {
+    return this.http.get(url, {
+      ...options,
+      responseType: 'text',
+    });
   }
 }

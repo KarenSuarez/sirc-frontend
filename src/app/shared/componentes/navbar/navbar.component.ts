@@ -1,9 +1,12 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { UsuarioService } from '../../../core/services/usuario.service';
-import { Usuario } from '../../../core/models/usuario.interface';
+import { Subject, takeUntil } from 'rxjs';
+
+import { AuthService } from '../../../core/services/auth.service';
+import { UsuarioHelperService } from '../../../core/services/usuario-helper.service';
+import { UsuarioAutenticado } from '../../../core/models/usuario.interface';
 
 
 interface MenuItem {
@@ -16,104 +19,100 @@ interface MenuItem {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    NzIconModule
-  ],
+  imports: [CommonModule, RouterModule, NzIconModule],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css']
+  styleUrls: ['./navbar.component.css'],
 })
-export class NavbarComponent implements OnInit {
-  usuario: Usuario | null = null;
+export class NavbarComponent implements OnInit, OnDestroy {
+  usuario: UsuarioAutenticado | null = null;
   showUserMenu = false;
   filteredMenuItems: MenuItem[] = [];
+  puntosReferente = 0;
+
+  private destroy$ = new Subject<void>();
 
   private baseMenuItems: MenuItem[] = [
     {
       label: 'Mis referidos',
       route: '/referente/referidos',
       icon: 'team',
-      roles: ['referente']
+      roles: ['referente'],
     },
     {
       label: 'Recompensas',
       route: '/referente/recompensas',
       icon: 'gift',
-      roles: ['referente']
+      roles: ['referente'],
     },
     {
-      label: 'Puntos y categorías',
+      label: 'Puntos y niveles',
       route: '/referente/puntos',
       icon: 'trophy',
-      roles: ['referente']
+      roles: ['referente'],
     },
     {
       label: 'Gestión de referidos',
       route: '/asesor/referidos',
       icon: 'usergroup-add',
-      roles: ['asesor']
+      roles: ['asesor_ventas'],
     },
     {
       label: 'Gestión de referentes',
       route: '/asesor/referentes',
       icon: 'team',
-      roles: ['asesor']
+      roles: ['asesor_ventas'],
     },
     {
       label: 'Configuración',
       route: '/gerente/configuracion',
       icon: 'setting',
-      roles: ['gerente']
+      roles: ['gerente_ventas'],
     },
     {
       label: 'Análisis de ventas',
       route: '/gerente/analiticas',
       icon: 'line-chart',
-      roles: ['gerente']
+      roles: ['gerente_ventas'],
     },
-    // {
-    //   label: 'Equipo de ventas',
-    //   route: '/gerente/equipo',
-    //   icon: 'eye',
-    //   roles: ['gerente']
-    // },
     {
       label: 'Gestión de usuarios',
       route: '/admin/usuarios',
       icon: 'user',
-      roles: ['admin']
+      roles: ['administrador'],
     },
-    // {
-    //   label: 'Reportes del sistema',
-    //   route: '/admin/logs',
-    //   icon: 'setting',
-    //   roles: ['admin']
-    // },
     {
       label: 'Gestión de retiros',
       route: '/contador/retiros',
       icon: 'file-text',
-      roles: ['contador']
+      roles: ['contador'],
     },
     {
       label: 'Reportes financieros',
       route: '/contador/reportes',
       icon: 'bar-chart',
-      roles: ['contador']
-    }
+      roles: ['contador'],
+    },
   ];
 
   constructor(
     private router: Router,
-    private usuarioService: UsuarioService
+    private authService: AuthService,
+    public usuarioHelper: UsuarioHelperService
   ) {}
 
   ngOnInit() {
-    this.usuarioService.usuario$.subscribe(usuario => {
-      this.usuario = usuario;
-      this.updateMenuItems();
-    });
+    this.authService.usuario$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((usuario) => {
+        this.usuario = usuario;
+        this.updateMenuItems();
+        this.cargarPuntosReferente();
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private updateMenuItems(): void {
@@ -127,25 +126,40 @@ export class NavbarComponent implements OnInit {
         label: 'Inicio',
         route: this.getDashboardRoute(),
         icon: 'home',
-        roles: ['referente', 'asesor', 'gerente', 'contador', 'admin']
+        roles: [
+          'referente',
+          'asesor_ventas',
+          'gerente_ventas',
+          'contador',
+          'administrador',
+        ],
       },
       {
         label: 'Mi perfil',
         route: this.getProfileRoute(),
         icon: 'user',
-        roles: ['referente', 'asesor', 'gerente', 'contador']
-      }
+        roles: ['referente', 'asesor_ventas', 'gerente_ventas', 'contador'],
+      },
     ];
 
-    const allItems = [
-      dynamicItems[0],
-      ...this.baseMenuItems,
-      dynamicItems[1]
-    ];
+    const allItems = [dynamicItems[0], ...this.baseMenuItems, dynamicItems[1]];
 
-    this.filteredMenuItems = allItems.filter(item =>
-      item.roles.includes(this.usuario!.rol)
+    this.filteredMenuItems = allItems.filter((item) =>
+      this.tieneAlgunRol(item.roles)
     );
+  }
+
+  private cargarPuntosReferente(): void {
+    if (this.usuarioHelper.esReferente) {
+      this.usuarioHelper.obtenerPuntosActuales().subscribe({
+        next: (puntos) => {
+          this.puntosReferente = puntos;
+        },
+        error: (error) => {
+          console.error('Error al cargar puntos:', error);
+        },
+      });
+    }
   }
 
   getFilteredMenuItems(): MenuItem[] {
@@ -153,31 +167,22 @@ export class NavbarComponent implements OnInit {
   }
 
   private getDashboardRoute(): string {
-    if (!this.usuario) return '/dashboard';
-
-    const roleRoutes: { [key: string]: string } = {
-      'referente': '/referente/dashboard',
-      'asesor': '/asesor/dashboard',
-      'gerente': '/gerente/dashboard',
-      'contador': '/contador/dashboard',
-      'admin': '/admin/dashboard'
-    };
-
-    return roleRoutes[this.usuario.rol] || '/dashboard';
+    return this.authService.obtenerDashboardRuta();
   }
 
-   getProfileRoute(): string {
+  getProfileRoute(): string {
     if (!this.usuario) return '/perfil';
 
     const roleRoutes: { [key: string]: string } = {
-      'referente': '/referente/perfil',
-      'asesor': '/asesor/perfil',
-      'gerente': '/gerente/perfil',
-      'contador': '/contador/perfil',
-      'admin': '/admin/perfil'
+      referente: '/referente/perfil',
+      asesor_ventas: '/asesor/perfil',
+      gerente_ventas: '/gerente/perfil',
+      contador: '/contador/perfil',
+      administrador: '/admin/perfil',
     };
 
-    return roleRoutes[this.usuario.rol] || '/perfil';
+    const primerRol = this.usuario.roles[0]?.toLowerCase() || '';
+    return roleRoutes[primerRol] || '/perfil';
   }
 
   toggleUserMenu() {
@@ -185,19 +190,52 @@ export class NavbarComponent implements OnInit {
   }
 
   logout(): void {
-    this.usuarioService.logout();
-    this.router.navigate(['/auth/login']);
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/auth/login']);
+      },
+    });
+  }
+
+  private tieneAlgunRol(roles: string[]): boolean {
+    return this.authService.tieneAlgunRol(roles);
+  }
+
+  get nombreCompleto(): string {
+    return this.usuarioHelper.nombreCompleto;
+  }
+
+  get iniciales(): string {
+    return this.usuarioHelper.iniciales;
+  }
+
+  get rolDisplay(): string {
+    const primerRol = this.usuario?.roles[0] || '';
+    return this.getRoleDisplayName(primerRol);
+  }
+
+  get esReferente(): boolean {
+    return this.usuarioHelper.esReferente;
   }
 
   getRoleDisplayName(rol: string): string {
-    const roles = {
-      'referente': 'Referente',
-      'asesor': 'Asesor de Ventas',
-      'admin': 'Administrador',
-      'gerente': 'Gerente de Ventas',
-      'contador': 'Contador'
+    const roles: Record<string, string> = {
+      referente: 'Referente',
+      asesor_ventas: 'Asesor de Ventas',
+      administrador: 'Administrador',
+      gerente_ventas: 'Gerente de Ventas',
+      contador: 'Contador',
     };
-    return roles[rol as keyof typeof roles] || rol;
+    return roles[rol.toLowerCase()] || rol;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const clickedInside = target.closest('.user-profile');
+    if (!clickedInside) {
+      this.showUserMenu = false;
+    }
   }
 
     @HostListener('document:click', ['$event'])

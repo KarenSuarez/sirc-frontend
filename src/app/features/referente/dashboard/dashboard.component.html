@@ -1,48 +1,75 @@
 <div class="dashboard-container" *ngIf="usuario">
-  <div class="dashboard-header">
-    <h1>¡Bienvenido, {{ usuario.nombre }}!</h1>
-  </div>
-
   <div class="estadisticas-section">
     <nz-card class="estadisticas-card" [nzBordered]="false">
       <div class="estadisticas-content">
-        <div class="avatar-section">
-          <nz-avatar
-            [nzSize]="80"
-            [nzSrc]="usuario.avatar"
-            [nzText]="usuario.nombre.charAt(0).toUpperCase()"
-          >
-          </nz-avatar>
+        <div class="welcome-section">
+          <div class="avatar-section">
+            <nz-avatar [nzSize]="64" [nzText]="iniciales"> </nz-avatar>
+          </div>
+          <div class="welcome-text">
+            <h1>Hola, {{ usuario.nombre }}</h1>
+            <p *ngIf="perfilReferente" class="nivel-text">
+              Nivel {{ nivelActual }}
+            </p>
+          </div>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-grid" *ngIf="perfilReferente">
           <div class="stat-item">
-            <nz-statistic [nzValue]="usuario.puntos || 0" nzTitle="Puntos">
-            </nz-statistic>
-          </div>
-          <div class="stat-item">
-            <nz-statistic
-              [nzValue]="usuario.referidos || 0"
-              nzTitle="Referidos"
-            >
-            </nz-statistic>
-          </div>
-          <div class="stat-item">
-            <nz-statistic
-              [nzValue]="usuario.creditos || 0"
-              nzTitle="Créditos"
-              nzPrefix="$"
-            >
-            </nz-statistic>
-          </div>
-          <div class="stat-item">
-            <div class="categoria-display">
-              <span class="categoria-letra">{{
-                usuario.categoria || "N/A"
-              }}</span>
-              <span class="categoria-label">Categoría</span>
+            <div class="stat-icon-wrapper stat-puntos">
+              <i nz-icon nzType="trophy" nzTheme="outline"></i>
             </div>
+            <nz-statistic
+              [nzValue]="perfilReferente.puntos_actuales || 0"
+            ></nz-statistic>
+            <span class="stat-label">Puntos</span>
           </div>
+
+          <div class="stat-item">
+            <div class="stat-icon-wrapper stat-referidos">
+              <i nz-icon nzType="team" nzTheme="outline"></i>
+            </div>
+            <nz-statistic [nzValue]="totalReferidos"></nz-statistic>
+            <span class="stat-label">Referidos</span>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-icon-wrapper stat-saldo">
+              <i nz-icon nzType="dollar" nzTheme="outline"></i>
+            </div>
+            <nz-statistic
+              [nzValue]="perfilReferente.saldo_disponible || 0"
+              nzPrefix="$"
+            ></nz-statistic>
+            <span class="stat-label">Saldo</span>
+          </div>
+
+          <div
+            class="stat-item"
+            [ngStyle]="{ 'background-color': colorNivelTranslucido }"
+          >
+            <div
+              class="nivel-icon-wrapper"
+              [ngStyle]="{ 'background-color': colorNivel }"
+            >
+              <i
+                nz-icon
+                [nzType]="iconoNivel"
+                nzTheme="outline"
+                [ngStyle]="{ color: 'white', 'font-size': '20px' }"
+              ></i>
+            </div>
+            <div class="categoria-display">
+              <span class="categoria-letra" [ngStyle]="{ color: colorNivel }">
+                {{ nivelActual }}
+              </span>
+            </div>
+            <span class="stat-label">Nivel</span>
+          </div>
+        </div>
+
+        <div class="stats-grid" *ngIf="!perfilReferente && cargando">
+          <nz-spin nzSimple></nz-spin>
         </div>
       </div>
     </nz-card>
@@ -58,15 +85,15 @@
         <div class="user-info">
           <div class="info-item">
             <strong>Nombre completo:</strong>
-            <span>{{ usuario.nombre }}</span>
+            <span>{{ usuario.nombre }} {{ usuario.apellido }}</span>
           </div>
           <div class="info-item">
             <strong>Correo:</strong>
-            <span>{{ usuario.correo }}</span>
+            <span>{{ usuario.correo_electronico }}</span>
           </div>
           <div class="info-item">
             <strong>Documento:</strong>
-            <span>{{ usuario.tipoDoc }} {{ usuario.documento }}</span>
+            <span>{{ usuario.numero_documento }}</span>
           </div>
           <div class="info-item">
             <strong>Teléfono:</strong>
@@ -81,37 +108,35 @@
         </ng-template>
       </nz-card>
 
-      <nz-card
-        nzTitle="Tu Código de Referidos"
-        class="referidos-card"
-        *ngIf="usuario.codigo"
-      >
+      <nz-card nzTitle="Tu Código de Referidos" class="referidos-card">
         <div class="referidos-content">
           <div class="codigo-section">
             <label>Código de Referido:</label>
             <div class="codigo-display">
-              <span class="codigo">{{ usuario.codigo }}</span>
+              <span class="codigo">{{ codigoReferente }}</span>
               <button nz-button nzType="default" (click)="copiarCodigo()">
                 <i nz-icon nzType="copy"></i>
               </button>
             </div>
           </div>
 
-          <div class="link-section" *ngIf="usuario.link">
+          <div class="link-section" *ngIf="linkReferido">
             <label>Enlace de Referido:</label>
-            <nz-input-group [nzSuffix]="suffixTemplate">
+            <div class="link-wrapper">
               <input
                 nz-input
-                [value]="usuario.link"
+                [value]="linkReferido"
                 readonly
                 class="link-input"
               />
-            </nz-input-group>
-            <ng-template #suffixTemplate>
-              <button nz-button nzType="link" (click)="copiarLink()">
+              <button
+                class="link-copy-icon"
+                nzType="link"
+                (click)="copiarLink()"
+              >
                 <i nz-icon nzType="copy"></i>
               </button>
-            </ng-template>
+            </div>
           </div>
 
           <div class="referidos-note">
