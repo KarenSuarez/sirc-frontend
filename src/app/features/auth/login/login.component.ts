@@ -1,7 +1,13 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnDestroy } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -13,9 +19,9 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
 
-import { UsuarioService } from '../../../core/services/usuario.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { NotificacionService } from '../../../core/services/notificacion.service';
 
 @Component({
   selector: 'app-login',
@@ -33,83 +39,82 @@ import { UsuarioService } from '../../../core/services/usuario.service';
     NzTypographyModule,
     NzCheckboxModule,
     NzDividerModule,
-    NzMessageModule
   ],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   loginForm: FormGroup;
   isLoading = false;
   errorMessage = '';
   passwordVisible = false;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private message: NzMessageService,
-    private usuarioService: UsuarioService
+    private authService: AuthService,
+    private notificacion: NotificacionService
   ) {
     this.loginForm = this.formBuilder.group({
       nit: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false]
+      password: ['', [Validators.required, Validators.minLength(5)]],
+      rememberMe: [false],
     });
   }
 
- onSubmit() {
-  if (this.loginForm.valid) {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onSubmit(): void {
+    if (this.loginForm.invalid) {
+      this.markFormGroupTouched();
+      this.notificacion.advertencia(
+        'Por favor, complete todos los campos requeridos'
+      );
+      return;
+    }
+
     this.isLoading = true;
     this.clearError();
 
-    const loginData = {
-      nit: this.loginForm.get('nit')?.value,
-      password: this.loginForm.get('password')?.value,
-      rememberMe: this.loginForm.get('rememberMe')?.value
-    };
+    const { nit, password, rememberMe } = this.loginForm.value;
 
-    this.usuarioService.login(loginData.nit, loginData.password).subscribe({
-      next: (success) => {
-        this.isLoading = false;
-        if (success) {
-          const usuario = this.usuarioService.getUsuarioActual();
+    this.authService
+      .login(nit, password, rememberMe)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+
+          const usuario = this.authService.usuario();
 
           if (usuario) {
-            this.message.success(`¡Bienvenido, ${usuario.nombre}!`);
+            this.notificacion.exito(`¡Bienvenido, ${usuario.nombre}!`);
 
-            const panelRoutes: any = {
-              'referente': '/referente/dashboard',
-              'asesor': '/asesor/dashboard',
-              'gerente': '/gerente/dashboard',
-              'admin': '/admin/dashboard',
-              'contador': '/contador/dashboard'
-            };
-
-            const route = panelRoutes[usuario.rol] || '/referente/dashboard';
+            const dashboardRuta = this.authService.obtenerDashboardRuta();
 
             setTimeout(() => {
-              this.router.navigate([route]);
-            }, 100);
+              this.router.navigate([dashboardRuta]);
+            }, 300);
           }
-        } else {
-          this.errorMessage = 'NIT/Cédula o contraseña incorrectos. Por favor, verifique sus credenciales.';
-          this.message.error('Credenciales incorrectas');
-        }
-      },
-      error: () => {
-        this.isLoading = false;
-        this.errorMessage = 'Error de conexión. Intente nuevamente.';
-        this.message.error('Error de conexión');
-      }
-    });
-  } else {
-    this.markFormGroupTouched();
-    this.message.warning('Por favor, complete todos los campos requeridos');
-  }
-}
+        },
+        error: (error) => {
+          this.isLoading = false;
 
-  private markFormGroupTouched() {
-    Object.keys(this.loginForm.controls).forEach(key => {
+          const mensaje =
+            error.error?.message || 'NIT/Cédula o contraseña incorrectos';
+          this.errorMessage = mensaje;
+          this.notificacion.error(mensaje);
+        },
+      });
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.loginForm.controls).forEach((key) => {
       const control = this.loginForm.get(key);
       control?.markAsTouched();
       control?.updateValueAndValidity();

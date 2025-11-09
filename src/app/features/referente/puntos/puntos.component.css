@@ -1,5 +1,5 @@
 .gamificacion-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
 }
@@ -69,7 +69,7 @@
 }
 
 .puntos-faltantes {
-  color: #1890ff;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
@@ -81,6 +81,21 @@
   color: #595959;
   font-size: 14px;
 }
+
+.nivel-beneficio-badge {
+  display: inline-block;
+  margin: 8px auto 0;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dark);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: var(--border-radius);
+  max-width: 90%;
+  text-align: center;
+  line-height: 1.4;
+}
+
 
 /* Niveles Grid */
 .niveles-card {
@@ -109,7 +124,6 @@
 }
 
 .nivel-actual {
-  border-color: #1890ff;
   background: #e6f7ff;
 }
 
@@ -179,8 +193,30 @@
   border-color: #b7eb8f;
 }
 
+/* Agregar al final del archivo */
+
+.logro-criterio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
 .logro-bloqueado {
-  opacity: 0.6;
+  opacity: 0.7;
+  filter: grayscale(50%);
+}
+
+.logro-bloqueado:hover {
+  opacity: 0.9;
+  filter: grayscale(30%);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
 }
 
 .logro-icon {
@@ -203,7 +239,7 @@
   display: block;
   margin-top: 8px;
   font-size: 12px;
-  color: #52c41a;
+  color: var(--success-color);
   font-weight: 500;
 }
 

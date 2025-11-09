@@ -7,8 +7,10 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { UsuarioService } from '../../../core/services/usuario.service';
-import { Usuario } from '../../../core/models/usuario.interface';
+
+import { AuthService } from '../../../core/services/auth.service';
+import { UsuarioHelperService } from '../../../core/services/usuario-helper.service';
+import { UsuarioAutenticado } from '../../../core/models/usuario.interface';
 
 interface Estadisticas {
   retirosPendientes: number;
@@ -42,7 +44,7 @@ interface SolicitudRetiro {
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
-  usuario: Usuario | null = null;
+  usuario: UsuarioAutenticado | null = null;
   estadisticas: Estadisticas = {
     retirosPendientes: 0,
     retirosHoy: 0,
@@ -51,16 +53,18 @@ export class DashboardComponent implements OnInit {
   };
   ultimasSolicitudes: SolicitudRetiro[] = [];
 
-  constructor(private usuarioService: UsuarioService) {}
+  constructor(
+    private authService: AuthService,
+    public usuarioHelper: UsuarioHelperService
+  ) {}
 
   ngOnInit() {
-    this.usuario = this.usuarioService.getUsuarioActual();
+    this.usuario = this.authService.usuario();
     this.cargarEstadisticas();
     this.cargarUltimasSolicitudes();
   }
 
   cargarEstadisticas() {
-    // Simulación de datos
     this.estadisticas = {
       retirosPendientes: 8,
       retirosHoy: 5,
@@ -70,7 +74,6 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarUltimasSolicitudes() {
-    // Simulación de datos
     this.ultimasSolicitudes = [
       {
         id: '1',
@@ -134,5 +137,13 @@ export class DashboardComponent implements OnInit {
       month: 'short',
       year: 'numeric'
     });
+  }
+
+  get nombreCompleto(): string {
+    return this.usuarioHelper.nombreCompleto;
+  }
+
+  get iniciales(): string {
+    return this.usuarioHelper.iniciales;
   }
 }

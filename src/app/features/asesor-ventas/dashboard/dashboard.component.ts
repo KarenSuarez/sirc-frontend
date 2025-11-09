@@ -4,8 +4,10 @@ import { RouterModule } from '@angular/router';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { UsuarioService } from '../../../core/services/usuario.service';
-import { Usuario } from '../../../core/models/usuario.interface';
+
+import { AuthService } from '../../../core/services/auth.service';
+import { UsuarioHelperService } from '../../../core/services/usuario-helper.service';
+import { UsuarioAutenticado } from '../../../core/models/usuario.interface';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,17 +17,28 @@ import { Usuario } from '../../../core/models/usuario.interface';
     RouterModule,
     NzCardModule,
     NzButtonModule,
-    NzIconModule
+    NzIconModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
-  usuario: Usuario | null = null;
+  usuario: UsuarioAutenticado | null = null;
 
-  constructor(private usuarioService: UsuarioService) {}
+  constructor(
+    private authService: AuthService,
+    public usuarioHelper: UsuarioHelperService
+  ) {}
 
   ngOnInit() {
-    this.usuario = this.usuarioService.getUsuarioActual();
+    this.usuario = this.authService.usuario();
+  }
+
+  get nombreCompleto(): string {
+    return this.usuarioHelper.nombreCompleto;
+  }
+
+  get iniciales(): string {
+    return this.usuarioHelper.iniciales;
   }
 }

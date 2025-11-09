@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
-//import { AuthGuard } from '../../core/guards/auth.guard';
-//import { RoleGuard } from '../../core/guards/role.guard';
-import { Rol } from '../../core/enums/rol.enum';
+import { roleGuard } from '../../core/guards/role.guard';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ListaComponent } from './referidos/lista/lista.component';
@@ -12,8 +10,8 @@ import { PerfilComponent } from './perfil/perfil.component';
 export const ASESOR_VENTAS_ROUTES: Routes = [
   {
     path: '',
- //   canActivate: [AuthGuard, RoleGuard],
-    data: { roles: [Rol.ASESOR_VENTAS] },
+    canActivate: [roleGuard],
+    data: { roles: ['asesor_ventas', 'asesor'] },
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'referidos', component: ListaComponent },

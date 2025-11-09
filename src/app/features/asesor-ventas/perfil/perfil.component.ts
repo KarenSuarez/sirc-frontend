@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -13,9 +14,10 @@ import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { PerfilBaseComponent } from '../../../shared/componentes/perfil-base/perfil-base.component';
-import { UsuarioService } from '../../../core/services/usuario.service';
 
+import { PerfilBaseComponent } from '../../../shared/componentes/perfil-base/perfil-base.component';
+import { AuthService } from '../../../core/services/auth.service';
+import { UsuarioHelperService } from '../../../core/services/usuario-helper.service';
 
 @Component({
   selector: 'app-perfil-asesor',
@@ -32,19 +34,23 @@ import { UsuarioService } from '../../../core/services/usuario.service';
     NzAvatarModule,
     NzIconModule,
     NzSpinModule,
-    NzDividerModule
+    NzDividerModule,
   ],
   templateUrl: './perfil.component.html',
-  styleUrls: ['../../../shared/componentes/perfil-base/perfil-base.component.css']
+  styleUrls: [
+    '../../../shared/componentes/perfil-base/perfil-base.component.css',
+  ],
 })
 export class PerfilComponent extends PerfilBaseComponent {
   constructor(
     formBuilder: FormBuilder,
-    usuarioService: UsuarioService,
+    authService: AuthService,
+    usuarioHelper: UsuarioHelperService,
     message: NzMessageService,
-    router: Router
+    router: Router,
+    http: HttpClient
   ) {
-    super(formBuilder, usuarioService, message, router);
+    super(formBuilder, authService, usuarioHelper, message, router, http);
     this.dashboardRoute = '/asesor/dashboard';
   }
 }

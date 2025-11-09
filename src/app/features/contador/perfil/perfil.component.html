@@ -1,24 +1,14 @@
 <div class="perfil-container">
-  <!-- Header -->
-  <div class="perfil-header">
-    <button nz-button nzType="text" nzSize="large" (click)="goBack()" class="back-button">
-      <i nz-icon nzType="arrow-left"></i>
-      <span>Volver al Inicio</span>
-    </button>
-    <h1>Mi Perfil</h1>
-    <p>Administra tu información personal y configuración de cuenta</p>
-  </div>
 
   <div class="perfil-content" *ngIf="usuario">
-    <!-- Información del Usuario (SIN estadísticas) -->
     <nz-card class="user-info-card" [nzBordered]="false">
       <div class="user-header">
         <div class="avatar-section">
           <nz-avatar
             [nzSize]="80"
-            [nzSrc]="usuario.avatar"
             [nzText]="usuario.nombre.charAt(0).toUpperCase()"
-            class="user-avatar">
+            class="user-avatar"
+          >
           </nz-avatar>
           <button nz-button nzType="link" class="avatar-upload" disabled>
             <i nz-icon nzType="camera"></i>
@@ -29,32 +19,62 @@
         <div class="user-details">
           <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
           <p class="user-role">{{ getRoleDisplayName() }}</p>
-          <p class="user-email">{{ usuario.correo }}</p>
+          <p class="user-email">{{ usuario.correo_electronico }}</p>
         </div>
       </div>
     </nz-card>
 
     <div class="perfil-grid">
-      <!-- Formulario de Información Personal -->
-      <nz-card nzTitle="Información Personal" class="form-card" [nzExtra]="editButtonTemplate">
+      <nz-card
+        nzTitle="Información Personal"
+        class="form-card"
+        [nzExtra]="editButtonTemplate"
+      >
         <nz-spin [nzSpinning]="isLoading">
-          <form nz-form [formGroup]="perfilForm" (ngSubmit)="onSubmit()" class="perfil-form">
+          <form
+            nz-form
+            [formGroup]="perfilForm"
+            (ngSubmit)="onSubmit()"
+            class="perfil-form"
+          >
             <div class="form-row">
-              <nz-form-item class="form-item-full">
-                <nz-form-label nzRequired>Nombre Completo</nz-form-label>
+              <nz-form-item class="form-item-half">
+                <nz-form-label nzRequired>Nombres</nz-form-label>
                 <nz-form-control [nzErrorTip]="nombreErrorTemplate">
                   <input
                     nz-input
                     formControlName="nombre"
-                    placeholder="Ingrese su nombre completo"
-                    [disabled]="!isEditMode">
+                    placeholder="Ingrese sus nombres"
+                    [disabled]="!isEditMode"
+                  />
 
                   <ng-template #nombreErrorTemplate let-control>
                     <ng-container *ngIf="control.hasError('required')">
-                      El nombre es requerido
+                      Los nombres son requeridos
                     </ng-container>
                     <ng-container *ngIf="control.hasError('minlength')">
-                      El nombre debe tener al menos 2 caracteres
+                      Los nombres deben tener al menos 2 caracteres
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item class="form-item-half">
+                <nz-form-label nzRequired>Apellidos</nz-form-label>
+                <nz-form-control [nzErrorTip]="apellidoErrorTemplate">
+                  <input
+                    nz-input
+                    formControlName="apellido"
+                    placeholder="Ingrese sus apellidos"
+                    [disabled]="!isEditMode"
+                  />
+
+                  <ng-template #apellidoErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      Los apellidos son requeridos
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('minlength')">
+                      Los apellidos deben tener al menos 2 caracteres
                     </ng-container>
                   </ng-template>
                 </nz-form-control>
@@ -63,29 +83,25 @@
 
             <div class="form-row">
               <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Tipo de Documento</nz-form-label>
-                <nz-form-control [nzErrorTip]="'Seleccione un tipo de documento'">
-                  <nz-select
+                <nz-form-label>Tipo de Documento</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
                     formControlName="tipoDoc"
-                    nzPlaceHolder="Seleccionar"
-                    [disabled]="!isEditMode">
-                    <nz-option
-                      *ngFor="let tipo of tiposDocumento"
-                      [nzValue]="tipo.value"
-                      [nzLabel]="tipo.label">
-                    </nz-option>
-                  </nz-select>
+                    [disabled]="true"
+                    placeholder="Cargando..."
+                  />
                 </nz-form-control>
               </nz-form-item>
 
               <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Número de Documento</nz-form-label>
-                <nz-form-control [nzErrorTip]="'El documento es requerido'">
+                <nz-form-label>Número de Documento</nz-form-label>
+                <nz-form-control>
                   <input
                     nz-input
                     formControlName="documento"
-                    placeholder="Número de documento"
-                    [disabled]="!isEditMode">
+                    [disabled]="true"
+                  />
                 </nz-form-control>
               </nz-form-item>
             </div>
@@ -98,7 +114,8 @@
                     nz-input
                     formControlName="correo"
                     placeholder="correo@ejemplo.com"
-                    [disabled]="!isEditMode">
+                    [disabled]="!isEditMode"
+                  />
 
                   <ng-template #emailErrorTemplate let-control>
                     <ng-container *ngIf="control.hasError('required')">
@@ -112,36 +129,20 @@
               </nz-form-item>
 
               <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Teléfono</nz-form-label>
+                <nz-form-label>Teléfono</nz-form-label>
                 <nz-form-control [nzErrorTip]="telefonoErrorTemplate">
                   <input
                     nz-input
                     formControlName="telefono"
                     placeholder="3001234567"
-                    [disabled]="!isEditMode">
+                    [disabled]="!isEditMode"
+                  />
 
                   <ng-template #telefonoErrorTemplate let-control>
-                    <ng-container *ngIf="control.hasError('required')">
-                      El teléfono es requerido
-                    </ng-container>
                     <ng-container *ngIf="control.hasError('pattern')">
                       Ingrese un teléfono válido (10 dígitos)
                     </ng-container>
                   </ng-template>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-
-            <div class="form-row">
-              <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Fecha de Nacimiento</nz-form-label>
-                <nz-form-control [nzErrorTip]="'La fecha de nacimiento es requerida'">
-                  <nz-date-picker
-                    formControlName="fechaNacimiento"
-                    nzPlaceHolder="Seleccionar fecha"
-                    [disabled]="!isEditMode"
-                    style="width: 100%">
-                  </nz-date-picker>
                 </nz-form-control>
               </nz-form-item>
             </div>
@@ -151,7 +152,8 @@
                 nz-button
                 nzType="default"
                 (click)="cancelEdit()"
-                [disabled]="isLoading">
+                [disabled]="isLoading"
+              >
                 Cancelar
               </button>
               <button
@@ -159,7 +161,8 @@
                 nzType="primary"
                 nzHtmlType="submit"
                 [nzLoading]="isLoading"
-                [disabled]="!perfilForm.valid">
+                [disabled]="!perfilForm.valid"
+              >
                 Guardar Cambios
               </button>
             </div>
@@ -171,22 +174,23 @@
             nz-button
             nzType="link"
             (click)="enableEditMode()"
-            *ngIf="!isEditMode">
+            *ngIf="!isEditMode"
+          >
             <i nz-icon nzType="edit"></i> Editar
           </button>
         </ng-template>
       </nz-card>
 
-      <!-- Cambiar Contraseña -->
       <nz-card nzTitle="Seguridad" class="security-card">
         <div class="security-content">
           <button
             nz-button
             nzType="default"
             (click)="showPasswordForm = !showPasswordForm"
-            class="change-password-btn">
+            class="change-password-btn"
+          >
             <i nz-icon nzType="lock"></i>
-            {{ showPasswordForm ? 'Cancelar' : 'Cambiar Contraseña' }}
+            {{ showPasswordForm ? "Cancelar" : "Cambiar Contraseña" }}
           </button>
 
           <form
@@ -194,18 +198,21 @@
             [formGroup]="passwordForm"
             (ngSubmit)="onPasswordSubmit()"
             class="password-form"
-            *ngIf="showPasswordForm">
-
+            *ngIf="showPasswordForm"
+          >
             <nz-divider nzText="Nueva Contraseña"></nz-divider>
 
             <nz-form-item>
               <nz-form-label nzRequired>Contraseña Actual</nz-form-label>
-              <nz-form-control [nzErrorTip]="'La contraseña actual es requerida'">
+              <nz-form-control
+                [nzErrorTip]="'La contraseña actual es requerida'"
+              >
                 <input
                   nz-input
                   type="password"
                   formControlName="currentPassword"
-                  placeholder="Contraseña actual">
+                  placeholder="Contraseña actual"
+                />
               </nz-form-control>
             </nz-form-item>
 
@@ -217,7 +224,8 @@
                     nz-input
                     [type]="passwordVisible ? 'text' : 'password'"
                     formControlName="newPassword"
-                    placeholder="Nueva contraseña">
+                    placeholder="Nueva contraseña"
+                  />
                 </nz-input-group>
 
                 <ng-template #passwordSuffixTemplate>
@@ -225,7 +233,8 @@
                     nz-icon
                     [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
                     (click)="togglePasswordVisibility('password')"
-                    class="password-toggle">
+                    class="password-toggle"
+                  >
                   </i>
                 </ng-template>
 
@@ -248,7 +257,8 @@
                     nz-input
                     [type]="confirmPasswordVisible ? 'text' : 'password'"
                     formControlName="confirmPassword"
-                    placeholder="Confirmar nueva contraseña">
+                    placeholder="Confirmar nueva contraseña"
+                  />
                 </nz-input-group>
 
                 <ng-template #confirmPasswordSuffixTemplate>
@@ -256,7 +266,8 @@
                     nz-icon
                     [nzType]="confirmPasswordVisible ? 'eye-invisible' : 'eye'"
                     (click)="togglePasswordVisibility('confirm')"
-                    class="password-toggle">
+                    class="password-toggle"
+                  >
                   </i>
                 </ng-template>
 
@@ -264,7 +275,9 @@
                   <ng-container *ngIf="control.hasError('required')">
                     Confirme su nueva contraseña
                   </ng-container>
-                  <ng-container *ngIf="passwordForm.hasError('passwordMismatch')">
+                  <ng-container
+                    *ngIf="passwordForm.hasError('passwordMismatch')"
+                  >
                     Las contraseñas no coinciden
                   </ng-container>
                 </ng-template>
@@ -277,7 +290,8 @@
                 nzType="primary"
                 nzHtmlType="submit"
                 [nzLoading]="isLoading"
-                [disabled]="!passwordForm.valid">
+                [disabled]="!passwordForm.valid"
+              >
                 Cambiar Contraseña
               </button>
             </div>

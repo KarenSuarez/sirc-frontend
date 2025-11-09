@@ -1,140 +1,205 @@
 <div class="gamificacion-container">
   <div class="page-header">
-    <h1>🏆 Sistema de Puntos y Categorías</h1>
+    <h1>Mis Puntos, Niveles e Insignias</h1>
     <p>Sube de nivel y desbloquea más beneficios</p>
   </div>
 
-  <!-- Nivel Actual -->
-  <nz-card class="nivel-actual-card">
-    <div class="nivel-display">
-      <div class="nivel-icon" [style.background]="nivelActual.color">
-        <i nz-icon [nzType]="nivelActual.icon" style="font-size: 48px; color: white;"></i>
-      </div>
-      <div class="nivel-info">
-        <h2>Nivel {{ nivelActual.nombre }}</h2>
-        <p>{{ puntosActuales }} puntos acumulados</p>
-        <nz-tag [nzColor]="nivelActual.color" style="font-size: 14px;">
-          {{ nivelActual.beneficio }}
-        </nz-tag>
-      </div>
-    </div>
-
-    <div class="progreso-section" *ngIf="siguienteNivel">
-      <div class="progreso-header">
-        <span>Progreso al siguiente nivel</span>
-        <span class="puntos-faltantes">Faltan {{ puntosParaSiguienteNivel }} puntos</span>
-      </div>
-      <nz-progress
-        [nzPercent]="progresoNivel"
-        [nzStrokeColor]="siguienteNivel.color"
-        nzSize="small">
-      </nz-progress>
-      <div class="siguiente-nivel-info">
-        <i nz-icon [nzType]="siguienteNivel.icon"></i>
-        <span>Próximo: {{ siguienteNivel.nombre }} - {{ siguienteNivel.beneficio }}</span>
-      </div>
-    </div>
-
-    <nz-alert
-      *ngIf="!siguienteNivel"
-      nzType="success"
-      nzMessage="¡Felicidades!"
-      nzDescription="Has alcanzado el nivel máximo del sistema"
-      nzShowIcon>
-    </nz-alert>
-  </nz-card>
-
-  <!-- Escalera de Niveles -->
-  <nz-card nzTitle="Todos los Niveles" class="niveles-card">
-    <div class="niveles-grid">
-      <div
-        *ngFor="let nivel of niveles"
-        class="nivel-item"
-        [class.nivel-actual]="nivel.nombre === nivelActual.nombre"
-        [class.nivel-bloqueado]="puntosActuales < nivel.puntosMinimos">
-
-        <div class="nivel-badge" [style.background]="nivel.color">
-          <i nz-icon [nzType]="nivel.icon" style="font-size: 32px; color: white;"></i>
+  <nz-spin [nzSpinning]="cargando" nzTip="Cargando datos...">
+    <nz-card class="nivel-actual-card" *ngIf="!cargando">
+      <div class="nivel-display">
+        <div class="nivel-icon" [style.background]="nivelActual.color">
+          <i
+            nz-icon
+            [nzType]="nivelActual.icon"
+            style="font-size: 48px; color: white"
+          ></i>
         </div>
-
-        <h3>{{ nivel.nombre }}</h3>
-        <p class="nivel-puntos">{{ nivel.puntosMinimos }} - {{ nivel.puntosMaximos }} pts</p>
-        <p class="nivel-beneficio">{{ nivel.beneficio }}</p>
-
-        <nz-tag
-          *ngIf="nivel.nombre === nivelActual.nombre"
-          nzColor="blue"
-          style="margin-top: 8px;">
-          NIVEL ACTUAL
-        </nz-tag>
-
-        <i
-          *ngIf="puntosActuales >= nivel.puntosMinimos"
-          nz-icon
-          nzType="check-circle"
-          nzTheme="fill"
-          style="color: #52c41a; font-size: 24px; margin-top: 8px;">
-        </i>
-      </div>
-    </div>
-  </nz-card>
-
-  <!-- Logros -->
-  <nz-card nzTitle="🎖️ Logros y Medallas" class="logros-card">
-    <div class="logros-section">
-      <h3>Desbloqueados ({{ logrosDesbloqueados.length }})</h3>
-      <div class="logros-grid">
-        <div *ngFor="let logro of logrosDesbloqueados" class="logro-item logro-desbloqueado">
-          <nz-badge [nzStyle]="{ backgroundColor: '#52c41a' }">
-            <div class="logro-icon">
-              <i nz-icon [nzType]="logro.icon" style="font-size: 32px;"></i>
-            </div>
-          </nz-badge>
-          <h4>{{ logro.nombre }}</h4>
-          <p>{{ logro.descripcion }}</p>
-          <span class="logro-fecha">{{ logro.fecha }}</span>
+        <div class="nivel-info">
+          <h2>Nivel {{ nivelActual.nombre }}</h2>
+          <p>{{ puntosActuales }} puntos acumulados</p>
+          <nz-tag [nzColor]="nivelActual.color" style="font-size: 14px">
+            {{ nivelActual.beneficio }}
+          </nz-tag>
         </div>
       </div>
 
-      <h3 style="margin-top: 32px;">Bloqueados ({{ logrosBloqueados.length }})</h3>
-      <div class="logros-grid">
-        <div *ngFor="let logro of logrosBloqueados" class="logro-item logro-bloqueado">
-          <div class="logro-icon">
-            <i nz-icon nzType="lock" style="font-size: 32px; color: #d9d9d9;"></i>
+      <div class="progreso-section" *ngIf="siguienteNivel">
+        <div class="progreso-header">
+          <span>Progreso al siguiente nivel</span>
+          <span class="puntos-faltantes"
+            >Faltan {{ puntosParaSiguienteNivel }} puntos</span
+          >
+        </div>
+        <nz-progress
+          [nzPercent]="progresoNivel"
+          [nzStrokeColor]="siguienteNivel.color"
+          nzSize="small"
+        >
+        </nz-progress>
+        <div class="siguiente-nivel-info">
+          <i nz-icon [nzType]="siguienteNivel.icon"></i>
+          <span
+            >Próximo: {{ siguienteNivel.nombre }} -
+            {{ siguienteNivel.beneficio }}</span
+          >
+        </div>
+      </div>
+
+      <nz-alert
+        *ngIf="!siguienteNivel"
+        nzType="success"
+        nzMessage="¡Felicidades!"
+        nzDescription="Has alcanzado el nivel máximo del sistema"
+        nzShowIcon
+      >
+      </nz-alert>
+    </nz-card>
+
+    <nz-card nzTitle="Todos los Niveles" class="niveles-card" *ngIf="!cargando">
+      <div class="niveles-grid">
+        <div
+          *ngFor="let nivel of niveles"
+          class="nivel-item"
+          [ngStyle]="{
+            background: getNivelFondo(nivel.color_nivel || '#FFFFFF'),
+            borderColor: nivel.color_nivel
+          }"
+          [class.nivel-actual]="nivel.nombre_nivel === nivelActual.nombre"
+          [class.nivel-bloqueado]="puntosActuales < nivel.puntos_minimos"
+        >
+          <div class="nivel-badge" [style.background]="nivel.color_nivel">
+            <i
+              nz-icon
+              [nzType]="nivel.icono_nivel || 'trophy'"
+              style="font-size: 32px; color: white"
+            ></i>
           </div>
-          <h4>{{ logro.nombre }}</h4>
-          <p>{{ logro.descripcion }}</p>
-        </div>
-      </div>
-    </div>
-  </nz-card>
 
-  <!-- Información adicional -->
-  <nz-card nzTitle="¿Cómo ganar puntos?" class="info-card">
-    <div class="info-content">
-      <div class="info-item">
-        <i nz-icon nzType="team" style="font-size: 24px; color: #1890ff;"></i>
-        <div>
-          <h4>Refiere clientes</h4>
-          <p>Gana 2-10 puntos por cada cliente referido según el plan adquirido</p>
-        </div>
-      </div>
+          <h3>{{ nivel.nombre_nivel }}</h3>
+          <p class="nivel-puntos">
+            {{ nivel.puntos_minimos }} - {{ nivel.puntos_maximos }} pts
+          </p>
 
-      <div class="info-item">
-        <i nz-icon nzType="trophy" style="font-size: 24px; color: #faad14;"></i>
-        <div>
-          <h4>Sube de nivel</h4>
-          <p>Obtén bonificaciones adicionales del 5% al 20% según tu categoría</p>
-        </div>
-      </div>
+          <div class="nivel-beneficio-badge">
+            {{ nivel.beneficios_nivel }}
+          </div>
 
-      <div class="info-item">
-        <i nz-icon nzType="fire" style="font-size: 24px; color: #ff4d4f;"></i>
-        <div>
-          <h4>Desbloquea logros</h4>
-          <p>Completa desafíos y obtén reconocimientos especiales</p>
+          <nz-tag
+            *ngIf="nivel.nombre_nivel === nivelActual.nombre"
+            [nzColor]="nivel.color_nivel"
+            style="margin-top: 8px"
+          >
+            NIVEL ACTUAL
+          </nz-tag>
+
+          <i
+            *ngIf="puntosActuales >= nivel.puntos_minimos"
+            nz-icon
+            nzType="check-circle"
+            nzTheme="fill"
+            style="
+              color: var(--success-color);
+              font-size: 24px;
+              margin-top: 8px;
+            "
+          ></i>
         </div>
       </div>
-    </div>
-  </nz-card>
+    </nz-card>
+
+    <nz-card nzTitle="Logros y Medallas" class="logros-card" *ngIf="!cargando">
+      <div class="logros-section">
+        <h3>Desbloqueados ({{ logrosDesbloqueados.length }})</h3>
+        <div class="logros-grid" *ngIf="logrosDesbloqueados.length > 0">
+          <div
+            *ngFor="let logro of logrosDesbloqueados"
+            class="logro-item logro-desbloqueado"
+          >
+            <nz-badge [nzStyle]="{ backgroundColor: '#52c41a' }">
+              <div class="logro-icon">
+                <i nz-icon [nzType]="logro.icon" style="font-size: 32px"></i>
+              </div>
+            </nz-badge>
+            <h4>{{ logro.nombre }}</h4>
+            <p>{{ logro.descripcion }}</p>
+            <span class="logro-fecha">{{ logro.fecha }}</span>
+          </div>
+        </div>
+        <nz-empty
+          *ngIf="logrosDesbloqueados.length === 0"
+          nzNotFoundContent="Sin logros desbloqueados aún"
+        ></nz-empty>
+
+        <h3 style="margin-top: 32px">
+          Bloqueados ({{ logrosBloqueados.length }})
+        </h3>
+        <div class="logros-grid" *ngIf="logrosBloqueados.length > 0">
+          <div
+            *ngFor="let logro of logrosBloqueados"
+            class="logro-item logro-bloqueado">
+            <div class="logro-icon">
+              <i
+                nz-icon
+                nzType="lock"
+                style="font-size: 32px; color: #d9d9d9">
+              </i>
+            </div>
+            <h4>{{ logro.nombre }}</h4>
+            <p>{{ logro.descripcion }}</p>
+
+            <div class="logro-criterio">
+              <i nz-icon nzType="info-circle" style="font-size: 12px;"></i>
+              <span>{{ logro.criterio }}</span>
+            </div>
+
+            <nz-tag
+              [nzColor]="getRarezaColor(logro.rareza)"
+              style="margin-top: 8px;">
+              {{ logro.rareza | uppercase }}
+            </nz-tag>
+          </div>
+        </div>
+        <nz-empty
+          *ngIf="logrosBloqueados.length === 0"
+          nzNotFoundContent="¡Todos los logros desbloqueados! 🎉">
+        </nz-empty>
+      </div>
+    </nz-card>
+
+    <nz-card nzTitle="¿Cómo ganar puntos?" class="info-card">
+      <div class="info-content">
+        <div class="info-item">
+          <i
+            nz-icon
+            nzType="team"
+            style="font-size: 24px; color: var(--primary-dark)"
+          ></i>
+          <div>
+            <h4>Refiere clientes</h4>
+            <p>Gana puntos por cada cliente referido según el plan adquirido</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <i
+            nz-icon
+            nzType="trophy"
+            style="font-size: 24px; color: #faad14"
+          ></i>
+          <div>
+            <h4>Sube de nivel</h4>
+            <p>Obtén bonificaciones adicionales según tu categoría</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <i nz-icon nzType="fire" style="font-size: 24px; color: #ff4d4f"></i>
+          <div>
+            <h4>Desbloquea logros</h4>
+            <p>Completa desafíos y obtén reconocimientos especiales</p>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+  </nz-spin>
 </div>

@@ -5,14 +5,8 @@
       <p>Gestiona y realiza seguimiento a tus referidos</p>
     </div>
     <div class="header-actions">
-      <button
-        nz-button
-        nzType="primary"
-        nzSize="large"
-        (click)="crearReferido()"
-        class="crear-btn">
-        <i nz-icon nzType="plus"></i>
-        Agregar Referido
+      <button nz-button nzType="primary" nzSize="large" (click)="crearReferido()" class="crear-btn">
+        <i nz-icon nzType="plus"></i> Agregar Referido
       </button>
     </div>
   </div>
@@ -24,8 +18,8 @@
       [nzLoading]="loading"
       nzSize="middle"
       [nzScroll]="{ x: '800px' }"
-      class="referidos-table">
-
+      class="referidos-table"
+    >
       <thead>
         <tr>
           <th>Referido</th>
@@ -33,102 +27,160 @@
           <th>Documento</th>
           <th>Estado</th>
           <th>Fecha Registro</th>
-          <th>Puntos</th>
+          <th>Plan</th>
           <th nzWidth="120px">Acciones</th>
         </tr>
       </thead>
 
       <tbody>
-        <tr *ngFor="let referido of basicTable.data">
-          <td>
-            <div class="referido-info">
-              <div class="referido-avatar">
-                {{ referido.nombre.charAt(0).toUpperCase() }}
+        <ng-container *ngFor="let referido of basicTable.data">
+          <tr>
+            <td>
+              <div class="referido-info">
+                <div class="referido-avatar">
+                  {{ getIniciales(referido.nombre_referido, referido.apellido_referido) }}
+                </div>
+                <div class="referido-datos">
+                  <div class="referido-nombre">
+                    {{ referido.nombre_referido }} {{ referido.apellido_referido }}
+                  </div>
+                </div>
               </div>
-              <div class="referido-datos">
-                <div class="referido-nombre">{{ referido.nombre }}</div>
-                <div class="referido-codigo">Ref: {{ referido.referenteCodigo }}</div>
+            </td>
+
+            <td>
+              <div class="contacto-info">
+                <div class="contacto-item">
+                  <i nz-icon nzType="mail"></i>
+                  <span>{{ referido.correo_referido }}</span>
+                </div>
+                <div class="contacto-item">
+                  <i nz-icon nzType="phone"></i>
+                  <span>{{ referido.telefono_referido }}</span>
+                </div>
               </div>
-            </div>
-          </td>
+            </td>
 
-          <td>
-            <div class="contacto-info">
-              <div class="contacto-item">
-                <i nz-icon nzType="mail"></i>
-                <span>{{ referido.correo }}</span>
+            <td>
+              <div class="documento-info">
+                <span class="tipo-doc">{{ referido.tipoDocumento?.codigo_tipo || "N/A" }}</span>
+                <span class="numero-doc">{{ referido.numero_documento_referido }}</span>
               </div>
-              <div class="contacto-item">
-                <i nz-icon nzType="phone"></i>
-                <span>{{ referido.telefono }}</span>
+            </td>
+
+            <td>
+              <nz-tag [nzColor]="getEstadoColor(referido.estado_referido)">
+                {{ getEstadoTexto(referido.estado_referido) }}
+              </nz-tag>
+            </td>
+
+            <td>
+              <div class="fechas-info">
+                <div class="fecha-item">
+                  <i nz-icon nzType="calendar"></i>
+                  <span>{{ formatearFecha(referido.fecha_referencia) }}</span>
+                </div>
+                <div class="fecha-item" *ngIf="referido.fecha_conversion">
+                  <i nz-icon nzType="check-circle"></i>
+                  <span>{{ formatearFecha(referido.fecha_conversion) }}</span>
+                </div>
               </div>
-            </div>
-          </td>
+            </td>
 
-          <td>
-            <div class="documento-info">
-              <span class="tipo-doc">{{ referido.tipoDoc }}</span>
-              <span class="numero-doc">{{ referido.documento }}</span>
-            </div>
-          </td>
-
-          <td>
-            <nz-tag [nzColor]="getEstadoColor(referido.estado)">
-              {{ getEstadoTexto(referido.estado) }}
-            </nz-tag>
-          </td>
-
-          <td>
-            <div class="fechas-info">
-              <div class="fecha-item">
-                <i nz-icon nzType="calendar"></i>
-                <span>{{ formatearFecha(referido.fechaRegistro) }}</span>
+            <td>
+              <div class="plan-info" *ngIf="referido.plan; else sinPlan">
+                <nz-tag [nzColor]="referido.plan.color_plan || 'blue'">
+                  {{ referido.plan.nombre_plan }}
+                </nz-tag>
               </div>
-              <div class="fecha-item" *ngIf="referido.fechaContacto">
-                <i nz-icon nzType="phone"></i>
-                <span>{{ formatearFecha(referido.fechaContacto) }}</span>
+              <ng-template #sinPlan>
+                <span class="sin-plan">-</span>
+              </ng-template>
+            </td>
+
+            <td>
+              <nz-space nzSize="small">
+                <button
+                  *nzSpaceItem
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="toggleDetalle(referido)"
+                  nz-tooltip="Ver detalles"
+                >
+                  <i nz-icon nzType="eye"></i>
+                </button>
+
+                <button
+                  *nzSpaceItem
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  nzDanger
+                  (click)="eliminarReferido(referido)"
+                  nz-tooltip="Eliminar"
+                  [disabled]="referido.estado_referido !== 'pendiente'"
+                >
+                  <i nz-icon nzType="delete"></i>
+                </button>
+              </nz-space>
+            </td>
+          </tr>
+
+          <tr *ngIf="isExpanded(referido)" class="detalle-row">
+            <td colspan="8" class="detalle-cell">
+              <div class="detalle-container">
+                <nz-descriptions nzTitle="Información Completa" nzBordered [nzColumn]="2" nzSize="small">
+                  <nz-descriptions-item nzTitle="Nombre Completo" [nzSpan]="2">
+                    {{ referido.nombre_referido }} {{ referido.apellido_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Correo Electrónico">
+                    <a [href]="'mailto:' + referido.correo_referido">{{ referido.correo_referido }}</a>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Teléfono">
+                    <a [href]="'tel:' + referido.telefono_referido">{{ referido.telefono_referido }}</a>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Tipo de Documento">
+                    {{ referido.tipoDocumento?.nombre_tipo || "N/A" }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Número de Documento">
+                    {{ referido.numero_documento_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Empresa" *ngIf="referido.empresa_referido">
+                    {{ referido.empresa_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Cargo" *ngIf="referido.cargo_referido">
+                    {{ referido.cargo_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Estado">
+                    <nz-tag [nzColor]="getEstadoColor(referido.estado_referido)">
+                      {{ getEstadoTexto(referido.estado_referido) }}
+                    </nz-tag>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Fecha de Referencia">
+                    {{ formatearFecha(referido.fecha_referencia) }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Fecha de Conversión" *ngIf="referido.fecha_conversion">
+                    {{ formatearFecha(referido.fecha_conversion) }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Plan Adquirido" *ngIf="referido.plan">
+                    <div class="plan-detalle">
+                      <nz-tag [nzColor]="referido.plan.color_plan || 'blue'">
+                        {{ referido.plan.nombre_plan }}
+                      </nz-tag>
+                      <span class="plan-precio">
+                        ${{ referido.plan.precio_actual | number : "1.0-0" }}
+                      </span>
+                    </div>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Observaciones" [nzSpan]="2" *ngIf="referido.observaciones">
+                    {{ referido.observaciones }}
+                  </nz-descriptions-item>
+                </nz-descriptions>
               </div>
-            </div>
-          </td>
-
-          <td>
-            <div class="puntos-info" *ngIf="referido.puntos; else sinPuntos">
-              <i nz-icon nzType="trophy"></i>
-              <span>{{ referido.puntos }}</span>
-            </div>
-            <ng-template #sinPuntos>
-              <span class="sin-puntos">-</span>
-            </ng-template>
-          </td>
-
-          <td>
-            <nz-space nzSize="small">
-              <button
-                *nzSpaceItem
-                nz-button
-                nzType="text"
-                nzSize="small"
-                (click)="verDetalle(referido)"
-                nz-tooltip="Ver detalles">
-                <i nz-icon nzType="eye"></i>
-              </button>
-
-              <nz-dropdown-menu #menu="nzDropdownMenu">
-                <ul nz-menu>
-                  <li nz-menu-item (click)="verDetalle(referido)">
-                    <i nz-icon nzType="eye"></i>
-                    Ver detalles
-                  </li>
-                  <li nz-menu-divider></li>
-                  <li nz-menu-item (click)="eliminarReferido(referido)" class="menu-danger">
-                    <i nz-icon nzType="delete"></i>
-                    Eliminar
-                  </li>
-                </ul>
-              </nz-dropdown-menu>
-            </nz-space>
-          </td>
-        </tr>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </nz-table>
 
@@ -138,8 +190,7 @@
         <h3>No tienes referidos aún</h3>
         <p>Comienza agregando tu primer referido</p>
         <button nz-button nzType="primary" (click)="crearReferido()">
-          <i nz-icon nzType="plus"></i>
-          Agregar Primer Referido
+          <i nz-icon nzType="plus"></i> Agregar Primer Referido
         </button>
       </div>
     </div>

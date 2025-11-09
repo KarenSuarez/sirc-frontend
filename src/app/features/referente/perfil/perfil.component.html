@@ -1,22 +1,11 @@
 <div class="perfil-container">
-  <!-- Header -->
-  <div class="perfil-header">
-    <button nz-button nzType="text" nzSize="large" (click)="goBack()" class="back-button">
-      <i nz-icon nzType="arrow-left"></i>
-      <span>Volver al Inicio</span>
-    </button>
-    <h1>Mi Perfil</h1>
-    <p>Administra tu información personal y configuración de cuenta</p>
-  </div>
 
   <div class="perfil-content" *ngIf="usuario">
-    <!-- Información del Usuario con Estadísticas -->
     <nz-card class="user-info-card" [nzBordered]="false">
       <div class="user-header">
         <div class="avatar-section">
           <nz-avatar
             [nzSize]="80"
-            [nzSrc]="usuario.avatar"
             [nzText]="usuario.nombre.charAt(0).toUpperCase()"
             class="user-avatar">
           </nz-avatar>
@@ -27,50 +16,69 @@
         </div>
 
         <div class="user-details">
-          <h2>{{ usuario.nombre }}</h2>
+          <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
           <p class="user-role">{{ getRoleDisplayName() }}</p>
-          <p class="user-email">{{ usuario.correo }}</p>
+          <p class="user-email">{{ usuario.correo_electronico }}</p>
         </div>
 
-        <!-- Estadísticas específicas del Referente -->
-        <div class="user-stats">
+        <div class="user-stats" *ngIf="perfilReferente">
           <div class="stat-item">
-            <span class="stat-value">{{ usuario.puntos || 0 }}</span>
+            <span class="stat-value">{{ perfilReferente.puntos_actuales || 0 }}</span>
             <span class="stat-label">Puntos</span>
           </div>
           <div class="stat-item">
-            <span class="stat-value">{{ usuario.referidos || 0 }}</span>
+            <span class="stat-value">{{ totalReferidos }}</span>
             <span class="stat-label">Referidos</span>
           </div>
           <div class="stat-item">
-            <span class="stat-value">{{ usuario.categoria || 'N/A' }}</span>
-            <span class="stat-label">Categoría</span>
+            <span class="stat-value">{{ nivelActual }}</span>
+            <span class="stat-label">Nivel</span>
           </div>
         </div>
       </div>
     </nz-card>
 
     <div class="perfil-grid">
-      <!-- Formulario de Información Personal -->
       <nz-card nzTitle="Información Personal" class="form-card" [nzExtra]="editButtonTemplate">
         <nz-spin [nzSpinning]="isLoading">
           <form nz-form [formGroup]="perfilForm" (ngSubmit)="onSubmit()" class="perfil-form">
+
             <div class="form-row">
-              <nz-form-item class="form-item-full">
-                <nz-form-label nzRequired>Nombre Completo</nz-form-label>
+              <nz-form-item class="form-item-half">
+                <nz-form-label nzRequired>Nombres</nz-form-label>
                 <nz-form-control [nzErrorTip]="nombreErrorTemplate">
                   <input
                     nz-input
                     formControlName="nombre"
-                    placeholder="Ingrese su nombre completo"
+                    placeholder="Ingrese sus nombres"
                     [disabled]="!isEditMode">
 
                   <ng-template #nombreErrorTemplate let-control>
                     <ng-container *ngIf="control.hasError('required')">
-                      El nombre es requerido
+                      Los nombres son requeridos
                     </ng-container>
                     <ng-container *ngIf="control.hasError('minlength')">
-                      El nombre debe tener al menos 2 caracteres
+                      Los nombres deben tener al menos 2 caracteres
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item class="form-item-half">
+                <nz-form-label nzRequired>Apellidos</nz-form-label>
+                <nz-form-control [nzErrorTip]="apellidoErrorTemplate">
+                  <input
+                    nz-input
+                    formControlName="apellido"
+                    placeholder="Ingrese sus apellidos"
+                    [disabled]="!isEditMode">
+
+                  <ng-template #apellidoErrorTemplate let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      Los apellidos son requeridos
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('minlength')">
+                      Los apellidos deben tener al menos 2 caracteres
                     </ng-container>
                   </ng-template>
                 </nz-form-control>
@@ -79,29 +87,23 @@
 
             <div class="form-row">
               <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Tipo de Documento</nz-form-label>
-                <nz-form-control [nzErrorTip]="'Seleccione un tipo de documento'">
-                  <nz-select
+                <nz-form-label>Tipo de Documento</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
                     formControlName="tipoDoc"
-                    nzPlaceHolder="Seleccionar"
-                    [disabled]="!isEditMode">
-                    <nz-option
-                      *ngFor="let tipo of tiposDocumento"
-                      [nzValue]="tipo.value"
-                      [nzLabel]="tipo.label">
-                    </nz-option>
-                  </nz-select>
+                    [disabled]="true"
+                    placeholder="Cargando...">
                 </nz-form-control>
               </nz-form-item>
 
               <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Número de Documento</nz-form-label>
-                <nz-form-control [nzErrorTip]="'El documento es requerido'">
+                <nz-form-label>Número de Documento</nz-form-label>
+                <nz-form-control>
                   <input
                     nz-input
                     formControlName="documento"
-                    placeholder="Número de documento"
-                    [disabled]="!isEditMode">
+                    [disabled]="true">
                 </nz-form-control>
               </nz-form-item>
             </div>
@@ -128,7 +130,7 @@
               </nz-form-item>
 
               <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Teléfono</nz-form-label>
+                <nz-form-label>Teléfono</nz-form-label>
                 <nz-form-control [nzErrorTip]="telefonoErrorTemplate">
                   <input
                     nz-input
@@ -137,27 +139,10 @@
                     [disabled]="!isEditMode">
 
                   <ng-template #telefonoErrorTemplate let-control>
-                    <ng-container *ngIf="control.hasError('required')">
-                      El teléfono es requerido
-                    </ng-container>
                     <ng-container *ngIf="control.hasError('pattern')">
                       Ingrese un teléfono válido (10 dígitos)
                     </ng-container>
                   </ng-template>
-                </nz-form-control>
-              </nz-form-item>
-            </div>
-
-            <div class="form-row">
-              <nz-form-item class="form-item-half">
-                <nz-form-label nzRequired>Fecha de Nacimiento</nz-form-label>
-                <nz-form-control [nzErrorTip]="'La fecha de nacimiento es requerida'">
-                  <nz-date-picker
-                    formControlName="fechaNacimiento"
-                    nzPlaceHolder="Seleccionar fecha"
-                    [disabled]="!isEditMode"
-                    style="width: 100%">
-                  </nz-date-picker>
                 </nz-form-control>
               </nz-form-item>
             </div>
@@ -193,25 +178,24 @@
         </ng-template>
       </nz-card>
 
-      <!-- Código de Referidos (específico del Referente) -->
-      <nz-card nzTitle="Código de Referidos" class="referral-card" *ngIf="usuario.codigo">
+      <nz-card nzTitle="Código de Referidos" class="referral-card" *ngIf="codigoReferente">
         <div class="referral-content">
           <div class="referral-item">
             <label>Tu Código:</label>
             <div class="code-display">
-              <span class="code-value">{{ usuario.codigo }}</span>
+              <span class="code-value">{{ codigoReferente }}</span>
               <button nz-button nzType="default" nzSize="small" (click)="copyReferralCode()">
                 <i nz-icon nzType="copy"></i>
               </button>
             </div>
           </div>
 
-          <div class="referral-item" *ngIf="usuario.link">
+          <div class="referral-item" *ngIf="linkReferido">
             <label>Enlace de Referido:</label>
             <div class="link-display">
               <input
                 nz-input
-                [value]="usuario.link"
+                [value]="linkReferido"
                 readonly
                 class="link-input">
               <button nz-button nzType="default" nzSize="small" (click)="copyReferralLink()">
@@ -227,7 +211,6 @@
         </div>
       </nz-card>
 
-      <!-- Cambiar Contraseña -->
       <nz-card nzTitle="Seguridad" class="security-card">
         <div class="security-content">
           <button

@@ -5,7 +5,6 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
-import { UsuarioService } from '../../../core/services/usuario.service';
 import { Usuario } from '../../../core/models/usuario.interface';
 
 interface Estadisticas {
@@ -30,23 +29,23 @@ interface Resumen {
     NzCardModule,
     NzButtonModule,
     NzIconModule,
-    NzSpaceModule
+    NzSpaceModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
   estadisticas: Estadisticas = {
     referidosMes: 0,
     conversiones: 0,
-    tasaConversion: 0
+    tasaConversion: 0,
   };
 
   resumen: Resumen = {
     totalReferentes: 0,
     totalReferidos: 0,
     planesActivos: 0,
-    comisionesTotales: 0
+    comisionesTotales: 0,
   };
 
   ngOnInit() {
@@ -55,22 +54,19 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarEstadisticas() {
-    // Simulación de datos
     this.estadisticas = {
       referidosMes: 45,
       conversiones: 32,
-      tasaConversion: 71
+      tasaConversion: 71,
     };
   }
 
   cargarResumen() {
-    // Simulación de datos
     this.resumen = {
       totalReferentes: 28,
       totalReferidos: 156,
       planesActivos: 3,
-      comisionesTotales: 8500000
+      comisionesTotales: 8500000,
     };
   }
-
 }
