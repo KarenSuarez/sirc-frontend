@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UsuarioHelperService } from '../../../core/services/usuario-helper.service';
 import { UsuarioAutenticado } from '../../../core/models/usuario.interface';
 
+
 interface MenuItem {
   label: string;
   route: string;
@@ -236,4 +237,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.showUserMenu = false;
     }
   }
+
+    @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const clickedInside = target.closest('.user-profile');
+    if (!clickedInside) {
+      this.showUserMenu = false;
+    }
+  }
+
 }
