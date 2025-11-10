@@ -50,8 +50,7 @@
                   <input
                     nz-input
                     formControlName="nombre"
-                    placeholder="Ingrese sus nombres"
-                    [disabled]="!isEditMode">
+                    placeholder="Ingrese sus nombres">
 
                   <ng-template #nombreErrorTemplate let-control>
                     <ng-container *ngIf="control.hasError('required')">
@@ -70,8 +69,7 @@
                   <input
                     nz-input
                     formControlName="apellido"
-                    placeholder="Ingrese sus apellidos"
-                    [disabled]="!isEditMode">
+                    placeholder="Ingrese sus apellidos">
 
                   <ng-template #apellidoErrorTemplate let-control>
                     <ng-container *ngIf="control.hasError('required')">
@@ -92,7 +90,6 @@
                   <input
                     nz-input
                     formControlName="tipoDoc"
-                    [disabled]="true"
                     placeholder="Cargando...">
                 </nz-form-control>
               </nz-form-item>
@@ -102,8 +99,7 @@
                 <nz-form-control>
                   <input
                     nz-input
-                    formControlName="documento"
-                    [disabled]="true">
+                    formControlName="documento">
                 </nz-form-control>
               </nz-form-item>
             </div>
@@ -115,8 +111,7 @@
                   <input
                     nz-input
                     formControlName="correo"
-                    placeholder="correo@ejemplo.com"
-                    [disabled]="!isEditMode">
+                    placeholder="correo@ejemplo.com">
 
                   <ng-template #emailErrorTemplate let-control>
                     <ng-container *ngIf="control.hasError('required')">
@@ -135,8 +130,7 @@
                   <input
                     nz-input
                     formControlName="telefono"
-                    placeholder="3001234567"
-                    [disabled]="!isEditMode">
+                    placeholder="3001234567">
 
                   <ng-template #telefonoErrorTemplate let-control>
                     <ng-container *ngIf="control.hasError('pattern')">
@@ -151,16 +145,14 @@
               <button
                 nz-button
                 nzType="default"
-                (click)="cancelEdit()"
-                [disabled]="isLoading">
+                (click)="cancelEdit()">
                 Cancelar
               </button>
               <button
                 nz-button
                 nzType="primary"
                 nzHtmlType="submit"
-                [nzLoading]="isLoading"
-                [disabled]="!perfilForm.valid">
+                [nzLoading]="isLoading">
                 Guardar Cambios
               </button>
             </div>
@@ -309,8 +301,7 @@
                 nz-button
                 nzType="primary"
                 nzHtmlType="submit"
-                [nzLoading]="isLoading"
-                [disabled]="!passwordForm.valid">
+                [nzLoading]="isLoading">
                 Cambiar Contraseña
               </button>
             </div>

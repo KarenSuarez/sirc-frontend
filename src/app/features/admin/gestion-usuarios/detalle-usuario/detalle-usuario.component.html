@@ -1,226 +1,261 @@
 <div class="detalle-usuario-container">
-  <div class="detalle-usuario-header">
-    <button nz-button nzType="text" [routerLink]="['/admin/usuarios']" class="btn-volver">
-      <i nz-icon nzType="arrow-left"></i>
-      Volver a la lista
-    </button>
-    <div class="header-title-actions">
-      <div>
-        <h1>Detalle del Usuario</h1>
-        <p>Información completa del usuario</p>
-      </div>
-      <div class="header-buttons">
-        <button nz-button nzType="default" [routerLink]="['/admin/usuarios', usuarioId, 'editar']">
-          <i nz-icon nzType="edit"></i>
-          Editar
-        </button>
-        <button nz-button nzType="primary" nzDanger (click)="eliminarUsuario()">
-          <i nz-icon nzType="delete"></i>
-          Eliminar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div nz-row [nzGutter]="24" *ngIf="!loading">
-    <!-- Información Principal -->
-    <div nz-col [nzSpan]="16">
-      <!-- Datos Personales -->
-      <nz-card nzTitle="Información Personal" [nzBordered]="false" class="info-card">
-        <div class="usuario-header-card">
-          <div class="usuario-avatar-large">
-            {{ usuario.nombre.charAt(0).toUpperCase() }}{{ usuario.apellido.charAt(0).toUpperCase() }}
-          </div>
-          <div class="usuario-info-principal">
-            <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
-            <div class="info-badges">
-              <nz-tag [nzColor]="getRolColor(usuario.rol)">
-                {{ getRolTexto(usuario.rol) }}
-              </nz-tag>
-              <nz-tag [nzColor]="usuario.activo ? 'green' : 'red'">
-                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
-              </nz-tag>
-            </div>
-          </div>
-        </div>
-
-        <nz-divider></nz-divider>
-
-        <nz-descriptions [nzColumn]="2" nzBordered>
-          <nz-descriptions-item nzTitle="ID de Usuario">
-            <span class="info-value">{{ usuario.id }}</span>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Documento">
-            <span class="info-value">{{ usuario.documento }}</span>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Correo Electrónico">
-            <span class="info-value">{{ usuario.correo }}</span>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Teléfono">
-            <span class="info-value">{{ usuario.telefono }}</span>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Fecha de Registro">
-            {{ formatearFechaCompleta(usuario.fechaRegistro) }}
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Último Acceso">
-            {{ formatearFechaCompleta(usuario.ultimoAcceso) }}
-          </nz-descriptions-item>
-        </nz-descriptions>
-      </nz-card>
-
-      <!-- Información Específica por Rol -->
-      <nz-card
-        *ngIf="usuario.rol === 'referente'"
-        nzTitle="Información de Referente"
-        [nzBordered]="false"
-        class="info-card">
-
-        <nz-descriptions [nzColumn]="2" nzBordered>
-          <nz-descriptions-item nzTitle="Código de Referido">
-            <div class="codigo-display-detalle">
-              <span class="codigo-value">{{ infoReferente.codigoReferido }}</span>
-              <button nz-button nzType="text" nzSize="small" (click)="copiarCodigo()">
-                <i nz-icon nzType="copy"></i>
-              </button>
-            </div>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Asesor Asignado">
-            {{ infoReferente.asesorAsignado || 'Sin asignar' }}
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Total Referidos">
-            <strong>{{ infoReferente.totalReferidos }}</strong>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Referidos Activos">
-            <strong style="color: #52c41a;">{{ infoReferente.referidosActivos }}</strong>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Comisiones Acumuladas">
-            <strong style="color: #4A90E2;">
-              {{ infoReferente.comisionesAcumuladas | currency:'COP':'symbol-narrow':'1.0-0' }}
-            </strong>
-          </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Nivel Actual">
-            <nz-tag nzColor="gold">{{ infoReferente.nivelActual }}</nz-tag>
-          </nz-descriptions-item>
-        </nz-descriptions>
-      </nz-card>
-
-      <!-- Actividad Reciente -->
-      <nz-card nzTitle="Actividad Reciente" [nzBordered]="false" class="info-card">
-        <nz-timeline>
-          <nz-timeline-item
-            *ngFor="let actividad of actividadReciente"
-            [nzColor]="actividad.color">
-            <div class="timeline-item-content">
-              <div class="timeline-header">
-                <span class="timeline-accion">{{ actividad.accion }}</span>
-                <span class="timeline-fecha">{{ formatearFechaRelativa(actividad.fecha) }}</span>
-              </div>
-              <p class="timeline-descripcion">{{ actividad.descripcion }}</p>
-            </div>
-          </nz-timeline-item>
-        </nz-timeline>
-
-        <div class="ver-mas" *ngIf="actividadReciente.length > 0">
-          <button nz-button nzType="link" nzSize="small">
-            Ver historial completo
-          </button>
-        </div>
-      </nz-card>
-    </div>
-
-    <!-- Sidebar -->
-    <div nz-col [nzSpan]="8">
-      <!-- Estadísticas Rápidas -->
-      <nz-card nzTitle="Estadísticas" [nzBordered]="false" class="stats-sidebar-card">
-        <div class="stat-sidebar-item">
-          <div class="stat-sidebar-icon login">
-            <i nz-icon nzType="login"></i>
-          </div>
-          <div class="stat-sidebar-content">
-            <span class="stat-sidebar-label">Total Inicios de Sesión</span>
-            <span class="stat-sidebar-value">{{ estadisticas.totalLogins }}</span>
-          </div>
-        </div>
-
-        <nz-divider></nz-divider>
-
-        <div class="stat-sidebar-item">
-          <div class="stat-sidebar-icon tiempo">
-            <i nz-icon nzType="clock-circle"></i>
-          </div>
-          <div class="stat-sidebar-content">
-            <span class="stat-sidebar-label">Días en el Sistema</span>
-            <span class="stat-sidebar-value">{{ estadisticas.diasRegistrado }}</span>
-          </div>
-        </div>
-
-        <nz-divider></nz-divider>
-
-        <div class="stat-sidebar-item">
-          <div class="stat-sidebar-icon actividad">
-            <i nz-icon nzType="thunderbolt"></i>
-          </div>
-          <div class="stat-sidebar-content">
-            <span class="stat-sidebar-label">Acciones Realizadas</span>
-            <span class="stat-sidebar-value">{{ estadisticas.accionesRealizadas }}</span>
-          </div>
-        </div>
-      </nz-card>
-
-      <!-- Acciones Rápidas -->
-      <nz-card nzTitle="Acciones" [nzBordered]="false" class="acciones-card">
-        <button nz-button nzType="default" nzBlock (click)="enviarNotificacion()">
-          <i nz-icon nzType="mail"></i>
-          Enviar Notificación
-        </button>
-
-        <button nz-button nzType="default" nzBlock (click)="resetearContrasena()">
-          <i nz-icon nzType="lock"></i>
-          Resetear Contraseña
-        </button>
-
-        <button nz-button nzType="default" nzBlock (click)="verHistorial()">
-          <i nz-icon nzType="history"></i>
-          Ver Historial Completo
-        </button>
-
-        <nz-divider></nz-divider>
-
-        <button
-          nz-button
-          [nzType]="usuario.activo ? 'default' : 'primary'"
-          nzBlock
-          nzDanger
-          (click)="toggleEstadoUsuario()">
-          <i nz-icon [nzType]="usuario.activo ? 'stop' : 'check-circle'"></i>
-          {{ usuario.activo ? 'Desactivar Usuario' : 'Activar Usuario' }}
-        </button>
-      </nz-card>
-
-      <!-- Notas del Administrador -->
-      <nz-card nzTitle="Notas" [nzBordered]="false" class="notas-card">
-        <textarea
-          nz-input
-          [(ngModel)]="notas"
-          placeholder="Agrega notas sobre este usuario..."
-          [nzAutosize]="{ minRows: 4, maxRows: 8 }">
-        </textarea>
-        <button
-          nz-button
-          nzType="primary"
-          nzBlock
-          (click)="guardarNotas()"
-          [disabled]="!notas"
-          style="margin-top: 12px;">
-          <i nz-icon nzType="save"></i>
-          Guardar Notas
-        </button>
-      </nz-card>
-    </div>
-  </div>
-
   <!-- Loading State -->
   <div class="loading-container" *ngIf="loading">
     <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+    <p style="margin-top: 16px; color: #7f8c8d;">Cargando datos del usuario...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && usuario">
+    <div class="detalle-usuario-header">
+      <button nz-button nzType="text" [routerLink]="['/admin/usuarios']" class="btn-volver">
+        <i nz-icon nzType="arrow-left"></i>
+        Volver a la lista
+      </button>
+      <div class="header-title-actions">
+        <div>
+          <h1>Detalle del Usuario</h1>
+          <p>Información completa del usuario</p>
+        </div>
+        <div class="header-buttons">
+          <button nz-button nzType="default" [routerLink]="['/admin/usuarios', usuarioId, 'editar']">
+            <i nz-icon nzType="edit"></i>
+            Editar
+          </button>
+          <button nz-button nzType="primary" nzDanger (click)="eliminarUsuario()">
+            <i nz-icon nzType="delete"></i>
+            Desactivar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="24">
+      <!-- Información Principal -->
+      <div nz-col [nzSpan]="16">
+        <!-- Datos Personales -->
+        <nz-card nzTitle="Información Personal" [nzBordered]="false" class="info-card">
+          <div class="usuario-header-card">
+            <div class="usuario-avatar-large">
+              {{ obtenerIniciales() }}
+            </div>
+            <div class="usuario-info-principal">
+              <h2>{{ obtenerNombreCompleto() }}</h2>
+              <div class="info-badges">
+                <nz-tag [nzColor]="getRolColor()">
+                  {{ getRolTexto() }}
+                </nz-tag>
+                <nz-tag [nzColor]="estaActivo() ? 'green' : 'red'">
+                  {{ estaActivo() ? 'Activo' : 'Inactivo' }}
+                </nz-tag>
+              </div>
+            </div>
+          </div>
+
+          <nz-divider></nz-divider>
+
+          <nz-descriptions [nzColumn]="2" nzBordered>
+            <nz-descriptions-item nzTitle="ID de Usuario">
+              <span class="info-value">{{ usuario.id_usuario }}</span>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Documento">
+              <span class="info-value">{{ usuario.numero_documento }}</span>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Correo Electrónico">
+              <span class="info-value">{{ usuario.correo_electronico }}</span>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Teléfono">
+              <span class="info-value">{{ usuario.telefono || 'No registrado' }}</span>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Tipo de Documento">
+              {{ usuario.tipoDocumento?.nombre_tipo || 'No especificado' }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Fecha de Registro">
+              {{ formatearFechaCompleta(usuario.fecha_registro) }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Roles Asignados" [nzSpan]="2">
+              <!-- <nz-tag
+                *ngFor="let rol of usuario.roles"
+                [nzColor]="getRolColor(rol.codigo_rol)"
+                style="margin-right: 8px;">
+                {{ getRolTexto(rol.codigo_rol) }}
+              </nz-tag> -->
+              <span *ngIf="!usuario.roles || usuario.roles.length === 0" style="color: #7f8c8d;">
+                Sin roles asignados
+              </span>
+            </nz-descriptions-item>
+          </nz-descriptions>
+        </nz-card>
+
+        <!-- Información Específica por Rol - Referente -->
+        <nz-card
+          *ngIf="usuario.referente"
+          nzTitle="Información de Referente"
+          [nzBordered]="false"
+          class="info-card">
+
+          <nz-descriptions [nzColumn]="2" nzBordered>
+            <nz-descriptions-item nzTitle="Código de Referido">
+              <div class="codigo-display-detalle">
+                <span class="codigo-value">{{ usuario.referente.codigo_referente }}</span>
+                <button nz-button nzType="text" nzSize="small" (click)="copiarCodigo()">
+                  <i nz-icon nzType="copy"></i>
+                </button>
+              </div>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Tipo de Referente">
+              <nz-tag [nzColor]="usuario.referente.tipo_referente === 'cliente_externo' ? 'blue' : 'green'">
+                {{ usuario.referente.tipo_referente === 'cliente_externo' ? 'Cliente Externo' : 'Colaborador Interno' }}
+              </nz-tag>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Puntos Actuales">
+              <strong style="font-size: 16px; color: #faad14;">{{ usuario.referente.puntos_actuales }}</strong>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Puntos Totales Histórico">
+              <strong>{{ usuario.referente.puntos_totales_historico }}</strong>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Saldo Disponible">
+              <strong style="color: #52c41a; font-size: 16px;">
+                {{ usuario.referente.saldo_disponible | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </strong>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Comisiones Históricas">
+              <strong style="color: #4A90E2;">
+                {{ usuario.referente.total_comisiones_historico | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </strong>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Total Retirado">
+              {{ usuario.referente.total_retirado | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Estado del Referente">
+              <nz-tag [nzColor]="usuario.referente.estado_referente === 'activo' ? 'green' : 'red'">
+                {{ usuario.referente.estado_referente === 'activo' ? 'Activo' : 'Inactivo' }}
+              </nz-tag>
+            </nz-descriptions-item>
+            <nz-descriptions-item nzTitle="Última Actividad" [nzSpan]="2" *ngIf="usuario.referente.fecha_ultima_actividad">
+              {{ formatearFechaCompleta(usuario.referente.fecha_ultima_actividad) }}
+            </nz-descriptions-item>
+          </nz-descriptions>
+        </nz-card>
+
+        <!-- Actividad Reciente -->
+        <nz-card nzTitle="Actividad Reciente" [nzBordered]="false" class="info-card">
+          <nz-timeline>
+            <nz-timeline-item
+              *ngFor="let actividad of actividadReciente"
+              [nzColor]="actividad.color">
+              <div class="timeline-item-content">
+                <div class="timeline-header">
+                  <span class="timeline-accion">{{ actividad.accion }}</span>
+                  <span class="timeline-fecha">{{ formatearFechaRelativa(actividad.fecha) }}</span>
+                </div>
+                <p class="timeline-descripcion">{{ actividad.descripcion }}</p>
+              </div>
+            </nz-timeline-item>
+          </nz-timeline>
+
+          <div class="ver-mas" *ngIf="actividadReciente.length > 0">
+            <button nz-button nzType="link" nzSize="small" (click)="verHistorial()">
+              Ver historial completo
+            </button>
+          </div>
+
+          <div *ngIf="actividadReciente.length === 0" style="text-align: center; padding: 40px 20px; color: #7f8c8d;">
+            <i nz-icon nzType="inbox" style="font-size: 48px; margin-bottom: 12px; display: block;"></i>
+            <p>No hay actividad registrada</p>
+          </div>
+        </nz-card>
+      </div>
+
+      <!-- Sidebar -->
+      <div nz-col [nzSpan]="8">
+        <!-- Estadísticas Rápidas -->
+        <nz-card nzTitle="Estadísticas" [nzBordered]="false" class="stats-sidebar-card">
+          <div class="stat-sidebar-item">
+            <div class="stat-sidebar-icon login">
+              <i nz-icon nzType="login"></i>
+            </div>
+            <div class="stat-sidebar-content">
+              <span class="stat-sidebar-label">Total Inicios de Sesión</span>
+              <span class="stat-sidebar-value">{{ estadisticas.totalLogins }}</span>
+            </div>
+          </div>
+
+          <nz-divider></nz-divider>
+
+          <div class="stat-sidebar-item">
+            <div class="stat-sidebar-icon tiempo">
+              <i nz-icon nzType="clock-circle"></i>
+            </div>
+            <div class="stat-sidebar-content">
+              <span class="stat-sidebar-label">Días en el Sistema</span>
+              <span class="stat-sidebar-value">{{ estadisticas.diasRegistrado }}</span>
+            </div>
+          </div>
+
+          <nz-divider></nz-divider>
+
+          <div class="stat-sidebar-item">
+            <div class="stat-sidebar-icon actividad">
+              <i nz-icon nzType="thunderbolt"></i>
+            </div>
+            <div class="stat-sidebar-content">
+              <span class="stat-sidebar-label">Acciones Realizadas</span>
+              <span class="stat-sidebar-value">{{ estadisticas.accionesRealizadas }}</span>
+            </div>
+          </div>
+        </nz-card>
+
+        <!-- Acciones Rápidas -->
+        <nz-card nzTitle="Acciones" [nzBordered]="false" class="acciones-card">
+          <button nz-button nzType="default" nzBlock (click)="enviarNotificacion()">
+            <i nz-icon nzType="mail"></i>
+            Enviar Notificación
+          </button>
+
+          <button nz-button nzType="default" nzBlock (click)="resetearContrasena()">
+            <i nz-icon nzType="lock"></i>
+            Resetear Contraseña
+          </button>
+
+          <button nz-button nzType="default" nzBlock (click)="verHistorial()">
+            <i nz-icon nzType="history"></i>
+            Ver Historial Completo
+          </button>
+
+          <nz-divider></nz-divider>
+
+          <button
+            nz-button
+            [nzType]="estaActivo() ? 'default' : 'primary'"
+            nzBlock
+            nzDanger
+            (click)="toggleEstadoUsuario()">
+            <i nz-icon [nzType]="estaActivo() ? 'stop' : 'check-circle'"></i>
+            {{ estaActivo() ? 'Desactivar Usuario' : 'Activar Usuario' }}
+          </button>
+        </nz-card>
+
+        <!-- Notas del Administrador -->
+        <nz-card nzTitle="Notas" [nzBordered]="false" class="notas-card">
+          <textarea
+            nz-input
+            [(ngModel)]="notas"
+            placeholder="Agrega notas sobre este usuario..."
+            [nzAutosize]="{ minRows: 4, maxRows: 8 }">
+          </textarea>
+          <button
+            nz-button
+            nzType="primary"
+            nzBlock
+            (click)="guardarNotas()"
+            [disabled]="!notas"
+            style="margin-top: 12px;">
+            <i nz-icon nzType="save"></i>
+            Guardar Notas
+          </button>
+        </nz-card>
+      </div>
+    </div>
   </div>
 </div>

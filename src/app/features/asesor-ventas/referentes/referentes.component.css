@@ -1,32 +1,8 @@
 .referentes-container {
-  max-width: 1600px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
-}
-
-.referentes-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-  gap: 24px;
-}
-
-.header-content h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin: 0 0 8px 0;
-}
-
-.header-content p {
-  font-size: 16px;
-  color: var(--text-light);
-  margin: 0;
-}
-
-.search-input {
-  width: 350px;
+  min-height: 100%;
 }
 
 /* Estadísticas generales */
@@ -36,8 +12,13 @@
 
 .estadisticas-card {
   border-radius: 16px !important;
-  box-shadow: var(--shadow-light) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   border: none !important;
+  background: white !important;
+}
+
+.estadisticas-card ::ng-deep .ant-card-body {
+  padding: 24px !important;
 }
 
 .stats-grid {
@@ -52,7 +33,13 @@
   gap: 16px;
   padding: 20px;
   background: #f8f9fa;
-  border-radius: var(--border-radius);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .stat-icon {
@@ -67,22 +54,22 @@
 }
 
 .stat-icon.referentes {
-  background: rgba(74, 144, 226, 0.1);
+  background: rgba(74, 144, 226, 0.15);
   color: #4A90E2;
 }
 
 .stat-icon.referidos {
-  background: rgba(82, 196, 26, 0.1);
+  background: rgba(82, 196, 26, 0.15);
   color: #52c41a;
 }
 
 .stat-icon.conversiones {
-  background: rgba(24, 144, 255, 0.1);
+  background: rgba(24, 144, 255, 0.15);
   color: #1890ff;
 }
 
 .stat-icon.comisiones {
-  background: rgba(250, 140, 22, 0.1);
+  background: rgba(250, 140, 22, 0.15);
   color: #fa8c16;
 }
 
@@ -94,33 +81,122 @@
   font-size: 14px;
   color: var(--text-light);
   margin-bottom: 4px;
+  font-weight: 600;
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 700;
   color: var(--text-dark);
+  line-height: 1;
 }
 
-/* Filtros */
+/* Sección de filtros */
 .filtros-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 24px;
-  gap: 16px;
-  flex-wrap: wrap;
 }
 
+.filtros-card {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border: none !important;
+  background: white !important;
+}
+
+.filtros-card ::ng-deep .ant-card-body {
+  padding: 20px 24px !important;
+}
+
+.filtros-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Segmented control */
+.filtros-row ::ng-deep .ant-segmented {
+  background: #f8f9fa;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.filtros-row ::ng-deep .ant-segmented-item {
+  border-radius: 8px !important;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.filtros-row ::ng-deep .ant-segmented-item-selected {
+  background: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* Input de búsqueda */
+.search-input {
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-input ::ng-deep .ant-input-group {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.search-input ::ng-deep .ant-input-affix-wrapper {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  height: 40px !important;
+  box-shadow: none !important;
+}
+
+.search-input ::ng-deep .ant-input-affix-wrapper:hover,
+.search-input ::ng-deep .ant-input-affix-wrapper:focus,
+.search-input ::ng-deep .ant-input-affix-wrapper-focused {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1) !important;
+}
+
+.search-input ::ng-deep .ant-input {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.search-input ::ng-deep .ant-input-prefix {
+  margin-right: 8px;
+  color: #8c8c8c;
+}
+
+/* Select de ordenar */
 .ordenar-select {
   min-width: 220px;
+}
+
+.ordenar-select ::ng-deep .ant-select-selector {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #e5e7eb !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.ordenar-select ::ng-deep .ant-select-selector:hover {
+  border-color: var(--primary-color) !important;
 }
 
 /* Grid de referentes */
 .tabla-card {
   border-radius: 16px !important;
-  box-shadow: var(--shadow-light) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   border: none !important;
+  background: white !important;
+}
+
+.tabla-card ::ng-deep .ant-card-body {
+  padding: 24px !important;
 }
 
 .referentes-grid {
@@ -208,7 +284,7 @@
 }
 
 .contacto-item i {
-  color: var(--text-light);
+  color: var(--primary-color);
   width: 14px;
 }
 
@@ -234,7 +310,7 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: rgba(74, 144, 226, 0.1);
+  background: rgba(74, 144, 226, 0.15);
   color: var(--primary-color);
   display: flex;
   align-items: center;
@@ -244,12 +320,12 @@
 }
 
 .metrica-icon.success {
-  background: rgba(82, 196, 26, 0.1);
+  background: rgba(82, 196, 26, 0.15);
   color: #52c41a;
 }
 
 .metrica-icon.warning {
-  background: rgba(250, 173, 20, 0.1);
+  background: rgba(250, 173, 20, 0.15);
   color: #faad14;
 }
 
@@ -264,6 +340,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 600;
 }
 
 .metrica-valor {
@@ -301,6 +378,11 @@
   gap: 6px;
   font-size: 13px;
   color: var(--text-light);
+  font-weight: 600;
+}
+
+.financiero-label i {
+  color: var(--text-light);
 }
 
 .financiero-valor {
@@ -333,11 +415,16 @@
   margin-bottom: 8px;
   font-size: 13px;
   color: var(--text-light);
+  font-weight: 600;
 }
 
 .conversion-header strong {
   color: var(--text-dark);
   font-size: 14px;
+}
+
+::ng-deep .conversion-section .ant-progress-bg {
+  border-radius: 4px;
 }
 
 /* Footer */
@@ -348,7 +435,15 @@
 
 .referente-footer button {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
+  height: 36px !important;
+  font-weight: 600 !important;
+  border-radius: var(--border-radius) !important;
+}
+
+.referente-footer button:hover {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
 }
 
 /* Estados vacío y loading */
@@ -400,6 +495,12 @@
   margin-bottom: 24px;
 }
 
+.detalle-descriptions ::ng-deep .ant-descriptions-bordered .ant-descriptions-item-label {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
 .modal-metricas h4 {
   font-size: 16px;
   font-weight: 600;
@@ -421,10 +522,19 @@
   border-top: 1px solid #f0f0f0;
 }
 
+.modal-acciones button {
+  border-radius: var(--border-radius) !important;
+  font-weight: 600 !important;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .referentes-grid {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -433,29 +543,26 @@
     padding: 16px;
   }
 
-  .referentes-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-input {
-    width: 100%;
-  }
-
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .referentes-grid {
     grid-template-columns: 1fr;
   }
 
-  .filtros-section {
+  .filtros-row {
     flex-direction: column;
     align-items: stretch;
   }
 
+  .search-input,
   .ordenar-select {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .filtros-row ::ng-deep .ant-segmented {
     width: 100%;
   }
 
@@ -473,10 +580,6 @@
 }
 
 @media (max-width: 480px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
   .referente-metricas {
     flex-direction: column;
   }
@@ -485,6 +588,7 @@
 /* Variables CSS */
 :root {
   --primary-color: #4A90E2;
+  --primary-dark: #357ABD;
   --text-dark: #2c3e50;
   --text-light: #7f8c8d;
   --border-radius: 8px;

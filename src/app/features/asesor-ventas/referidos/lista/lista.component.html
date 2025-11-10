@@ -1,277 +1,299 @@
 <div class="lista-container">
-  <div class="lista-header">
-    <div class="header-content">
-      <h1>Gestión de Referidos</h1>
-      <p>Administra y realiza seguimiento a todos los referidos</p>
-    </div>
-    <div class="header-actions">
-      <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
-        <input
-          type="text"
-          nz-input
-          placeholder="Buscar por nombre, documento o email"
-          [(ngModel)]="searchText"
-          (ngModelChange)="filtrarReferidos()" />
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="search"></i>
-      </ng-template>
-    </div>
-  </div>
-
-  <div class="filtros-section">
-    <nz-card [nzBordered]="false" class="filtros-card">
-      <div class="filtros-content">
-        <div class="filtro-item">
-          <label>Estado:</label>
-          <nz-select
-            [(ngModel)]="filtroEstado"
-            (ngModelChange)="filtrarReferidos()"
-            nzPlaceHolder="Todos los estados"
-            class="filtro-select">
-            <nz-option nzValue="" nzLabel="Todos"></nz-option>
-            <nz-option nzValue="pendiente" nzLabel="Pendiente"></nz-option>
-            <nz-option nzValue="contactado" nzLabel="Contactado"></nz-option>
-            <nz-option nzValue="activo" nzLabel="Activo"></nz-option>
-            <nz-option nzValue="rechazado" nzLabel="Rechazado"></nz-option>
-          </nz-select>
+  <!-- Estadísticas -->
+  <div class="estadisticas-section">
+    <nz-card [nzBordered]="false" class="estadisticas-card">
+      <div class="stats-grid">
+        <div
+          class="stat-box"
+          (click)="filtrarPorEstado('')"
+          [class.active]="filtroEstado === ''"
+        >
+          <div class="stat-icon total">
+            <i nz-icon nzType="team"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Referidos</div>
+            <div class="stat-value">{{ totalGeneral }}</div>
+          </div>
         </div>
 
-        <div class="filtro-item">
-          <label>Referente:</label>
-          <nz-select
-            [(ngModel)]="filtroReferente"
-            (ngModelChange)="filtrarReferidos()"
-            nzPlaceHolder="Todos los referentes"
-            nzShowSearch
-            class="filtro-select">
-            <nz-option nzValue="" nzLabel="Todos"></nz-option>
-            <nz-option
-              *ngFor="let ref of referentesUnicos"
-              [nzValue]="ref.codigo"
-              [nzLabel]="ref.nombre">
-            </nz-option>
-          </nz-select>
+        <div
+          class="stat-box"
+          (click)="filtrarPorEstado('pendiente')"
+          [class.active]="filtroEstado === 'pendiente'"
+        >
+          <div class="stat-icon pendientes">
+            <i nz-icon nzType="clock-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Pendientes</div>
+            <div class="stat-value">{{ estadisticas.pendientes }}</div>
+          </div>
         </div>
 
-        <div class="filtro-item">
-          <label>Plan:</label>
-          <nz-select
-            [(ngModel)]="filtroPlan"
-            (ngModelChange)="filtrarReferidos()"
-            nzPlaceHolder="Todos los planes"
-            class="filtro-select">
-            <nz-option nzValue="" nzLabel="Todos"></nz-option>
-            <nz-option nzValue="sin-plan" nzLabel="Sin plan asignado"></nz-option>
-            <nz-option nzValue="basico" nzLabel="Plan Básico"></nz-option>
-            <nz-option nzValue="profesional" nzLabel="Plan Profesional"></nz-option>
-            <nz-option nzValue="empresarial" nzLabel="Plan Empresarial"></nz-option>
-          </nz-select>
+        <div
+          class="stat-box"
+          (click)="filtrarPorEstado('contactado')"
+          [class.active]="filtroEstado === 'contactado'"
+        >
+          <div class="stat-icon contactados">
+            <i nz-icon nzType="phone"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Contactados</div>
+            <div class="stat-value">{{ estadisticas.contactados }}</div>
+          </div>
         </div>
 
-        <button
-          nz-button
-          nzType="default"
-          (click)="limpiarFiltros()"
-          class="limpiar-btn">
-          <i nz-icon nzType="clear"></i>
-          Limpiar filtros
-        </button>
-      </div>
-
-      <div class="estadisticas-rapidas">
-        <div class="stat-item">
-          <span class="stat-label">Total Referidos:</span>
-          <span class="stat-value">{{ referidosFiltrados.length }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Pendientes:</span>
-          <span class="stat-value pendiente">{{ contarPorEstado('pendiente') }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Contactados:</span>
-          <span class="stat-value contactado">{{ contarPorEstado('contactado') }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Activos:</span>
-          <span class="stat-value activo">{{ contarPorEstado('activo') }}</span>
+        <div
+          class="stat-box"
+          (click)="filtrarPorEstado('activo')"
+          [class.active]="filtroEstado === 'activo'"
+        >
+          <div class="stat-icon convertidos">
+            <i nz-icon nzType="check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Convertidos</div>
+            <div class="stat-value">{{ estadisticas.activos }}</div>
+          </div>
         </div>
       </div>
     </nz-card>
   </div>
 
-  <nz-card class="tabla-card" [nzBordered]="false">
-    <nz-table
-      #basicTable
-      [nzData]="referidosFiltrados"
-      [nzLoading]="loading"
-      nzSize="middle"
-      [nzScroll]="{ x: '1200px' }"
-      [nzPageSize]="10"
-      class="referidos-table">
+  <!-- Filtros -->
+  <nz-card class="filters-card">
+    <div class="filters-row">
+      <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
+        <input
+          nz-input
+          placeholder="Buscar por nombre, correo, documento..."
+          [(ngModel)]="searchText"
+          (keyup.enter)="aplicarFiltros()"
+        />
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="search"></i>
+      </ng-template>
 
+      <nz-select
+        [(ngModel)]="filtroEstado"
+        nzPlaceHolder="Filtrar por estado"
+        nzAllowClear
+        (ngModelChange)="aplicarFiltros()"
+        class="filter-select"
+      >
+        <nz-option nzValue="pendiente" nzLabel="Pendiente"></nz-option>
+        <nz-option nzValue="contactado" nzLabel="Contactado"></nz-option>
+        <nz-option nzValue="activo" nzLabel="Activo"></nz-option>
+        <nz-option nzValue="no_interesado" nzLabel="No Interesado"></nz-option>
+        <nz-option nzValue="inactivo" nzLabel="Inactivo"></nz-option>
+      </nz-select>
+
+      <button nz-button nzType="default" (click)="limpiarFiltros()">
+        <i nz-icon nzType="clear"></i>
+        Limpiar
+      </button>
+
+      <button nz-button nzType="primary" (click)="aplicarFiltros()">
+        <i nz-icon nzType="search"></i>
+        Buscar
+      </button>
+    </div>
+  </nz-card>
+
+  <!-- Tabla -->
+  <nz-card class="table-card">
+    <nz-table
+      #referidosTable
+      [nzData]="referidos"
+      [nzLoading]="loading"
+      [nzTotal]="total"
+      [nzPageSize]="pageSize"
+      [nzPageIndex]="pageIndex"
+      [nzFrontPagination]="false"
+      (nzPageIndexChange)="onPageChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzShowSizeChanger]="true"
+      [nzPageSizeOptions]="[10, 20, 50, 100]"
+      nzSize="middle"
+    >
       <thead>
         <tr>
-          <th nzWidth="250px">Referido</th>
-          <th nzWidth="160px">Referente</th>
-          <th nzWidth="220px">Contacto</th>
-          <th nzWidth="130px">Documento</th>
-          <th nzWidth="110px">Estado</th>
-          <th nzWidth="130px">Plan</th>
-          <th nzWidth="120px">Fecha Registro</th>
-          <th nzWidth="100px">Puntos</th>
-          <th nzWidth="150px" nzRight>Acciones</th>
+          <th>Referido</th>
+          <th>Contacto</th>
+          <th>Documento</th>
+          <th>Referente</th>
+          <th>Estado</th>
+          <th>Plan</th>
+          <th>Fecha Registro</th>
+          <th nzWidth="120px" nzAlign="center">Acciones</th>
         </tr>
       </thead>
-
       <tbody>
-        <tr *ngFor="let referido of basicTable.data">
-          <td>
-            <div class="referido-info">
-              <div class="referido-avatar">
-                {{ referido.nombre.charAt(0).toUpperCase() }}
+        <ng-container *ngFor="let referido of referidosTable.data">
+          <tr>
+            <td>
+              <div class="referido-info">
+                <strong>{{ getNombreCompleto(referido) }}</strong>
+                <small *ngIf="referido.empresa_referido">{{
+                  referido.empresa_referido
+                }}</small>
               </div>
-              <div class="referido-datos">
-                <div class="referido-nombre">{{ referido.nombre }}</div>
-                <div class="referido-id">ID: {{ referido.id }}</div>
+            </td>
+            <td>
+              <div class="contacto-info">
+                <div>
+                  <i nz-icon nzType="mail"></i>
+                  {{ referido.correo_referido }}
+                </div>
+                <div *ngIf="referido.telefono_referido">
+                  <i nz-icon nzType="phone"></i>
+                  {{ referido.telefono_referido }}
+                </div>
               </div>
-            </div>
-          </td>
-
-          <td>
-            <div class="referente-info">
-              <div class="referente-nombre">{{ referido.referenteNombre }}</div>
-              <div class="referente-codigo">{{ referido.referenteCodigo }}</div>
-            </div>
-          </td>
-
-          <td>
-            <div class="contacto-info">
-              <div class="contacto-item">
-                <i nz-icon nzType="mail"></i>
-                <span>{{ referido.correo }}</span>
-              </div>
-              <div class="contacto-item">
-                <i nz-icon nzType="phone"></i>
-                <span>{{ referido.telefono }}</span>
-              </div>
-            </div>
-          </td>
-
-          <td>
-            <div class="documento-info">
-              <span class="tipo-doc">{{ referido.tipoDoc }}</span>
-              <span class="numero-doc">{{ referido.documento }}</span>
-            </div>
-          </td>
-
-          <td>
-            <nz-tag [nzColor]="getEstadoColor(referido.estado)">
-              {{ getEstadoTexto(referido.estado) }}
-            </nz-tag>
-          </td>
-
-          <td>
-            <div class="plan-info" *ngIf="referido.plan; else sinPlan">
-              <span class="plan-nombre">{{ referido.plan }}</span>
-              <span class="plan-valor" *ngIf="referido.valorPlan">
-                {{ referido.valorPlan | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </td>
+            <td>
+              <span *ngIf="referido.tipoDocumento">
+                {{ referido.tipoDocumento.codigo_tipo }}
               </span>
-            </div>
-            <ng-template #sinPlan>
-              <span class="sin-plan">Sin plan asignado</span>
-            </ng-template>
-          </td>
-
-          <td>
-            <div class="fechas-info">
-              <div class="fecha-item">
-                <i nz-icon nzType="calendar"></i>
-                <span>{{ formatearFecha(referido.fechaRegistro) }}</span>
+              {{ referido.numero_documento_referido }}
+            </td>
+            <td>
+              <div class="referente-info" *ngIf="referido.referente">
+                <strong>{{ getCodigoReferente(referido) }}</strong>
+                <small>{{ getNombreReferente(referido) }}</small>
               </div>
-              <div class="fecha-item" *ngIf="referido.fechaContacto">
-                <i nz-icon nzType="phone"></i>
-                <span>{{ formatearFecha(referido.fechaContacto) }}</span>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getEstadoColor(referido.estado_referido)">
+                {{ getEstadoTexto(referido.estado_referido) }}
+              </nz-tag>
+            </td>
+            <td>
+              <span *ngIf="referido.plan">
+                {{ referido.plan.nombre_plan }}
+              </span>
+              <span *ngIf="!referido.plan" style="color: #8c8c8c">
+                Sin plan
+              </span>
+            </td>
+            <td>{{ formatearFecha(referido.fecha_referencia) }}</td>
+            <td nzAlign="center">
+              <div class="action-buttons">
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="toggleDetalle(referido)"
+                  nz-tooltip="Ver detalles"
+                >
+                  <i nz-icon nzType="eye"></i>
+                </button>
+
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="editarReferido(referido)"
+                  nz-tooltip="Actualizar"
+                >
+                  <i nz-icon nzType="edit"></i>
+                </button>
               </div>
-            </div>
-          </td>
+            </td>
+          </tr>
 
-          <td>
-            <div class="puntos-info" *ngIf="referido.puntos; else sinPuntos">
-              <i nz-icon nzType="trophy"></i>
-              <span>{{ referido.puntos }}</span>
-            </div>
-            <ng-template #sinPuntos>
-              <span class="sin-puntos">-</span>
-            </ng-template>
-          </td>
-
-          <td nzRight>
-            <nz-space nzSize="small">
-              <button
-                *nzSpaceItem
-                nz-button
-                nzType="primary"
-                nzSize="small"
-                (click)="editarReferido(referido)"
-                nz-tooltip="Actualizar estado">
-                <i nz-icon nzType="edit"></i>
-              </button>
-
-              <button
-                *nzSpaceItem
-                nz-button
-                nzType="default"
-                nzSize="small"
-                (click)="verDetalle(referido)"
-                nz-tooltip="Ver detalles">
-                <i nz-icon nzType="eye"></i>
-              </button>
-
-              <button
-                *nzSpaceItem
-                nz-button
-                nzType="default"
-                nzSize="small"
-                nz-dropdown="menu"
-                nzTrigger="click">
-                <i nz-icon nzType="more"></i>
-              </button>
-
-              <nz-dropdown-menu #menu="nzDropdownMenu">
-                <ul nz-menu>
-                  <li nz-menu-item (click)="llamarReferido(referido)">
-                    <i nz-icon nzType="phone"></i>
-                    Llamar
-                  </li>
-                  <li nz-menu-item (click)="enviarEmail(referido)">
-                    <i nz-icon nzType="mail"></i>
-                    Enviar email
-                  </li>
-                  <li nz-menu-divider></li>
-                  <li nz-menu-item (click)="verHistorial(referido)">
-                    <i nz-icon nzType="history"></i>
-                    Ver historial
-                  </li>
-                </ul>
-              </nz-dropdown-menu>
-            </nz-space>
-          </td>
-        </tr>
+          <!-- Fila de detalle expandida -->
+          <tr *ngIf="isExpanded(referido)" class="detalle-row">
+            <td colspan="8" class="detalle-cell">
+              <div class="detalle-container">
+                <nz-descriptions
+                  nzTitle="Información Completa"
+                  nzBordered
+                  [nzColumn]="2"
+                  nzSize="small"
+                >
+                  <nz-descriptions-item nzTitle="Nombre Completo" [nzSpan]="2">
+                    {{ referido.nombre_referido }}
+                    {{ referido.apellido_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Correo Electrónico">
+                    <a [href]="'mailto:' + referido.correo_referido">{{
+                      referido.correo_referido
+                    }}</a>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Teléfono">
+                    <a [href]="'tel:' + referido.telefono_referido">{{
+                      referido.telefono_referido
+                    }}</a>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Tipo de Documento">
+                    {{ referido.tipoDocumento?.nombre_tipo || "N/A" }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Número de Documento">
+                    {{ referido.numero_documento_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item
+                    nzTitle="Empresa"
+                    *ngIf="referido.empresa_referido"
+                  >
+                    {{ referido.empresa_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item
+                    nzTitle="Cargo"
+                    *ngIf="referido.cargo_referido"
+                  >
+                    {{ referido.cargo_referido }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Referente">
+                    {{ getNombreReferente(referido) }} ({{
+                      getCodigoReferente(referido)
+                    }})
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Estado">
+                    <nz-tag
+                      [nzColor]="getEstadoColor(referido.estado_referido)"
+                    >
+                      {{ getEstadoTexto(referido.estado_referido) }}
+                    </nz-tag>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item nzTitle="Fecha de Referencia">
+                    {{ formatearFecha(referido.fecha_referencia) }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item
+                    nzTitle="Fecha de Conversión"
+                    *ngIf="referido.fecha_conversion"
+                  >
+                    {{ formatearFecha(referido.fecha_conversion) }}
+                  </nz-descriptions-item>
+                  <nz-descriptions-item
+                    nzTitle="Plan Adquirido"
+                    *ngIf="referido.plan"
+                  >
+                    <div class="plan-detalle">
+                      <nz-tag [nzColor]="referido.plan.color_plan || 'blue'">
+                        {{ referido.plan.nombre_plan }}
+                      </nz-tag>
+                      <span class="plan-precio">
+                        ${{ referido.plan.precio_actual | number : "1.0-0" }}
+                      </span>
+                    </div>
+                  </nz-descriptions-item>
+                  <nz-descriptions-item
+                    nzTitle="Observaciones"
+                    [nzSpan]="2"
+                    *ngIf="referido.observaciones"
+                  >
+                    {{ referido.observaciones }}
+                  </nz-descriptions-item>
+                </nz-descriptions>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </nz-table>
-
-    <div class="tabla-empty" *ngIf="!loading && referidosFiltrados.length === 0">
-      <div class="empty-content">
-        <i nz-icon nzType="inbox" class="empty-icon"></i>
-        <h3>No se encontraron referidos</h3>
-        <p *ngIf="searchText || filtroEstado || filtroReferente || filtroPlan">
-          Intenta ajustar los filtros de búsqueda
-        </p>
-        <p *ngIf="!searchText && !filtroEstado && !filtroReferente && !filtroPlan">
-          Aún no hay referidos registrados en el sistema
-        </p>
-      </div>
-    </div>
   </nz-card>
 </div>

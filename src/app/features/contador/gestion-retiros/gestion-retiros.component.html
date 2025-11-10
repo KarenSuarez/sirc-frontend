@@ -11,7 +11,7 @@
           nz-input
           placeholder="Buscar por referente..."
           [(ngModel)]="searchText"
-          (ngModelChange)="filtrarRetiros()" />
+          (ngModelChange)="filtrarSolicitudes()" />
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="search"></i>
@@ -28,7 +28,7 @@
           <nz-segmented
             [nzOptions]="opcionesEstado"
             [(ngModel)]="filtroEstado"
-            (ngModelChange)="filtrarRetiros()">
+            (ngModelChange)="filtrarSolicitudes()">
           </nz-segmented>
         </div>
 
@@ -36,7 +36,7 @@
           <label>Ordenar por:</label>
           <nz-select
             [(ngModel)]="ordenarPor"
-            (ngModelChange)="ordenarRetiros()"
+            (ngModelChange)="ordenarSolicitudes()"
             class="ordenar-select">
             <nz-option nzValue="fecha" nzLabel="Fecha más reciente"></nz-option>
             <nz-option nzValue="monto-desc" nzLabel="Mayor monto"></nz-option>
@@ -49,7 +49,7 @@
       <div class="estadisticas-filtros">
         <div class="stat-filtro">
           <span class="stat-label">Total Solicitudes:</span>
-          <span class="stat-value">{{ retirosFiltrados.length }}</span>
+          <span class="stat-value">{{ solicitudesFiltradas.length }}</span>
         </div>
         <div class="stat-filtro">
           <span class="stat-label">Monto Total:</span>
@@ -63,7 +63,7 @@
   <nz-card [nzBordered]="false" class="tabla-card">
     <nz-table
       #retirosTable
-      [nzData]="retirosFiltrados"
+      [nzData]="solicitudesFiltradas"
       [nzLoading]="loading"
       nzSize="middle"
       [nzPageSize]="10">
@@ -81,86 +81,85 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let retiro of retirosTable.data">
+        <tr *ngFor="let solicitud of retirosTable.data">
           <td>
-            <span class="retiro-id">{{ retiro.id }}</span>
+            <span class="retiro-id">#{{ solicitud.id_solicitud }}</span>
           </td>
           <td>
             <div class="referente-info">
               <div class="referente-avatar">
-                {{ retiro.referenteNombre.charAt(0).toUpperCase() }}
+                {{ obtenerInicialesReferente(solicitud) }}
               </div>
               <div class="referente-datos">
-                <span class="referente-nombre">{{ retiro.referenteNombre }}</span>
-                <span class="referente-codigo">{{ retiro.referenteCodigo }}</span>
+                <span class="referente-nombre">{{ obtenerNombreReferente(solicitud) }}</span>
+                <span class="referente-codigo">{{ solicitud.referente?.codigo_referente }}</span>
               </div>
             </div>
           </td>
           <td>
-            <span class="monto-solicitud">{{ retiro.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="monto-solicitud">{{ solicitud.monto_solicitado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
           </td>
           <td>
             <div class="fecha-info">
-              <span class="fecha">{{ formatearFecha(retiro.fechaSolicitud) }}</span>
-              <span class="hora">{{ formatearHora(retiro.fechaSolicitud) }}</span>
+              <span class="fecha">{{ formatearFecha(solicitud.fecha_solicitud) }}</span>
+              <span class="hora">{{ formatearHora(solicitud.fecha_solicitud) }}</span>
             </div>
           </td>
           <td>
-            <nz-tag [nzColor]="getEstadoColor(retiro.estado)">
-              {{ getEstadoTexto(retiro.estado) }}
+            <nz-tag [nzColor]="getEstadoColor(solicitud.estado_solicitud)">
+              {{ getEstadoTexto(solicitud.estado_solicitud) }}
             </nz-tag>
           </td>
           <td>
             <div class="metodo-pago">
-              <i nz-icon [nzType]="getMetodoIcon(retiro.metodoPago)"></i>
-              <span>{{ retiro.metodoPago }}</span>
+              <i nz-icon [nzType]="getMetodoIcon(solicitud.metodo_retiro)"></i>
+              <span>{{ formatearMetodoRetiro(solicitud.metodo_retiro) }}</span>
             </div>
           </td>
           <td>
             <nz-space nzSize="small">
-              <!-- Corregir: separar las directivas estructurales -->
-              <ng-container *ngIf="retiro.estado === 'pendiente'">
-                <button
-                  *nzSpaceItem
-                  nz-button
-                  nzType="primary"
-                  nzSize="small"
-                  (click)="procesarRetiro(retiro)">
-                  <i nz-icon nzType="check"></i>
-                  Procesar
-                </button>
-              </ng-container>
+              <ng-container *ngIf="solicitud.estado_solicitud === 'pendiente'">
+  <button
+    *nzSpaceItem
+    nz-button
+    nzType="primary"
+    nzSize="small"
+    (click)="procesarRetiro(solicitud)">
+    <i nz-icon nzType="check"></i>
+    Procesar
+  </button>
+</ng-container>
+
 
               <button
                 *nzSpaceItem
                 nz-button
                 nzType="default"
                 nzSize="small"
-                (click)="verDetalle(retiro)">
+                (click)="verDetalle(solicitud)">
                 <i nz-icon nzType="eye"></i>
               </button>
 
-              <!-- Corregir: usar nzDropdownMenu en lugar de nz-dropdown -->
-              <ng-container *ngIf="retiro.estado === 'aprobado'">
-                <button
-                  *nzSpaceItem
-                  nz-button
-                  nzType="default"
-                  nzSize="small"
-                  nz-dropdown
-                  [nzDropdownMenu]="menu"
-                  nzTrigger="click">
-                  <i nz-icon nzType="more"></i>
-                </button>
-              </ng-container>
+              <ng-container *ngIf="solicitud.estado_solicitud === 'pendiente'">
+  <button
+    *nzSpaceItem
+    nz-button
+    nzType="primary"
+    nzSize="small"
+    (click)="procesarRetiro(solicitud)">
+    <i nz-icon nzType="check"></i>
+    Procesar
+  </button>
+</ng-container>
+
 
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
-                  <li nz-menu-item (click)="descargarComprobante(retiro)">
+                  <li nz-menu-item (click)="descargarComprobante(solicitud)">
                     <i nz-icon nzType="download"></i>
                     Descargar Comprobante
                   </li>
-                  <li nz-menu-item (click)="reenviarNotificacion(retiro)">
+                  <li nz-menu-item (click)="reenviarNotificacion(solicitud)">
                     <i nz-icon nzType="mail"></i>
                     Reenviar Notificación
                   </li>
@@ -172,7 +171,7 @@
       </tbody>
     </nz-table>
 
-    <div class="tabla-empty" *ngIf="!loading && retirosFiltrados.length === 0">
+    <div class="tabla-empty" *ngIf="!loading && solicitudesFiltradas.length === 0">
       <div class="empty-content">
         <i nz-icon nzType="inbox" class="empty-icon"></i>
         <h3>No se encontraron solicitudes</h3>
@@ -190,33 +189,30 @@
 <!-- Modal Procesar Retiro -->
 <nz-modal
   [(nzVisible)]="modalProcesarVisible"
-  [nzTitle]="'Procesar Retiro - ' + (retiroSeleccionado?.id || '')"
+  [nzTitle]="'Procesar Retiro - #' + (solicitudSeleccionada?.id_solicitud || '')"
   [nzFooter]="null"
   nzWidth="600px"
   (nzOnCancel)="cerrarModalProcesar()">
 
-  <!-- Corregir: separar las directivas estructurales -->
   <div *nzModalContent>
-    <div *ngIf="retiroSeleccionado">
+    <div *ngIf="solicitudSeleccionada">
       <div class="modal-info">
         <nz-descriptions nzBordered [nzColumn]="1">
           <nz-descriptions-item nzTitle="Referente">
-            {{ retiroSeleccionado.referenteNombre }}
+            {{ obtenerNombreReferente(solicitudSeleccionada) }}
           </nz-descriptions-item>
           <nz-descriptions-item nzTitle="Monto">
             <strong style="font-size: 18px; color: #4A90E2;">
-              {{ retiroSeleccionado.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
+              {{ solicitudSeleccionada.monto_solicitado | currency:'COP':'symbol-narrow':'1.0-0' }}
             </strong>
           </nz-descriptions-item>
           <nz-descriptions-item nzTitle="Método de Pago">
-            {{ retiroSeleccionado.metodoPago }}
+            {{ formatearMetodoRetiro(solicitudSeleccionada.metodo_retiro) }}
           </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Información Bancaria" *ngIf="retiroSeleccionado.datosBancarios">
+          <nz-descriptions-item nzTitle="Información Bancaria" *ngIf="solicitudSeleccionada.banco_destino">
             <div class="datos-bancarios">
-              <p><strong>Banco:</strong> {{ retiroSeleccionado.datosBancarios.banco }}</p>
-              <p><strong>Tipo:</strong> {{ retiroSeleccionado.datosBancarios.tipoCuenta }}</p>
-              <p><strong>Número:</strong> {{ retiroSeleccionado.datosBancarios.numeroCuenta }}</p>
-              <p><strong>Titular:</strong> {{ retiroSeleccionado.datosBancarios.titular }}</p>
+              <p><strong>Banco:</strong> {{ solicitudSeleccionada.banco_destino }}</p>
+              <p><strong>Cuenta:</strong> {{ solicitudSeleccionada.cuenta_destino }}</p>
             </div>
           </nz-descriptions-item>
         </nz-descriptions>
@@ -244,10 +240,22 @@
         </nz-form-item>
 
         <nz-form-item *ngIf="procesarForm.get('decision')?.value === 'aprobar'">
-          <nz-form-label [nzSpan]="24" nzRequired nzFor="comprobante">
-            Comprobante de Pago
+          <nz-form-label [nzSpan]="24" nzFor="comprobante">
+            URL del Comprobante (Opcional)
           </nz-form-label>
-          <nz-form-control [nzSpan]="24" nzErrorTip="Por favor carga el comprobante">
+          <nz-form-control [nzSpan]="24">
+            <input
+              nz-input
+              formControlName="comprobante_pago_url"
+              placeholder="https://ejemplo.com/comprobante.pdf" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item *ngIf="procesarForm.get('decision')?.value === 'aprobar'">
+          <nz-form-label [nzSpan]="24" nzFor="comprobante-upload">
+            O sube el comprobante
+          </nz-form-label>
+          <nz-form-control [nzSpan]="24">
             <nz-upload
               nzType="drag"
               [nzMultiple]="false"
@@ -304,43 +312,53 @@
   nzWidth="600px"
   (nzOnCancel)="cerrarModalDetalle()">
 
-  <!-- Corregir: separar las directivas estructurales -->
   <div *nzModalContent>
-    <div *ngIf="retiroSeleccionado">
+    <div *ngIf="solicitudSeleccionada">
       <nz-descriptions nzBordered [nzColumn]="1">
         <nz-descriptions-item nzTitle="ID">
-          {{ retiroSeleccionado.id }}
+          #{{ solicitudSeleccionada.id_solicitud }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Referente">
-          {{ retiroSeleccionado.referenteNombre }}
+          {{ obtenerNombreReferente(solicitudSeleccionada) }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Código Referente">
-          {{ retiroSeleccionado.referenteCodigo }}
+          {{ solicitudSeleccionada.referente?.codigo_referente }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Email Referente">
+          {{ solicitudSeleccionada.referente?.usuario?.correo_electronico }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Monto">
           <strong style="font-size: 18px; color: #4A90E2;">
-            {{ retiroSeleccionado.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
+            {{ solicitudSeleccionada.monto_solicitado | currency:'COP':'symbol-narrow':'1.0-0' }}
           </strong>
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Estado">
-          <nz-tag [nzColor]="getEstadoColor(retiroSeleccionado.estado)">
-            {{ getEstadoTexto(retiroSeleccionado.estado) }}
+          <nz-tag [nzColor]="getEstadoColor(solicitudSeleccionada.estado_solicitud)">
+            {{ getEstadoTexto(solicitudSeleccionada.estado_solicitud) }}
           </nz-tag>
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Método de Pago">
-          {{ retiroSeleccionado.metodoPago }}
+          {{ formatearMetodoRetiro(solicitudSeleccionada.metodo_retiro) }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Fecha Solicitud">
-          {{ formatearFechaCompleta(retiroSeleccionado.fechaSolicitud) }}
+          {{ formatearFechaCompleta(solicitudSeleccionada.fecha_solicitud) }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Fecha Procesado" *ngIf="retiroSeleccionado.fechaProcesado">
-          {{ formatearFechaCompleta(retiroSeleccionado.fechaProcesado) }}
+        <nz-descriptions-item nzTitle="Fecha Procesado" *ngIf="solicitudSeleccionada.fecha_procesamiento">
+          {{ formatearFechaCompleta(solicitudSeleccionada.fecha_procesamiento) }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Procesado Por" *ngIf="retiroSeleccionado.procesadoPor">
-          {{ retiroSeleccionado.procesadoPor }}
+        <nz-descriptions-item nzTitle="Procesado Por" *ngIf="solicitudSeleccionada.procesado_por">
+          {{ solicitudSeleccionada.procesado_por.nombre }} {{ solicitudSeleccionada.procesado_por.apellido }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Observaciones" *ngIf="retiroSeleccionado.observaciones">
-          {{ retiroSeleccionado.observaciones }}
+        <nz-descriptions-item nzTitle="Banco Destino" *ngIf="solicitudSeleccionada.banco_destino">
+          {{ solicitudSeleccionada.banco_destino }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Cuenta Destino" *ngIf="solicitudSeleccionada.cuenta_destino">
+          {{ solicitudSeleccionada.cuenta_destino }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Comprobante" *ngIf="solicitudSeleccionada.comprobante_pago_url">
+          <a [href]="solicitudSeleccionada.comprobante_pago_url" target="_blank">
+            <i nz-icon nzType="download"></i> Descargar Comprobante
+          </a>
         </nz-descriptions-item>
       </nz-descriptions>
     </div>

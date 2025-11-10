@@ -9,7 +9,8 @@
     <nz-card [nzBordered]="false" class="kpi-card usuarios">
       <nz-statistic
         [nzValue]="estadisticas.totalUsuarios"
-        nzTitle="Total Usuarios">
+        nzTitle="Total Usuarios"
+      >
         <ng-template #nzPrefix>
           <i nz-icon nzType="team"></i>
         </ng-template>
@@ -22,7 +23,8 @@
     <nz-card [nzBordered]="false" class="kpi-card activos">
       <nz-statistic
         [nzValue]="estadisticas.usuariosActivos"
-        nzTitle="Usuarios Activos">
+        nzTitle="Usuarios Activos"
+      >
         <ng-template #nzPrefix>
           <i nz-icon nzType="check-circle"></i>
         </ng-template>
@@ -35,7 +37,8 @@
     <nz-card [nzBordered]="false" class="kpi-card referentes">
       <nz-statistic
         [nzValue]="estadisticas.totalReferentes"
-        nzTitle="Referentes">
+        nzTitle="Referentes"
+      >
         <ng-template #nzPrefix>
           <i nz-icon nzType="user"></i>
         </ng-template>
@@ -49,7 +52,8 @@
       <nz-statistic
         [nzValue]="estadisticas.ingresosTotal"
         [nzPrefix]="'$'"
-        nzTitle="Ingresos Totales">
+        nzTitle="Ingresos Totales"
+      >
         <ng-template #nzPrefix>
           <i nz-icon nzType="dollar"></i>
         </ng-template>
@@ -81,7 +85,12 @@
             <span class="label">Activos</span>
           </div>
         </div>
-        <button nz-button nzType="primary" nzBlock [routerLink]="['/admin/usuarios']">
+        <button
+          nz-button
+          nzType="primary"
+          nzBlock
+          [routerLink]="['/admin/usuarios']"
+        >
           <i nz-icon nzType="setting"></i>
           Gestionar Usuarios
         </button>
@@ -143,12 +152,23 @@
 
   <!-- Distribución de Usuarios -->
   <div class="distribucion-section">
-    <nz-card nzTitle="Distribución de Usuarios por Rol" [nzBordered]="false" class="distribucion-card">
+    <nz-card
+      nzTitle="Distribución de Usuarios por Rol"
+      [nzBordered]="false"
+      class="distribucion-card"
+    >
       <div class="distribucion-content">
         <div class="chart-container">
           <div class="donut-chart">
             <svg viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="#e9ecef" stroke-width="10"/>
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="#e9ecef"
+                stroke-width="10"
+              />
               <circle
                 *ngFor="let seg of chartSegments; let i = index"
                 cx="50"
@@ -160,7 +180,8 @@
                 [attr.stroke-dasharray]="seg.dashArray"
                 [attr.stroke-dashoffset]="seg.offset"
                 [style.transform]="'rotate(-90deg)'"
-                [style.transform-origin]="'50% 50%'"/>
+                [style.transform-origin]="'50% 50%'"
+              />
             </svg>
             <div class="chart-center">
               <span class="center-value">{{ estadisticas.totalUsuarios }}</span>
@@ -187,13 +208,17 @@
 
   <!-- Actividad Reciente del Sistema -->
   <div class="actividad-section">
-    <nz-card nzTitle="Actividad Reciente del Sistema" [nzBordered]="false" class="actividad-card">
+    <nz-card
+      nzTitle="Actividad Reciente del Sistema"
+      [nzBordered]="false"
+      class="actividad-card"
+    >
       <nz-table
         #actividadTable
         [nzData]="actividadReciente"
         [nzShowPagination]="false"
-        nzSize="small">
-
+        nzSize="small"
+      >
         <thead>
           <tr>
             <th>Fecha/Hora</th>
@@ -207,7 +232,9 @@
         <tbody>
           <tr *ngFor="let actividad of actividadTable.data">
             <td>
-              <span class="fecha-hora">{{ formatearFecha(actividad.fecha) }}</span>
+              <span class="fecha-hora">{{
+                formatearFecha(actividad.fecha)
+              }}</span>
             </td>
             <td>
               <div class="usuario-actividad">
@@ -227,7 +254,8 @@
               <i
                 nz-icon
                 [nzType]="actividad.exitoso ? 'check-circle' : 'close-circle'"
-                [style.color]="actividad.exitoso ? '#52c41a' : '#ff4d4f'">
+                [style.color]="actividad.exitoso ? '#52c41a' : '#ff4d4f'"
+              >
               </i>
             </td>
           </tr>
@@ -238,25 +266,37 @@
 
   <!-- Últimos Usuarios Registrados -->
   <div class="ultimos-usuarios-section">
-    <nz-card nzTitle="Últimos Usuarios Registrados" [nzBordered]="false" class="ultimos-card">
+    <nz-card
+      nzTitle="Últimos Usuarios Registrados"
+      [nzBordered]="false"
+      class="ultimos-card"
+    >
       <div class="usuarios-list">
         <div *ngFor="let usuario of ultimosUsuarios" class="usuario-item">
           <div class="usuario-avatar">
-            {{ usuario.nombre.charAt(0).toUpperCase() }}{{ usuario.apellido.charAt(0).toUpperCase() }}
+            {{ usuario.nombre.charAt(0).toUpperCase()
+            }}{{ usuario.apellido.charAt(0).toUpperCase() }}
           </div>
           <div class="usuario-info">
-            <span class="usuario-nombre">{{ usuario.nombre }} {{ usuario.apellido }}</span>
-            <span class="usuario-email">{{ usuario.correo }}</span>
+            <span class="usuario-nombre"
+              >{{ usuario.nombre }} {{ usuario.apellido }}</span
+            >
+            <span class="usuario-email">{{ usuario.correo_electronico }}</span>
           </div>
           <div class="usuario-meta">
-            <nz-tag [nzColor]="getRolColor(usuario.rol)">{{ getRolTexto(usuario.rol) }}</nz-tag>
-            <span class="usuario-fecha">{{ formatearFechaRelativa(usuario.fechaRegistro) }}</span>
+            <nz-tag [nzColor]="getRolColor(usuario)">
+              {{ getRolTexto(usuario) }}
+            </nz-tag>
+            <span class="usuario-fecha">
+              {{ formatearFechaRelativa(usuario.creado_en) }}
+            </span>
           </div>
           <button
             nz-button
             nzType="text"
             nzSize="small"
-            [routerLink]="['/admin/usuarios', usuario.id]">
+            [routerLink]="['/admin/usuarios', usuario.id_usuario]"
+          >
             <i nz-icon nzType="eye"></i>
           </button>
         </div>

@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -8,8 +10,12 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzMessageModule } from 'ng-zorro-antd/message';
+
+import { ContadorService } from '../../../core/services/contador.service';
+import { SolicitudRecompensa } from '../../../core/models/solicitud.interface';
 
 interface Resumen {
   totalPagado: number;
@@ -32,8 +38,8 @@ interface TopReferente {
 }
 
 interface PagoDetalle {
-  fecha: Date;
-  retiroId: string;
+  fecha: string;
+  retiroId: number;
   referenteNombre: string;
   monto: number;
   metodo: string;
@@ -61,12 +67,13 @@ interface MetodoPago {
     NzTableModule,
     NzTagModule,
     NzProgressModule,
-    NzMessageModule
+    NzMessageModule,
+    NzSpinModule,
   ],
   templateUrl: './reportes.component.html',
-  styleUrl: './reportes.component.css'
+  styleUrl: './reportes.component.css',
 })
-export class ReportesComponent implements OnInit {
+export class ReportesComponent implements OnInit, OnDestroy {
   rangoFechas: Date[] = [];
   loading = false;
 
@@ -76,7 +83,7 @@ export class ReportesComponent implements OnInit {
     totalPendiente: 0,
     cantidadPendientes: 0,
     comisionesGeneradas: 0,
-    promedioPago: 0
+    promedioPago: 0,
   };
 
   pagosPorMes: PagoMes[] = [];
@@ -85,11 +92,21 @@ export class ReportesComponent implements OnInit {
   pagosDetalle: PagoDetalle[] = [];
   resumenMetodos: MetodoPago[] = [];
 
-  constructor(private message: NzMessageService) {}
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private contadorService: ContadorService,
+    private message: NzMessageService
+  ) {}
 
   ngOnInit() {
     this.inicializarFechas();
     this.cargarDatos();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   inicializarFechas() {
@@ -99,84 +116,155 @@ export class ReportesComponent implements OnInit {
     this.rangoFechas = [hace30Dias, hoy];
   }
 
+  /**
+   * Cargar datos desde backend
+   * SOLO usando endpoints de solicitudes (sin KPIs de comisiones que requieren permisos)
+   */
   cargarDatos() {
     this.loading = true;
 
-    setTimeout(() => {
-      // Resumen
-      this.resumen = {
-        totalPagado: 4500000,
-        cantidadPagos: 18,
-        totalPendiente: 850000,
-        cantidadPendientes: 5,
-        comisionesGeneradas: 8750000,
-        promedioPago: 250000
-      };
-
-      // Pagos por mes
-      this.pagosPorMes = [
-        { mes: 'Jul', monto: 2800000 },
-        { mes: 'Ago', monto: 3200000 },
-        { mes: 'Sep', monto: 2900000 },
-        { mes: 'Oct', monto: 3500000 },
-        { mes: 'Nov', monto: 4100000 },
-        { mes: 'Dic', monto: 4500000 }
-      ];
-      this.maxPagoMes = Math.max(...this.pagosPorMes.map(p => p.monto));
-
-      // Top referentes
-      const maxMonto = 1200000;
-      this.topReferentes = [
-        { nombre: 'María González', monto: 1200000, porcentaje: 100 },
-        { nombre: 'Carlos Ramírez', monto: 950000, porcentaje: 79 },
-        { nombre: 'Ana Martínez', monto: 820000, porcentaje: 68 },
-        { nombre: 'Pedro Sánchez', monto: 680000, porcentaje: 57 },
-        { nombre: 'Luis Hernández', monto: 450000, porcentaje: 38 }
-      ];
-
-      // Detalle de pagos
-      this.pagosDetalle = [
-        {
-          fecha: new Date('2024-01-27'),
-          retiroId: 'RET-2024-015',
-          referenteNombre: 'María González',
-          monto: 320000,
-          metodo: 'Transferencia Bancaria',
-          procesadoPor: 'Laura Pérez',
-          estado: 'completado'
+    this.contadorService
+      .listarTodasSolicitudes({
+        limite: 1000,
+        pagina: 1,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.procesarDatos(response.solicitudes);
+          this.loading = false;
         },
-        {
-          fecha: new Date('2024-01-26'),
-          retiroId: 'RET-2024-014',
-          referenteNombre: 'Carlos Ramírez',
-          monto: 280000,
-          metodo: 'Transferencia Bancaria',
-          procesadoPor: 'Laura Pérez',
-          estado: 'completado'
+        error: (error) => {
+          console.error('Error al cargar reportes:', error);
+          this.message.error('Error al cargar reportes financieros');
+          this.loading = false;
         },
-        {
-          fecha: new Date('2024-01-25'),
-          retiroId: 'RET-2024-013',
-          referenteNombre: 'Ana Martínez',
-          monto: 195000,
-          metodo: 'Transferencia Bancaria',
-          procesadoPor: 'Laura Pérez',
-          estado: 'completado'
-        }
-      ];
+      });
+  }
 
-      // Resumen por método
-      this.resumenMetodos = [
-        {
-          nombre: 'Transferencia Bancaria',
-          icono: 'bank',
-          cantidad: 18,
-          monto: 4500000
-        }
-      ];
+  /**
+   * Procesar datos del backend
+   */
+  procesarDatos(solicitudes: SolicitudRecompensa[]) {
+    const stats = this.contadorService.calcularEstadisticasSolicitudes(solicitudes);
 
-      this.loading = false;
-    }, 1000);
+    // Resumen
+    this.resumen = {
+      totalPagado: stats.monto_total_aprobado,
+      cantidadPagos: stats.aprobadas,
+      totalPendiente: stats.monto_total_pendiente,
+      cantidadPendientes: stats.pendientes,
+      comisionesGeneradas: stats.monto_total_aprobado, // Usar el mismo dato
+      promedioPago: stats.aprobadas > 0 ? stats.monto_total_aprobado / stats.aprobadas : 0,
+    };
+
+    // Pagos por mes
+    this.calcularPagosPorMes(solicitudes);
+
+    // Top referentes
+    this.calcularTopReferentes(solicitudes);
+
+    // Detalle de pagos
+    this.pagosDetalle = solicitudes
+      .filter((s) => s.estado_solicitud === 'aprobada')
+      .slice(0, 10)
+      .map((s) => ({
+        fecha: s.fecha_procesamiento || s.fecha_solicitud,
+        retiroId: s.id_solicitud,
+        referenteNombre: this.contadorService.obtenerNombreReferente(s),
+        monto: s.monto_solicitado,
+        metodo: this.contadorService.formatearMetodoRetiro(s.metodo_retiro),
+        procesadoPor: s.procesado_por
+          ? `${s.procesado_por.nombre} ${s.procesado_por.apellido}`
+          : 'Sistema',
+        estado: 'completado',
+      }));
+
+    // Resumen por método
+    this.calcularResumenMetodos(solicitudes);
+  }
+
+  /**
+   * Calcular pagos por mes
+   */
+  calcularPagosPorMes(solicitudes: SolicitudRecompensa[]) {
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const montosPorMes: { [key: string]: number } = {};
+
+    solicitudes
+      .filter((s) => s.estado_solicitud === 'aprobada' && s.fecha_procesamiento)
+      .forEach((s) => {
+        const fecha = new Date(s.fecha_procesamiento!);
+        const mes = meses[fecha.getMonth()];
+        montosPorMes[mes] = (montosPorMes[mes] || 0) + s.monto_solicitado;
+      });
+
+    // Obtener últimos 6 meses
+    const hoy = new Date();
+    const ultimos6Meses = [];
+    for (let i = 5; i >= 0; i--) {
+      const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+      const mes = meses[fecha.getMonth()];
+      ultimos6Meses.push({
+        mes,
+        monto: montosPorMes[mes] || 0,
+      });
+    }
+
+    this.pagosPorMes = ultimos6Meses;
+    this.maxPagoMes = Math.max(...this.pagosPorMes.map((p) => p.monto), 1);
+  }
+
+  /**
+   * Calcular top referentes
+   */
+  calcularTopReferentes(solicitudes: SolicitudRecompensa[]) {
+    const montosPorReferente: { [key: string]: number } = {};
+
+    solicitudes
+      .filter((s) => s.estado_solicitud === 'aprobada')
+      .forEach((s) => {
+        const nombre = this.contadorService.obtenerNombreReferente(s);
+        montosPorReferente[nombre] = (montosPorReferente[nombre] || 0) + s.monto_solicitado;
+      });
+
+    const referentesArray = Object.entries(montosPorReferente)
+      .map(([nombre, monto]) => ({ nombre, monto }))
+      .sort((a, b) => b.monto - a.monto)
+      .slice(0, 5);
+
+    const maxMonto = referentesArray[0]?.monto || 1;
+
+    this.topReferentes = referentesArray.map((ref) => ({
+      nombre: ref.nombre,
+      monto: ref.monto,
+      porcentaje: Math.round((ref.monto / maxMonto) * 100),
+    }));
+  }
+
+  /**
+   * Calcular resumen por métodos
+   */
+  calcularResumenMetodos(solicitudes: SolicitudRecompensa[]) {
+    const metodos: { [key: string]: { cantidad: number; monto: number } } = {};
+
+    solicitudes
+      .filter((s) => s.estado_solicitud === 'aprobada')
+      .forEach((s) => {
+        const metodo = this.contadorService.formatearMetodoRetiro(s.metodo_retiro);
+        if (!metodos[metodo]) {
+          metodos[metodo] = { cantidad: 0, monto: 0 };
+        }
+        metodos[metodo].cantidad++;
+        metodos[metodo].monto += s.monto_solicitado;
+      });
+
+    this.resumenMetodos = Object.entries(metodos).map(([nombre, datos]) => ({
+      nombre,
+      icono: nombre.includes('Transferencia') ? 'bank' : 'gift',
+      cantidad: datos.cantidad,
+      monto: datos.monto,
+    }));
   }
 
   cambiarRangoFechas() {
@@ -188,12 +276,10 @@ export class ReportesComponent implements OnInit {
 
   exportarExcel() {
     this.message.success('Exportando a Excel...');
-    // Aquí iría la lógica de exportación
   }
 
   exportarPDF() {
     this.message.success('Generando PDF...');
-    // Aquí iría la lógica de exportación
   }
 
   getEstadoColor(estado: string): string {
@@ -204,11 +290,11 @@ export class ReportesComponent implements OnInit {
     return 'Completado';
   }
 
-  formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-CO', {
+  formatearFecha(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-CO', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 }

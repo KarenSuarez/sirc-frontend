@@ -100,15 +100,16 @@ export class PerfilBaseComponent implements OnInit, OnDestroy {
   }
 
   protected createPerfilForm(): FormGroup {
-    return this.formBuilder.group({
-      nombre: ['', [Validators.required, Validators.minLength(2)]],
-      apellido: ['', [Validators.required, Validators.minLength(2)]],
-      correo: ['', [Validators.required, Validators.email]],
-      tipoDoc: [{ value: '', disabled: true }],
-      documento: [{ value: '', disabled: true }],
-      telefono: ['', [Validators.pattern(/^[0-9]{10}$/)]],
-    });
-  }
+  return this.formBuilder.group({
+    nombre: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(2)]],
+    apellido: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(2)]],
+    correo: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+    tipoDoc: [{ value: '', disabled: true }],
+    documento: [{ value: '', disabled: true }],
+    telefono: [{ value: '', disabled: true }, [Validators.pattern(/^[0-9]{10}$/)]],
+  });
+}
+
 
   protected createPasswordForm(): FormGroup {
     return this.formBuilder.group(

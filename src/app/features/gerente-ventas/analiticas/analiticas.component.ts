@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -12,6 +14,15 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzMessageService } from 'ng-zorro-antd/message';
+
+import { GerenteService } from '../../../core/services/gerente.service';
+import {
+  KPIsGenerales,
+  KPIsReferentes,
+  KPIsComisiones,
+  TopReferente,
+  ComisionPorPlan,
+} from '../../../core/models/kpi.interface';
 
 interface KPI {
   totalReferidos: number;
@@ -82,12 +93,12 @@ interface Insight {
     NzTagModule,
     NzTableModule,
     NzSpinModule,
-    NzAlertModule
+    NzAlertModule,
   ],
   templateUrl: './analiticas.component.html',
-  styleUrl: './analiticas.component.css'
+  styleUrl: './analiticas.component.css',
 })
-export class AnaliticasComponent implements OnInit {
+export class AnaliticasComponent implements OnInit, OnDestroy {
   rangoFechas: Date[] = [];
   cargandoGraficos = false;
   cargandoTabla = false;
@@ -97,7 +108,7 @@ export class AnaliticasComponent implements OnInit {
     referidosTendencia: 0,
     tasaConversion: 0,
     comisionesTotales: 0,
-    referentesActivos: 0
+    referentesActivos: 0,
   };
 
   datosReferidosMes: DatoMes[] = [];
@@ -109,11 +120,21 @@ export class AnaliticasComponent implements OnInit {
   datosResumen: Resumen[] = [];
   insights: Insight[] = [];
 
-  constructor(private message: NzMessageService) {}
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private gerenteService: GerenteService,
+    private message: NzMessageService
+  ) {}
 
   ngOnInit() {
     this.inicializarFechas();
     this.cargarDatos();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   inicializarFechas() {
@@ -123,218 +144,209 @@ export class AnaliticasComponent implements OnInit {
     this.rangoFechas = [hace30Dias, hoy];
   }
 
+  /**
+   * Cargar todos los datos desde el backend
+   */
   cargarDatos() {
-    this.cargarKPIs();
-    this.cargarDatosReferidosMes();
-    this.cargarEstadosDistribucion();
-    this.cargarPlanesTop();
-    this.cargarReferentesTop();
-    this.cargarResumen();
-    this.cargarInsights();
-  }
-
-  cargarKPIs() {
-    // Simulación de datos
-    this.kpis = {
-      totalReferidos: 156,
-      referidosTendencia: 12.5,
-      tasaConversion: 68.4,
-      comisionesTotales: 8500000,
-      referentesActivos: 28
-    };
-  }
-
-  cargarDatosReferidosMes() {
     this.cargandoGraficos = true;
+    this.cargandoTabla = true;
 
-    setTimeout(() => {
-      this.datosReferidosMes = [
-        { mes: 'Ene', valor: 12 },
-        { mes: 'Feb', valor: 18 },
-        { mes: 'Mar', valor: 25 },
-        { mes: 'Abr', valor: 20 },
-        { mes: 'May', valor: 32 },
-        { mes: 'Jun', valor: 28 }
-      ];
+    forkJoin({
+      generales: this.gerenteService.obtenerKPIsGenerales(),
+      referentes: this.gerenteService.obtenerKPIsReferentes(),
+      comisiones: this.gerenteService.obtenerKPIsComisiones(),
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.procesarKPIsGenerales(data.generales);
+          this.procesarKPIsReferentes(data.referentes);
+          this.procesarKPIsComisiones(data.comisiones);
+          this.generarInsights(data.generales);
 
-      this.maxReferidosMes = Math.max(...this.datosReferidosMes.map(d => d.valor));
-      this.cargandoGraficos = false;
-    }, 800);
+          this.cargandoGraficos = false;
+          this.cargandoTabla = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar analíticas:', error);
+          this.message.error('Error al cargar analíticas');
+          this.cargandoGraficos = false;
+          this.cargandoTabla = false;
+        },
+      });
   }
 
-  cargarEstadosDistribucion() {
-    const total = 156;
+  /**
+   * Procesar KPIs generales
+   */
+  procesarKPIsGenerales(data: KPIsGenerales) {
+    this.kpis.totalReferidos = data.referidos.total;
+    this.kpis.referentesActivos = data.usuarios.referentes.activos;
+    this.kpis.comisionesTotales = data.comisiones.total;
 
+    // Calcular tasa de conversión
+    if (data.referidos.total > 0) {
+      this.kpis.tasaConversion = parseFloat(
+        ((data.referidos.activos / data.referidos.total) * 100).toFixed(1)
+      );
+    }
+
+    // Tendencia (simulada - debería venir del backend)
+    this.kpis.referidosTendencia = 12.5;
+
+    // Distribución por estados
     this.estadosDistribucion = [
       {
         nombre: 'Activos',
-        cantidad: 89,
-        porcentaje: Math.round((89 / total) * 100),
+        cantidad: data.referidos.activos,
+        porcentaje: Math.round((data.referidos.activos / data.referidos.total) * 100),
         color: '#52c41a',
         icono: 'check-circle',
-        destacado: true
-      },
-      {
-        nombre: 'Contactados',
-        cantidad: 35,
-        porcentaje: Math.round((35 / total) * 100),
-        color: '#1890ff',
-        icono: 'phone',
-        destacado: false
+        destacado: true,
       },
       {
         nombre: 'Pendientes',
-        cantidad: 24,
-        porcentaje: Math.round((24 / total) * 100),
+        cantidad: data.referidos.pendientes,
+        porcentaje: Math.round((data.referidos.pendientes / data.referidos.total) * 100),
         color: '#faad14',
         icono: 'clock-circle',
-        destacado: false
+        destacado: false,
       },
-      {
-        nombre: 'Rechazados',
-        cantidad: 8,
-        porcentaje: Math.round((8 / total) * 100),
-        color: '#ff4d4f',
-        icono: 'close-circle',
-        destacado: false
-      }
     ];
   }
 
-  cargarPlanesTop() {
-    this.planesTop = [
-      {
-        nombre: 'Plan Profesional',
-        ventas: 45,
-        ingresos: 6750000,
-        porcentaje: 50,
-        color: '#1890ff'
-      },
-      {
-        nombre: 'Plan Básico',
-        ventas: 32,
-        ingresos: 2560000,
-        porcentaje: 36,
-        color: '#52c41a'
-      },
-      {
-        nombre: 'Plan Empresarial',
-        ventas: 12,
-        ingresos: 3600000,
-        porcentaje: 13,
-        color: '#722ed1'
+  /**
+   * Procesar KPIs de referentes
+   */
+  procesarKPIsReferentes(data: KPIsReferentes) {
+    // Top referentes
+    this.referentesTop = data.top_puntos.slice(0, 5).map((ref, index) => ({
+      nombre: `${ref.usuario.nombre} ${ref.usuario.apellido}`,
+      iniciales: `${ref.usuario.nombre.charAt(0)}${ref.usuario.apellido.charAt(0)}`.toUpperCase(),
+      referidos: 0, // Esto debería venir de top_referidos
+      conversiones: 0, // Calculado
+      nivel: this.obtenerNivelPorPuntos(ref.puntos_actuales || 0),
+      nivelColor: this.obtenerColorNivel(ref.puntos_actuales || 0),
+    }));
+
+    // Combinar con datos de referidos
+    data.top_referidos.slice(0, 5).forEach((refReferidos, index) => {
+      if (this.referentesTop[index]) {
+        this.referentesTop[index].referidos = refReferidos.total_referidos;
       }
+    });
+
+    // Datos para gráfico de meses (simulados - deberían venir del backend)
+    this.datosReferidosMes = [
+      { mes: 'Ene', valor: 12 },
+      { mes: 'Feb', valor: 18 },
+      { mes: 'Mar', valor: 25 },
+      { mes: 'Abr', valor: 20 },
+      { mes: 'May', valor: 32 },
+      { mes: 'Jun', valor: 28 },
+    ];
+    this.maxReferidosMes = Math.max(...this.datosReferidosMes.map((d) => d.valor));
+  }
+
+  /**
+   * Procesar KPIs de comisiones
+   */
+  procesarKPIsComisiones(data: KPIsComisiones) {
+    // Top planes
+    this.planesTop = data.por_plan.slice(0, 3).map((plan, index) => {
+      const maxIngresos = Math.max(
+        ...data.por_plan.map((p) => p.monto_total)
+      );
+      const ingresos = plan.monto_total;
+
+      return {
+        nombre: plan.nombre_plan,
+        ventas: plan.cantidad_comisiones,
+        ingresos: ingresos,
+        porcentaje: Math.round((ingresos / maxIngresos) * 100),
+        color: this.obtenerColorPlan(index),
+      };
+    });
+
+    // Resumen por periodo (simulado - debería venir del backend)
+    this.datosResumen = [
+      {
+        periodo: 'Noviembre 2024',
+        referidos: 28,
+        conversiones: 19,
+        tasaConversion: 68,
+        comisiones: data.ultimos_30_dias,
+        promedioReferido: data.promedio_comision,
+      },
     ];
   }
 
-  cargarReferentesTop() {
-    this.referentesTop = [
-      {
-        nombre: 'María González',
-        iniciales: 'MG',
-        referidos: 15,
-        conversiones: 12,
-        nivel: 'Oro',
-        nivelColor: 'gold'
-      },
-      {
-        nombre: 'Carlos Ramírez',
-        iniciales: 'CR',
-        referidos: 12,
-        conversiones: 10,
-        nivel: 'Plata',
-        nivelColor: 'default'
-      },
-      {
-        nombre: 'Ana Martínez',
-        iniciales: 'AM',
-        referidos: 11,
-        conversiones: 9,
-        nivel: 'Platino',
-        nivelColor: 'purple'
-      },
-      {
-        nombre: 'Pedro Sánchez',
-        iniciales: 'PS',
-        referidos: 8,
-        conversiones: 6,
-        nivel: 'Plata',
-        nivelColor: 'default'
-      },
-      {
-        nombre: 'Luis Hernández',
-        iniciales: 'LH',
-        referidos: 7,
-        conversiones: 5,
-        nivel: 'Bronce',
-        nivelColor: 'orange'
-      }
-    ];
-  }
+  /**
+   * Generar insights automáticos
+   */
+  generarInsights(data: KPIsGenerales) {
+    this.insights = [];
 
-  cargarResumen() {
-    this.cargandoTabla = true;
-
-    setTimeout(() => {
-      this.datosResumen = [
-        {
-          periodo: 'Junio 2024',
-          referidos: 28,
-          conversiones: 19,
-          tasaConversion: 68,
-          comisiones: 1850000,
-          promedioReferido: 66071
-        },
-        {
-          periodo: 'Mayo 2024',
-          referidos: 32,
-          conversiones: 23,
-          tasaConversion: 72,
-          comisiones: 2100000,
-          promedioReferido: 65625
-        },
-        {
-          periodo: 'Abril 2024',
-          referidos: 20,
-          conversiones: 14,
-          tasaConversion: 70,
-          comisiones: 1400000,
-          promedioReferido: 70000
-        },
-        {
-          periodo: 'Marzo 2024',
-          referidos: 25,
-          conversiones: 18,
-          tasaConversion: 72,
-          comisiones: 1750000,
-          promedioReferido: 70000
-        }
-      ];
-
-      this.cargandoTabla = false;
-    }, 1000);
-  }
-
-  cargarInsights() {
-    this.insights = [
-      {
+    // Tasa de conversión
+    const tasaConversion = (data.referidos.activos / data.referidos.total) * 100;
+    if (tasaConversion >= 60) {
+      this.insights.push({
         tipo: 'success',
         titulo: 'Excelente tasa de conversión',
-        descripcion: 'La tasa de conversión del 68.4% está por encima del promedio de la industria (45-55%). ¡Sigue así!'
-      },
-      {
+        descripcion: `La tasa de conversión del ${tasaConversion.toFixed(1)}% está por encima del promedio de la industria (45-55%). ¡Sigue así!`,
+      });
+    }
+
+    // Referentes activos
+    if (data.usuarios.referentes.activos > 20) {
+      this.insights.push({
         tipo: 'info',
         titulo: 'Crecimiento sostenido',
-        descripcion: 'Los referidos han aumentado un 12.5% este mes comparado con el anterior. Considera aumentar los incentivos para mantener el momentum.'
-      },
-      {
+        descripcion: `Tienes ${data.usuarios.referentes.activos} referentes activos. Considera aumentar los incentivos para mantener el momentum.`,
+      });
+    }
+
+    // Comisiones pendientes
+    if (data.comisiones.pendientes > 0) {
+      this.insights.push({
         tipo: 'warning',
-        titulo: 'Atención a pendientes',
-        descripcion: 'Hay 24 referidos pendientes de contacto. Asigna recursos para reducir este número y mejorar la conversión.'
-      }
-    ];
+        titulo: 'Comisiones pendientes',
+        descripcion: `Hay $${data.comisiones.pendientes.toLocaleString('es-CO')} en comisiones pendientes de pago.`,
+      });
+    }
   }
 
+  /**
+   * Obtener nivel por puntos
+   */
+  obtenerNivelPorPuntos(puntos: number): string {
+    if (puntos >= 1000) return 'Platino';
+    if (puntos >= 500) return 'Oro';
+    if (puntos >= 200) return 'Plata';
+    return 'Bronce';
+  }
+
+  /**
+   * Obtener color del nivel
+   */
+  obtenerColorNivel(puntos: number): string {
+    if (puntos >= 1000) return 'purple';
+    if (puntos >= 500) return 'gold';
+    if (puntos >= 200) return 'default';
+    return 'orange';
+  }
+
+  /**
+   * Obtener color del plan
+   */
+  obtenerColorPlan(index: number): string {
+    const colores = ['#1890ff', '#52c41a', '#722ed1'];
+    return colores[index] || '#4A90E2';
+  }
+
+  /**
+   * Cambiar rango de fechas
+   */
   cambiarRangoFechas() {
     if (this.rangoFechas && this.rangoFechas.length === 2) {
       this.message.info('Actualizando datos...');
@@ -342,21 +354,32 @@ export class AnaliticasComponent implements OnInit {
     }
   }
 
+  /**
+   * Exportar reporte
+   */
   exportarReporte() {
     this.message.success('Generando reporte... Se descargará en breve');
     // Aquí iría la lógica de exportación
   }
 
+  /**
+   * Obtener medalla
+   */
   getMedalIcon(index: number): string {
-    const icons = ['trophy', 'trophy', 'trophy'];
-    return icons[index];
+    return 'trophy';
   }
 
+  /**
+   * Obtener color de medalla
+   */
   getMedalColor(index: number): string {
     const colors = ['#FFD700', '#C0C0C0', '#CD7F32'];
     return colors[index];
   }
 
+  /**
+   * Obtener color de progreso
+   */
   getProgressColorByValue(value: number): string {
     if (value >= 70) return '#52c41a';
     if (value >= 50) return '#1890ff';

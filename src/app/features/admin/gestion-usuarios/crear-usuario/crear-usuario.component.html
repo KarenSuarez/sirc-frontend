@@ -8,7 +8,7 @@
     <p>Completa el formulario para registrar un nuevo usuario en el sistema</p>
   </div>
 
-  <nz-card [nzBordered]="false" class="formulario-card">
+  <nz-card [nzBordered]="false" class="formulario-card" [nzLoading]="cargando">
     <form nz-form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
 
       <!-- Información Personal -->
@@ -47,13 +47,34 @@
           </div>
         </div>
 
+        <!-- ⭐ TIPO DE DOCUMENTO Y NÚMERO -->
         <div nz-row [nzGutter]="16">
           <div nz-col [nzSpan]="12">
             <nz-form-item>
-              <nz-form-label [nzSpan]="24" nzRequired nzFor="documento">
-                Documento de Identidad
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="id_tipo_documento">
+                Tipo de Documento
               </nz-form-label>
-              <nz-form-control [nzSpan]="24" nzErrorTip="Por favor ingresa el documento">
+              <nz-form-control [nzSpan]="24" nzErrorTip="Por favor selecciona el tipo de documento">
+                <nz-select
+                  formControlName="id_tipo_documento"
+                  id="id_tipo_documento"
+                  nzPlaceHolder="Selecciona el tipo">
+                  <nz-option
+                    *ngFor="let tipo of tiposDocumento"
+                    [nzValue]="tipo.id_tipo_documento"
+                    [nzLabel]="tipo.nombre_tipo">
+                  </nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired nzFor="documento">
+                Número de Documento
+              </nz-form-label>
+              <nz-form-control [nzSpan]="24" nzErrorTip="Por favor ingresa el número de documento">
                 <input
                   nz-input
                   formControlName="documento"
@@ -62,7 +83,9 @@
               </nz-form-control>
             </nz-form-item>
           </div>
+        </div>
 
+        <div nz-row [nzGutter]="16">
           <div nz-col [nzSpan]="12">
             <nz-form-item>
               <nz-form-label [nzSpan]="24" nzRequired nzFor="telefono">
@@ -168,11 +191,11 @@
           </nz-form-label>
           <nz-form-control [nzSpan]="24" nzErrorTip="Por favor selecciona un rol">
             <nz-select formControlName="rol" id="rol" nzPlaceHolder="Selecciona el rol">
-              <nz-option nzValue="admin" nzLabel="Administrador"></nz-option>
-              <nz-option nzValue="gerente_ventas" nzLabel="Gerente de Ventas"></nz-option>
-              <nz-option nzValue="asesor_ventas" nzLabel="Asesor de Ventas"></nz-option>
-              <nz-option nzValue="contador" nzLabel="Contador"></nz-option>
-              <nz-option nzValue="referente" nzLabel="Referente"></nz-option>
+              <nz-option
+                *ngFor="let rol of rolesDisponibles"
+                [nzValue]="rol.nombre_rol"
+                [nzLabel]="formatearNombreRol(rol.nombre_rol)">
+              </nz-option>
             </nz-select>
           </nz-form-control>
         </nz-form-item>
@@ -190,27 +213,27 @@
       <nz-divider></nz-divider>
 
       <!-- Información Adicional para Referentes -->
-      <div class="form-section" *ngIf="usuarioForm.get('rol')?.value === 'referente'">
+      <div class="form-section" *ngIf="esRolReferente()">
         <h3>Información de Referente</h3>
 
         <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzFor="asesorAsignado">
-            Asesor Asignado
+          <nz-form-label [nzSpan]="24" nzFor="tipo_referente">
+            Tipo de Referente
           </nz-form-label>
           <nz-form-control [nzSpan]="24">
-            <nz-select formControlName="asesorAsignado" nzPlaceHolder="Selecciona un asesor (opcional)">
-              <nz-option *ngFor="let asesor of asesoresDisponibles" [nzValue]="asesor.id" [nzLabel]="asesor.nombre"></nz-option>
+            <nz-select formControlName="tipo_referente" nzPlaceHolder="Selecciona el tipo">
+              <nz-option nzValue="cliente_externo" nzLabel="Cliente Externo"></nz-option>
+              <nz-option nzValue="colaborador_interno" nzLabel="Colaborador Interno"></nz-option>
             </nz-select>
           </nz-form-control>
         </nz-form-item>
 
-        <nz-form-item>
-          <nz-form-label [nzSpan]="24">
-            <label nz-checkbox formControlName="generarCodigo">
-              Generar código de referido automáticamente
-            </label>
-          </nz-form-label>
-        </nz-form-item>
+        <nz-alert
+          nzType="info"
+          nzMessage="El código de referido se generará automáticamente al crear el usuario"
+          nzShowIcon
+          [nzCloseable]="false">
+        </nz-alert>
       </div>
 
       <!-- Estado -->

@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
+
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -15,28 +17,12 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 
-interface Referido {
-  id: string;
-  nombre: string;
-  correo: string;
-  telefono: string;
-  tipoDoc: string;
-  documento: string;
-  estado: 'pendiente' | 'contactado' | 'activo' | 'rechazado';
-  fechaRegistro: Date;
-  fechaContacto?: Date;
-  referenteCodigo: string;
-  referenteNombre: string;
-  puntos?: number;
-  plan?: string;
-  valorPlan?: number;
-}
-
-interface ReferenteUnico {
-  codigo: string;
-  nombre: string;
-}
+import { AsesorService } from '../../../../core/services/asesor.service';
+import { Referido, EstadoReferido } from '../../../../core/models/referido.interface';
 
 @Component({
   selector: 'app-lista',
@@ -56,222 +42,257 @@ interface ReferenteUnico {
     NzInputModule,
     NzSelectModule,
     NzMessageModule,
-    NzToolTipModule
+    NzToolTipModule,
+    NzStatisticModule,
+    NzGridModule,
+    NzDescriptionsModule,
   ],
   templateUrl: './lista.component.html',
-  styleUrl: './lista.component.css'
+  styleUrl: './lista.component.css',
 })
-export class ListaComponent implements OnInit {
+export class ListaComponent implements OnInit, OnDestroy {
   referidos: Referido[] = [];
-  referidosFiltrados: Referido[] = [];
-  referentesUnicos: ReferenteUnico[] = [];
   loading = true;
 
-  // Filtros
+  total = 0; // Total de referidos filtrados (para paginación)
+  totalGeneral = 0; // Total de todos los referidos (para estadísticas)
+  pageSize = 20;
+  pageIndex = 1;
+
   searchText = '';
-  filtroEstado = '';
+  filtroEstado: EstadoReferido | '' = '';
   filtroReferente = '';
-  filtroPlan = '';
+
+  estadisticas = {
+    pendientes: 0,
+    contactados: 0,
+    activos: 0,
+    no_interesados: 0,
+  };
+
+  // Control de filas expandidas
+  expandedRows = new Set<number>();
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
+    private asesorService: AsesorService,
     private message: NzMessageService
   ) {}
 
   ngOnInit() {
-    this.cargarReferidos();
-  }
-
-  cargarReferidos() {
-    this.loading = true;
-    // Simulación de datos - aquí iría la llamada al servicio
-    setTimeout(() => {
-      this.referidos = [
-        {
-          id: 'REF-001',
-          nombre: 'Juan Pérez García',
-          correo: 'juan.perez@email.com',
-          telefono: '3001234567',
-          tipoDoc: 'CC',
-          documento: '12345678',
-          estado: 'activo',
-          fechaRegistro: new Date('2024-01-15'),
-          fechaContacto: new Date('2024-01-16'),
-          referenteCodigo: 'REF-2024-001',
-          referenteNombre: 'María González',
-          puntos: 150,
-          plan: 'Plan Profesional',
-          valorPlan: 150000
-        },
-        {
-          id: 'REF-002',
-          nombre: 'María López Rodríguez',
-          correo: 'maria.lopez@email.com',
-          telefono: '3009876543',
-          tipoDoc: 'CC',
-          documento: '87654321',
-          estado: 'contactado',
-          fechaRegistro: new Date('2024-01-20'),
-          fechaContacto: new Date('2024-01-21'),
-          referenteCodigo: 'REF-2024-002',
-          referenteNombre: 'Carlos Ramírez'
-        },
-        {
-          id: 'REF-003',
-          nombre: 'Carlos Ramírez Santos',
-          correo: 'carlos.ramirez@email.com',
-          telefono: '3005551234',
-          tipoDoc: 'CC',
-          documento: '11223344',
-          estado: 'pendiente',
-          fechaRegistro: new Date('2024-01-25'),
-          referenteCodigo: 'REF-2024-001',
-          referenteNombre: 'María González'
-        },
-        {
-          id: 'REF-004',
-          nombre: 'Ana Martínez Díaz',
-          correo: 'ana.martinez@email.com',
-          telefono: '3007778888',
-          tipoDoc: 'CC',
-          documento: '99887766',
-          estado: 'activo',
-          fechaRegistro: new Date('2024-02-01'),
-          fechaContacto: new Date('2024-02-02'),
-          referenteCodigo: 'REF-2024-003',
-          referenteNombre: 'Pedro Sánchez',
-          puntos: 100,
-          plan: 'Plan Básico',
-          valorPlan: 80000
-        },
-        {
-          id: 'REF-005',
-          nombre: 'Luis Hernández Torres',
-          correo: 'luis.hernandez@email.com',
-          telefono: '3004445555',
-          tipoDoc: 'CC',
-          documento: '55667788',
-          estado: 'rechazado',
-          fechaRegistro: new Date('2024-02-05'),
-          fechaContacto: new Date('2024-02-06'),
-          referenteCodigo: 'REF-2024-002',
-          referenteNombre: 'Carlos Ramírez'
-        }
-      ];
-
-      this.extractReferentesUnicos();
-      this.referidosFiltrados = [...this.referidos];
-      this.loading = false;
-    }, 1000);
-  }
-
-  extractReferentesUnicos() {
-    const referentesMap = new Map<string, string>();
-    this.referidos.forEach(ref => {
-      if (!referentesMap.has(ref.referenteCodigo)) {
-        referentesMap.set(ref.referenteCodigo, ref.referenteNombre);
+    // Leer parámetros de query (si vienen desde dashboard)
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      if (params['estado']) {
+        this.filtroEstado = params['estado'] as EstadoReferido;
       }
+      if (params['referente']) {
+        this.filtroReferente = params['referente'];
+      }
+      this.cargarDatos();
     });
-
-    this.referentesUnicos = Array.from(referentesMap.entries()).map(([codigo, nombre]) => ({
-      codigo,
-      nombre
-    }));
   }
 
-  filtrarReferidos() {
-    let resultados = [...this.referidos];
-
-    // Filtro por texto de búsqueda
-    if (this.searchText) {
-      const search = this.searchText.toLowerCase();
-      resultados = resultados.filter(ref =>
-        ref.nombre.toLowerCase().includes(search) ||
-        ref.correo.toLowerCase().includes(search) ||
-        ref.documento.includes(search) ||
-        ref.telefono.includes(search)
-      );
-    }
-
-    // Filtro por estado
-    if (this.filtroEstado) {
-      resultados = resultados.filter(ref => ref.estado === this.filtroEstado);
-    }
-
-    // Filtro por referente
-    if (this.filtroReferente) {
-      resultados = resultados.filter(ref => ref.referenteCodigo === this.filtroReferente);
-    }
-
-    // Filtro por plan
-    if (this.filtroPlan) {
-      if (this.filtroPlan === 'sin-plan') {
-        resultados = resultados.filter(ref => !ref.plan);
-      } else {
-        resultados = resultados.filter(ref => ref.plan?.toLowerCase().includes(this.filtroPlan));
-      }
-    }
-
-    this.referidosFiltrados = resultados;
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
+  /**
+   * Cargar datos: referidos filtrados + estadísticas totales
+   */
+  cargarDatos() {
+    this.loading = true;
+
+    // Cargar referidos filtrados Y estadísticas totales en paralelo
+    forkJoin({
+      referidosFiltrados: this.asesorService.listarReferidos(
+        this.filtroEstado || undefined,
+        this.pageSize,
+        this.pageIndex
+      ),
+      // Llamada adicional para obtener el total general SIN filtros
+      // No pasar el primer parámetro (estado) para obtener todos
+      todosLosReferidos: this.asesorService.listarReferidos(undefined, 1, 1),
+      // Cargar estadísticas totales (sin filtro de estado)
+      totalPendientes: this.asesorService.listarReferidos('pendiente', 1, 1),
+      totalContactados: this.asesorService.listarReferidos('contactado', 1, 1),
+      totalActivos: this.asesorService.listarReferidos('activo', 1, 1),
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('Response completo:', response); // Debug temporal
+
+          // Referidos filtrados para la tabla
+          this.referidos = response.referidosFiltrados.referidos;
+          this.total = response.referidosFiltrados.total; // Total filtrado (para paginación)
+
+          // Total general (sin filtros)
+          this.totalGeneral = response.todosLosReferidos.total;
+
+          console.log('Total general:', this.totalGeneral); // Debug temporal
+          console.log('Total filtrado:', this.total); // Debug temporal
+
+          // Estadísticas totales (independientes del filtro)
+          this.estadisticas = {
+            pendientes: response.totalPendientes.total,
+            contactados: response.totalContactados.total,
+            activos: response.totalActivos.total,
+            no_interesados: 0, // Si necesitas este dato, añade otra llamada
+          };
+
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar datos:', error);
+          this.message.error('Error al cargar datos');
+          this.loading = false;
+        },
+      });
+  }
+
+  /**
+   * Cargar referidos desde backend (método simplificado)
+   */
+  cargarReferidos() {
+    this.cargarDatos();
+  }
+
+  /**
+   * Aplicar filtros
+   */
+  aplicarFiltros() {
+    this.pageIndex = 1; // Resetear a página 1
+    this.cargarDatos();
+  }
+
+  /**
+   * Limpiar filtros
+   */
   limpiarFiltros() {
     this.searchText = '';
     this.filtroEstado = '';
     this.filtroReferente = '';
-    this.filtroPlan = '';
-    this.filtrarReferidos();
+    this.pageIndex = 1;
+    this.cargarDatos();
   }
 
-  contarPorEstado(estado: string): number {
-    return this.referidosFiltrados.filter(ref => ref.estado === estado).length;
+  /**
+   * Cambio de página
+   */
+  onPageChange(pageIndex: number) {
+    this.pageIndex = pageIndex;
+    this.cargarReferidos();
   }
 
+  /**
+   * Cambio de tamaño de página
+   */
+  onPageSizeChange(pageSize: number) {
+    this.pageSize = pageSize;
+    this.pageIndex = 1;
+    this.cargarReferidos();
+  }
+
+  /**
+   * Filtrar por estado
+   */
+  filtrarPorEstado(estado: EstadoReferido | '') {
+    this.filtroEstado = estado;
+    this.pageIndex = 1;
+    this.cargarDatos();
+  }
+
+  /**
+   * Toggle detalle de referido
+   */
+  toggleDetalle(referido: Referido) {
+    if (this.expandedRows.has(referido.id_referido)) {
+      this.expandedRows.delete(referido.id_referido);
+    } else {
+      this.expandedRows.add(referido.id_referido);
+    }
+  }
+
+  /**
+   * Verificar si la fila está expandida
+   */
+  isExpanded(referido: Referido): boolean {
+    return this.expandedRows.has(referido.id_referido);
+  }
+
+  /**
+   * Editar referido
+   */
   editarReferido(referido: Referido) {
-    this.router.navigate(['/asesor/referidos', referido.id, 'editar']);
+    this.router.navigate([
+      `/asesor/referidos/${referido.id_referido}/editar`
+    ]);
   }
 
-  verDetalle(referido: Referido) {
-    this.message.info(`Ver detalles de ${referido.nombre}`);
-  }
-
-  llamarReferido(referido: Referido) {
-    window.location.href = `tel:${referido.telefono}`;
-  }
-
-  enviarEmail(referido: Referido) {
-    window.location.href = `mailto:${referido.correo}`;
-  }
-
-  verHistorial(referido: Referido) {
-    this.message.info(`Ver historial de ${referido.nombre}`);
-  }
-
+  /**
+   * Obtener color del estado
+   */
   getEstadoColor(estado: string): string {
-    const colores = {
-      'pendiente': 'orange',
-      'contactado': 'blue',
-      'activo': 'green',
-      'rechazado': 'red'
+    const colores: Record<string, string> = {
+      pendiente: 'orange',
+      contactado: 'blue',
+      activo: 'green',
+      no_interesado: 'red',
+      inactivo: 'default',
     };
-    return colores[estado as keyof typeof colores] || 'default';
+    return colores[estado] || 'default';
   }
 
+  /**
+   * Obtener texto del estado
+   */
   getEstadoTexto(estado: string): string {
-    const textos = {
-      'pendiente': 'Pendiente',
-      'contactado': 'Contactado',
-      'activo': 'Activo',
-      'rechazado': 'Rechazado'
+    const textos: Record<string, string> = {
+      pendiente: 'Pendiente',
+      contactado: 'Contactado',
+      activo: 'Activo',
+      no_interesado: 'No Interesado',
+      inactivo: 'Inactivo',
     };
-    return textos[estado as keyof typeof textos] || estado;
+    return textos[estado] || estado;
   }
 
-  formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-CO', {
+  /**
+   * Formatear fecha
+   */
+  formatearFecha(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-CO', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
+  }
+
+  /**
+   * Obtener nombre completo del referido
+   */
+  getNombreCompleto(referido: Referido): string {
+    return `${referido.nombre_referido} ${referido.apellido_referido}`;
+  }
+
+  /**
+   * Obtener código del referente
+   */
+  getCodigoReferente(referido: Referido): string {
+    return referido.referente?.codigo_referente || 'N/A';
+  }
+
+  /**
+   * Obtener nombre del referente
+   */
+  getNombreReferente(referido: Referido): string {
+    if (referido.referente?.usuario) {
+      return `${referido.referente.usuario.nombre} ${referido.referente.usuario.apellido}`;
+    }
+    return 'N/A';
   }
 }

@@ -1,7 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -12,7 +21,11 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
+
+import { AdminService } from '../../../../core/services/admin.service';
+import { Usuario } from '../../../../core/models/usuario.interface';
 
 @Component({
   selector: 'app-editar-usuario',
@@ -30,44 +43,56 @@ import { NzMessageService } from 'ng-zorro-antd/message';
     NzCheckboxModule,
     NzDividerModule,
     NzGridModule,
-    NzMessageModule
+    NzMessageModule,
+    NzSpinModule,
   ],
   templateUrl: './editar-usuario.component.html',
-  styleUrl: './editar-usuario.component.css'
+  styleUrl: './editar-usuario.component.css',
 })
-export class EditarUsuarioComponent implements OnInit {
+export class EditarUsuarioComponent implements OnInit, OnDestroy {
   usuarioForm!: FormGroup;
   loading = true;
   guardando = false;
   passwordVisible = false;
   confirmPasswordVisible = false;
-  usuarioId: string = '';
+  usuarioId: number = 0;
+  usuario: Usuario | null = null;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
+    private adminService: AdminService,
     private message: NzMessageService
   ) {}
 
   ngOnInit() {
-    this.usuarioId = this.route.snapshot.params['id'];
+    this.usuarioId = parseInt(this.route.snapshot.params['id']);
     this.initForm();
     this.cargarUsuario();
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   initForm() {
-    this.usuarioForm = this.fb.group({
-      nombre: ['', Validators.required],
-      apellido: ['', Validators.required],
-      documento: ['', Validators.required],
-      telefono: ['', Validators.required],
-      correo: ['', [Validators.required, Validators.email]],
-      rol: ['', Validators.required],
-      nuevaContrasena: ['', [Validators.minLength(6)]],
-      confirmarContrasena: [''],
-      activo: [true]
-    }, { validators: this.passwordMatchValidator });
+    this.usuarioForm = this.fb.group(
+      {
+        nombre: ['', Validators.required],
+        apellido: ['', Validators.required],
+        documento: [{ value: '', disabled: true }],
+        telefono: ['', Validators.required],
+        correo: ['', [Validators.required, Validators.email]],
+        nuevaContrasena: ['', [Validators.minLength(6)]],
+        confirmarContrasena: [''],
+        activo: [true],
+      },
+      { validators: this.passwordMatchValidator }
+    );
   }
 
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -89,29 +114,43 @@ export class EditarUsuarioComponent implements OnInit {
     return password.value === confirmPassword.value ? null : { mismatch: true };
   }
 
+  /**
+   * Cargar usuario desde backend
+   */
   cargarUsuario() {
     this.loading = true;
 
-    // Simulación de carga de datos
-    setTimeout(() => {
-      const usuario = {
-        nombre: 'María',
-        apellido: 'González',
-        documento: '9876543210',
-        telefono: '3009876543',
-        correo: 'maria.gonzalez@email.com',
-        rol: 'referente',
-        activo: true
-      };
-
-      this.usuarioForm.patchValue(usuario);
-      this.loading = false;
-    }, 1000);
+    this.adminService
+      .obtenerUsuario(this.usuarioId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (usuario) => {
+          this.usuario = usuario;
+          this.usuarioForm.patchValue({
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            documento: usuario.numero_documento,
+            telefono: usuario.telefono || '',
+            correo: usuario.correo_electronico,
+            activo: usuario.referente?.estado_referente === 'activo',
+          });
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar usuario:', error);
+          this.message.error('Error al cargar datos del usuario');
+          this.loading = false;
+          this.router.navigate(['/admin/usuarios']);
+        },
+      });
   }
 
+  /**
+   * Guardar cambios
+   */
   guardarCambios() {
     if (!this.usuarioForm.valid) {
-      Object.values(this.usuarioForm.controls).forEach(control => {
+      Object.values(this.usuarioForm.controls).forEach((control) => {
         if (control.invalid) {
           control.markAsDirty();
           control.updateValueAndValidity({ onlySelf: true });
@@ -122,10 +161,34 @@ export class EditarUsuarioComponent implements OnInit {
 
     this.guardando = true;
 
-    setTimeout(() => {
-      this.message.success('Usuario actualizado exitosamente');
-      this.guardando = false;
-      this.router.navigate(['/admin/usuarios']);
-    }, 1500);
+    const formData = this.usuarioForm.value;
+
+    const datosActualizar: any = {
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      correo_electronico: formData.correo,
+      telefono: formData.telefono,
+    };
+
+    // Solo incluir contraseña si se ingresó una nueva
+    if (formData.nuevaContrasena) {
+      datosActualizar.password = formData.nuevaContrasena;
+    }
+
+    this.adminService
+      .actualizarUsuario(this.usuarioId, datosActualizar)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.message.success('Usuario actualizado exitosamente');
+          this.guardando = false;
+          this.router.navigate(['/admin/usuarios']);
+        },
+        error: (error) => {
+          console.error('Error al actualizar usuario:', error);
+          this.message.error(error.error?.message || 'Error al actualizar usuario');
+          this.guardando = false;
+        },
+      });
   }
 }

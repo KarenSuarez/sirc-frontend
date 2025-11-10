@@ -1,3 +1,5 @@
+import { TipoDocumento } from './tipo-documento.interface';
+
 export interface Usuario {
   id_usuario: number;
   numero_documento: string;
@@ -8,6 +10,12 @@ export interface Usuario {
   fecha_registro: string;
   roles?: RolUsuario[];
   referente?: Referente;
+
+  // ⭐ NUEVOS CAMPOS PARA ADMIN
+  id_tipo_documento?: number;
+  tipoDocumento?: TipoDocumento;
+  creado_en?: string;
+  actualizado_en?: string;
 }
 
 export interface RolUsuario {
@@ -70,3 +78,72 @@ export interface ProgresoNivel {
   porcentaje_progreso: number;
 }
 
+// ════════════════════════════════════════════════
+// ⭐ NUEVAS INTERFACES PARA MÓDULO ADMIN
+// ════════════════════════════════════════════════
+
+/**
+ * Respuesta paginada de usuarios (Admin)
+ */
+export interface UsuariosResponse {
+  total: number;
+  pagina: number;
+  limite: number;
+  total_paginas: number;
+  usuarios: Usuario[];
+}
+
+/**
+ * Filtros para listar usuarios (Admin)
+ */
+export interface FiltrosUsuarios {
+  rol?: string;
+  estado?: 'activo' | 'inactivo';
+  limite?: number;
+  pagina?: number;
+}
+
+/**
+ * Request para crear usuario (usando /auth/register)
+ */
+export interface CrearUsuarioRequest {
+  nombre: string;
+  apellido: string;
+  correo_electronico: string;
+  password: string;
+  numero_documento: string;
+  id_tipo_documento: number;
+  telefono?: string;
+  roles?: string[]; // Array de códigos de rol o nombres
+  tipo_referente?: 'cliente_externo' | 'colaborador_interno';
+}
+
+/**
+ * Request para actualizar usuario (Admin)
+ */
+export interface ActualizarUsuarioRequest {
+  nombre?: string;
+  apellido?: string;
+  correo_electronico?: string;
+  telefono?: string;
+  password?: string;
+}
+
+/**
+ * Estadísticas de usuarios (Admin)
+ */
+export interface EstadisticasUsuarios {
+  distribucion_roles: {
+    rol: string;
+    cantidad: number;
+  }[];
+  ultimos_registros: Usuario[];
+}
+
+/**
+ * Asignar rol a usuario (Admin)
+ */
+export interface AsignarRolRequest {
+  id_usuario: number;
+  id_rol: number;
+}

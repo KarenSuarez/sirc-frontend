@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -18,27 +20,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Clipboard } from '@angular/cdk/clipboard';
 
-interface Usuario {
-  id: string;
-  nombre: string;
-  apellido: string;
-  documento: string;
-  correo: string;
-  telefono: string;
-  rol: string;
-  activo: boolean;
-  fechaRegistro: Date;
-  ultimoAcceso: Date;
-}
-
-interface InfoReferente {
-  codigoReferido: string;
-  asesorAsignado: string;
-  totalReferidos: number;
-  referidosActivos: number;
-  comisionesAcumuladas: number;
-  nivelActual: string;
-}
+import { AdminService } from '../../../../core/services/admin.service';
+import { Usuario } from '../../../../core/models/usuario.interface';
 
 interface Actividad {
   accion: string;
@@ -71,133 +54,99 @@ interface Estadisticas {
     NzInputModule,
     NzSpinModule,
     NzMessageModule,
-    NzModalModule
+    NzModalModule,
   ],
   templateUrl: './detalle-usuario.component.html',
-  styleUrl: './detalle-usuario.component.css'
+  styleUrl: './detalle-usuario.component.css',
 })
-export class DetalleUsuarioComponent implements OnInit {
+export class DetalleUsuarioComponent implements OnInit, OnDestroy {
   loading = true;
-  usuarioId: string = '';
+  usuarioId: number = 0;
+  usuario: Usuario | null = null;
   notas: string = '';
-
-  usuario: Usuario = {
-    id: '',
-    nombre: '',
-    apellido: '',
-    documento: '',
-    correo: '',
-    telefono: '',
-    rol: '',
-    activo: false,
-    fechaRegistro: new Date(),
-    ultimoAcceso: new Date()
-  };
-
-  infoReferente: InfoReferente = {
-    codigoReferido: '',
-    asesorAsignado: '',
-    totalReferidos: 0,
-    referidosActivos: 0,
-    comisionesAcumuladas: 0,
-    nivelActual: ''
-  };
 
   actividadReciente: Actividad[] = [];
 
   estadisticas: Estadisticas = {
     totalLogins: 0,
     diasRegistrado: 0,
-    accionesRealizadas: 0
+    accionesRealizadas: 0,
   };
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
+    private adminService: AdminService,
     private message: NzMessageService,
     private modal: NzModalService,
     private clipboard: Clipboard
   ) {}
 
   ngOnInit() {
-    this.usuarioId = this.route.snapshot.params['id'];
+    this.usuarioId = parseInt(this.route.snapshot.params['id']);
     this.cargarUsuario();
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Cargar usuario desde backend
+   */
   cargarUsuario() {
     this.loading = true;
 
-    setTimeout(() => {
-      this.usuario = {
-        id: '2',
-        nombre: 'María',
-        apellido: 'González',
-        documento: '9876543210',
-        correo: 'maria.gonzalez@email.com',
-        telefono: '3009876543',
-        rol: 'referente',
-        activo: true,
-        fechaRegistro: new Date('2024-01-15'),
-        ultimoAcceso: new Date('2025-01-28T14:30:00')
-      };
+    this.adminService
+      .obtenerUsuario(this.usuarioId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (usuario) => {
+          this.usuario = usuario;
 
-      if (this.usuario.rol === 'referente') {
-        this.infoReferente = {
-          codigoReferido: 'REF-2024-001',
-          asesorAsignado: 'Carlos Ramírez',
-          totalReferidos: 15,
-          referidosActivos: 12,
-          comisionesAcumuladas: 850000,
-          nivelActual: 'Oro'
-        };
-      }
+          // Calcular estadísticas
+          this.estadisticas = {
+            totalLogins: 0, // Esto vendría de un endpoint de historial
+            diasRegistrado: this.calcularDiasRegistrado(usuario.fecha_registro),
+            accionesRealizadas: 0,
+          };
 
-      this.actividadReciente = [
-        {
-          accion: 'Inicio de Sesión',
-          descripcion: 'El usuario ingresó al sistema',
-          fecha: new Date('2025-01-28T14:30:00'),
-          color: 'green'
+          // Actividad reciente (simulada - idealmente vendría del backend)
+          this.actividadReciente = [
+            {
+              accion: 'Registro en el Sistema',
+              descripcion: 'Usuario registrado exitosamente',
+              fecha: new Date(usuario.fecha_registro),
+              color: 'green',
+            },
+          ];
+
+          this.loading = false;
         },
-        {
-          accion: 'Referido Registrado',
-          descripcion: 'Registró un nuevo referido: Pedro López',
-          fecha: new Date('2025-01-27T10:15:00'),
-          color: 'blue'
+        error: (error) => {
+          console.error('Error al cargar usuario:', error);
+          this.message.error('Error al cargar datos del usuario');
+          this.loading = false;
+          this.router.navigate(['/admin/usuarios']);
         },
-        {
-          accion: 'Comisión Generada',
-          descripcion: 'Ganó $50,000 por conversión de referido',
-          fecha: new Date('2025-01-26T16:45:00'),
-          color: 'orange'
-        },
-        {
-          accion: 'Perfil Actualizado',
-          descripcion: 'Actualizó su información de contacto',
-          fecha: new Date('2025-01-25T09:20:00'),
-          color: 'cyan'
-        }
-      ];
-
-      this.estadisticas = {
-        totalLogins: 127,
-        diasRegistrado: this.calcularDiasRegistrado(this.usuario.fechaRegistro),
-        accionesRealizadas: 342
-      };
-
-      this.loading = false;
-    }, 1000);
+      });
   }
 
-  calcularDiasRegistrado(fecha: Date): number {
+  calcularDiasRegistrado(fecha: string): number {
     const hoy = new Date();
-    const diff = hoy.getTime() - fecha.getTime();
+    const fechaRegistro = new Date(fecha);
+    const diff = hoy.getTime() - fechaRegistro.getTime();
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   }
 
   copiarCodigo() {
-    this.clipboard.copy(this.infoReferente.codigoReferido);
-    this.message.success('Código copiado al portapapeles');
+    if (this.usuario?.referente?.codigo_referente) {
+      this.clipboard.copy(this.usuario.referente.codigo_referente);
+      this.message.success('Código copiado al portapapeles');
+    }
   }
 
   enviarNotificacion() {
@@ -207,12 +156,13 @@ export class DetalleUsuarioComponent implements OnInit {
   resetearContrasena() {
     this.modal.confirm({
       nzTitle: '¿Resetear contraseña?',
-      nzContent: 'Se enviará un correo electrónico al usuario con instrucciones para crear una nueva contraseña.',
+      nzContent:
+        'Se enviará un correo electrónico al usuario con instrucciones para crear una nueva contraseña.',
       nzOkText: 'Sí, resetear',
       nzCancelText: 'Cancelar',
       nzOnOk: () => {
         this.message.success('Correo de reseteo enviado correctamente');
-      }
+      },
     });
   }
 
@@ -221,17 +171,21 @@ export class DetalleUsuarioComponent implements OnInit {
   }
 
   toggleEstadoUsuario() {
-    const accion = this.usuario.activo ? 'desactivar' : 'activar';
+    if (!this.usuario) return;
+
+    const esActivo = this.usuario.referente?.estado_referente === 'activo';
+    const accion = esActivo ? 'desactivar' : 'activar';
 
     this.modal.confirm({
       nzTitle: `¿${accion.charAt(0).toUpperCase() + accion.slice(1)} usuario?`,
-      nzContent: `¿Estás seguro de ${accion} a ${this.usuario.nombre} ${this.usuario.apellido}?`,
+      nzContent: `¿Estás seguro de ${accion} a ${this.adminService.obtenerNombreCompleto(this.usuario)}?`,
       nzOkText: `Sí, ${accion}`,
       nzCancelText: 'Cancelar',
       nzOnOk: () => {
-        this.usuario.activo = !this.usuario.activo;
+        // Aquí iría la llamada al endpoint para cambiar estado
         this.message.success(`Usuario ${accion}do correctamente`);
-      }
+        this.cargarUsuario();
+      },
     });
   }
 
@@ -240,48 +194,63 @@ export class DetalleUsuarioComponent implements OnInit {
   }
 
   eliminarUsuario() {
+    if (!this.usuario) return;
+
     this.modal.confirm({
-      nzTitle: '¿Eliminar usuario?',
-      nzContent: `¿Estás seguro de eliminar a ${this.usuario.nombre} ${this.usuario.apellido}? Esta acción no se puede deshacer.`,
-      nzOkText: 'Sí, eliminar',
+      nzTitle: '¿Desactivar usuario?',
+      nzContent: `¿Estás seguro de desactivar a ${this.adminService.obtenerNombreCompleto(this.usuario)}? El usuario no podrá acceder al sistema.`,
+      nzOkText: 'Sí, desactivar',
       nzOkDanger: true,
       nzCancelText: 'Cancelar',
       nzOnOk: () => {
-        this.message.success('Usuario eliminado correctamente');
-        this.router.navigate(['/admin/usuarios']);
-      }
+        this.adminService
+          .desactivarUsuario(this.usuario!.id_usuario)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.message.success('Usuario desactivado correctamente');
+              this.router.navigate(['/admin/usuarios']);
+            },
+            error: (error) => {
+              console.error('Error al desactivar usuario:', error);
+              this.message.error(error.error?.message || 'Error al desactivar usuario');
+            },
+          });
+      },
     });
   }
 
-  getRolColor(rol: string): string {
-    const colores: { [key: string]: string } = {
-      'admin': 'red',
-      'gerente_ventas': 'purple',
-      'asesor_ventas': 'blue',
-      'contador': 'cyan',
-      'referente': 'green'
-    };
-    return colores[rol] || 'default';
+  getRolColor(): string {
+    if (!this.usuario) return 'default';
+    const rol = this.adminService.obtenerRolPrincipal(this.usuario);
+    return rol ? this.adminService.obtenerColorRol(rol.codigo_rol) : 'default';
   }
 
-  getRolTexto(rol: string): string {
-    const textos: { [key: string]: string } = {
-      'admin': 'Administrador',
-      'gerente_ventas': 'Gerente de Ventas',
-      'asesor_ventas': 'Asesor de Ventas',
-      'contador': 'Contador',
-      'referente': 'Referente'
-    };
-    return textos[rol] || rol;
+  getRolTexto(): string {
+    if (!this.usuario) return '';
+    const rol = this.adminService.obtenerRolPrincipal(this.usuario);
+    return rol ? this.adminService.formatearRol(rol.codigo_rol) : 'Sin rol';
   }
 
-  formatearFechaCompleta(fecha: Date): string {
-    return fecha.toLocaleString('es-CO', {
+  obtenerNombreCompleto(): string {
+    return this.usuario ? this.adminService.obtenerNombreCompleto(this.usuario) : '';
+  }
+
+  obtenerIniciales(): string {
+    return this.usuario ? this.adminService.obtenerIniciales(this.usuario) : '??';
+  }
+
+  estaActivo(): boolean {
+    return this.usuario?.referente?.estado_referente === 'activo';
+  }
+
+  formatearFechaCompleta(fecha: string): string {
+    return new Date(fecha).toLocaleString('es-CO', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -299,7 +268,7 @@ export class DetalleUsuarioComponent implements OnInit {
     return fecha.toLocaleDateString('es-CO', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 }

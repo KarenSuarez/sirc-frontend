@@ -77,24 +77,24 @@
   font-size: 20px;
 }
 .stat-saldo {
-  background-color: var(--success-color);
+  background-color: var(--primary-color);
 }
 .stat-pendiente {
   background-color: var(--warning-color);
 }
 .stat-pagado {
-  background-color: var(--primary-color);
+  background-color: var(--success-color);
 }
 
 /* 5. Fondos suaves para las tarjetas (como en dashboard) */
 .stat-card-saldo {
-  background-color: rgba(82, 196, 26, 0.08) !important;
+  background-color: rgba(74, 144, 226, 0.08) !important;
 }
 .stat-card-pendiente {
   background-color: rgba(250, 173, 20, 0.08) !important;
 }
 .stat-card-pagado {
-  background-color: rgba(74, 144, 226, 0.08) !important;
+  background-color: rgba(82, 196, 26, 0.08) !important;
 }
 
 /* 6. Contenedor de la estadística (para que crezca) */

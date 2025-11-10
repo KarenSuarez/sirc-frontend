@@ -1,12 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzMessageService } from 'ng-zorro-antd/message';
+
+import { AdminService } from '../../../core/services/admin.service';
+import { GerenteService } from '../../../core/services/gerente.service';
+import { Usuario } from '../../../core/models/usuario.interface';
 
 interface Estadisticas {
   totalUsuarios: number;
@@ -31,15 +39,6 @@ interface Actividad {
   exitoso: boolean;
 }
 
-interface Usuario {
-  id: string;
-  nombre: string;
-  apellido: string;
-  correo: string;
-  rol: string;
-  fechaRegistro: Date;
-}
-
 interface ChartSegment {
   color: string;
   dashArray: string;
@@ -57,17 +56,20 @@ interface ChartSegment {
     NzButtonModule,
     NzIconModule,
     NzTagModule,
-    NzTableModule
+    NzTableModule,
+    NzSpinModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  cargando = true;
+
   estadisticas: Estadisticas = {
     totalUsuarios: 0,
     usuariosActivos: 0,
     totalReferentes: 0,
-    ingresosTotal: 0
+    ingresosTotal: 0,
   };
 
   distribucionRoles: DistribucionRol[] = [];
@@ -75,39 +77,111 @@ export class DashboardComponent implements OnInit {
   actividadReciente: Actividad[] = [];
   ultimosUsuarios: Usuario[] = [];
 
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private adminService: AdminService,
+    private gerenteService: GerenteService,
+    private message: NzMessageService
+  ) {}
+
   ngOnInit() {
-    this.cargarEstadisticas();
-    this.cargarDistribucionRoles();
-    this.cargarActividadReciente();
-    this.cargarUltimosUsuarios();
+    this.cargarDatos();
   }
 
-  cargarEstadisticas() {
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Cargar datos desde backend
+   */
+  cargarDatos() {
+    this.cargando = true;
+
+    forkJoin({
+      usuarios: this.adminService.listarUsuarios({ limite: 100, pagina: 1 }),
+      kpisGenerales: this.gerenteService.obtenerKPIsGenerales(),
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.procesarDatos(data.usuarios.usuarios, data.kpisGenerales);
+          this.cargando = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar dashboard:', error);
+          this.message.error('Error al cargar datos del dashboard');
+          this.cargando = false;
+          // Cargar datos de respaldo
+          this.cargarDatosRespaldo();
+        },
+      });
+  }
+
+  /**
+   * Procesar datos del backend
+   */
+  procesarDatos(usuarios: Usuario[], kpis: any) {
+    const stats = this.adminService.calcularEstadisticas(usuarios);
+
+    // Estadísticas
     this.estadisticas = {
-      totalUsuarios: 47,
-      usuariosActivos: 42,
-      totalReferentes: 28,
-      ingresosTotal: 12500000
+      totalUsuarios: stats.total,
+      usuariosActivos: stats.activos,
+      totalReferentes: stats.por_rol['REF'] || stats.por_rol['referente'] || 0,
+      ingresosTotal: kpis.comisiones.total,
     };
+
+    // Distribución por roles
+    this.calcularDistribucionRoles(stats.por_rol, stats.total);
+
+    // Últimos usuarios registrados
+    this.ultimosUsuarios = usuarios
+      .sort((a, b) => {
+        const fechaA = new Date(a.fecha_registro).getTime();
+        const fechaB = new Date(b.fecha_registro).getTime();
+        return fechaB - fechaA;
+      })
+      .slice(0, 5);
+
+    // Actividad reciente (simulada por ahora)
+    this.actividadReciente = [
+      {
+        fecha: new Date(),
+        usuario: 'Sistema',
+        accion: 'Login',
+        tipo: 'login',
+        detalles: 'Acceso al dashboard',
+        exitoso: true,
+      },
+    ];
   }
 
-  cargarDistribucionRoles() {
-    this.distribucionRoles = [
-      { nombre: 'Referentes', cantidad: 28, porcentaje: 60, color: '#52c41a' },
-      { nombre: 'Asesores', cantidad: 8, porcentaje: 17, color: '#1890ff' },
-      { nombre: 'Gerentes', cantidad: 5, porcentaje: 11, color: '#722ed1' },
-      { nombre: 'Contadores', cantidad: 3, porcentaje: 6, color: '#13c2c2' },
-      { nombre: 'Administradores', cantidad: 3, porcentaje: 6, color: '#f5222d' }
-    ];
+  /**
+   * Calcular distribución por roles
+   */
+  calcularDistribucionRoles(porRol: { [rol: string]: number }, total: number) {
+    const roles = Object.entries(porRol).map(([codigo, cantidad]) => ({
+      nombre: this.adminService.formatearRol(codigo),
+      cantidad,
+      porcentaje: Math.round((cantidad / total) * 100),
+      color: this.adminService.obtenerColorRol(codigo),
+    }));
 
+    this.distribucionRoles = roles.sort((a, b) => b.cantidad - a.cantidad);
     this.generarChartSegments();
   }
 
+  /**
+   * Generar segmentos del gráfico
+   */
   generarChartSegments() {
     const circumference = 2 * Math.PI * 40;
     let currentOffset = 0;
 
-    this.chartSegments = this.distribucionRoles.map(rol => {
+    this.chartSegments = this.distribucionRoles.map((rol) => {
       const segmentLength = (rol.porcentaje / 100) * circumference;
       const dashArray = `${segmentLength} ${circumference}`;
       const offset = -currentOffset;
@@ -115,14 +189,48 @@ export class DashboardComponent implements OnInit {
       currentOffset += segmentLength;
 
       return {
-        color: rol.color,
+        color: this.getColorValue(rol.color),
         dashArray: dashArray,
-        offset: offset
+        offset: offset,
       };
     });
   }
 
-  cargarActividadReciente() {
+  /**
+   * Obtener valor hexadecimal del color
+   */
+  getColorValue(color: string): string {
+    const colores: { [key: string]: string } = {
+      red: '#f5222d',
+      purple: '#722ed1',
+      blue: '#1890ff',
+      cyan: '#13c2c2',
+      green: '#52c41a',
+    };
+    return colores[color] || color;
+  }
+
+  /**
+   * Cargar datos de respaldo
+   */
+  cargarDatosRespaldo() {
+    this.estadisticas = {
+      totalUsuarios: 47,
+      usuariosActivos: 42,
+      totalReferentes: 28,
+      ingresosTotal: 12500000,
+    };
+
+    this.distribucionRoles = [
+      { nombre: 'Referentes', cantidad: 28, porcentaje: 60, color: 'green' },
+      { nombre: 'Asesores', cantidad: 8, porcentaje: 17, color: 'blue' },
+      { nombre: 'Gerentes', cantidad: 5, porcentaje: 11, color: 'purple' },
+      { nombre: 'Contadores', cantidad: 3, porcentaje: 6, color: 'cyan' },
+      { nombre: 'Administradores', cantidad: 3, porcentaje: 6, color: 'red' },
+    ];
+
+    this.generarChartSegments();
+
     this.actividadReciente = [
       {
         fecha: new Date('2025-01-29T01:45:00'),
@@ -130,95 +238,32 @@ export class DashboardComponent implements OnInit {
         accion: 'Usuario Creado',
         tipo: 'crear',
         detalles: 'Nuevo referente registrado',
-        exitoso: true
+        exitoso: true,
       },
-      {
-        fecha: new Date('2025-01-29T01:30:00'),
-        usuario: 'Admin',
-        accion: 'Configuración',
-        tipo: 'config',
-        detalles: 'Modificó parámetros de comisiones',
-        exitoso: true
-      },
-      {
-        fecha: new Date('2025-01-29T01:15:00'),
-        usuario: 'Carlos Ramírez',
-        accion: 'Login',
-        tipo: 'login',
-        detalles: 'Inició sesión en el sistema',
-        exitoso: true
-      },
-      {
-        fecha: new Date('2025-01-29T01:00:00'),
-        usuario: 'Ana López',
-        accion: 'Usuario Editado',
-        tipo: 'editar',
-        detalles: 'Actualizó información de perfil',
-        exitoso: true
-      }
     ];
-  }
 
-  cargarUltimosUsuarios() {
-    this.ultimosUsuarios = [
-      {
-        id: '10',
-        nombre: 'Laura',
-        apellido: 'Martínez',
-        correo: 'laura.martinez@email.com',
-        rol: 'referente',
-        fechaRegistro: new Date('2025-01-28')
-      },
-      {
-        id: '9',
-        nombre: 'Diego',
-        apellido: 'Rodríguez',
-        correo: 'diego.rodriguez@email.com',
-        rol: 'referente',
-        fechaRegistro: new Date('2025-01-27')
-      },
-      {
-        id: '8',
-        nombre: 'Sofia',
-        apellido: 'López',
-        correo: 'sofia.lopez@email.com',
-        rol: 'asesor_ventas',
-        fechaRegistro: new Date('2025-01-26')
-      }
-    ];
+    this.ultimosUsuarios = [];
   }
 
   getAccionColor(tipo: string): string {
     const colores: { [key: string]: string } = {
-      'crear': 'green',
-      'editar': 'blue',
-      'eliminar': 'red',
-      'config': 'purple',
-      'login': 'cyan'
+      crear: 'green',
+      editar: 'blue',
+      eliminar: 'red',
+      config: 'purple',
+      login: 'cyan',
     };
     return colores[tipo] || 'default';
   }
 
-  getRolColor(rol: string): string {
-    const colores: { [key: string]: string } = {
-      'admin': 'red',
-      'gerente_ventas': 'purple',
-      'asesor_ventas': 'blue',
-      'contador': 'cyan',
-      'referente': 'green'
-    };
-    return colores[rol] || 'default';
+  getRolColor(usuario: Usuario): string {
+    const rol = this.adminService.obtenerRolPrincipal(usuario);
+    return rol ? this.adminService.obtenerColorRol(rol.codigo_rol) : 'default';
   }
 
-  getRolTexto(rol: string): string {
-    const textos: { [key: string]: string } = {
-      'admin': 'Administrador',
-      'gerente_ventas': 'Gerente',
-      'asesor_ventas': 'Asesor',
-      'contador': 'Contador',
-      'referente': 'Referente'
-    };
-    return textos[rol] || rol;
+  getRolTexto(usuario: Usuario): string {
+    const rol = this.adminService.obtenerRolPrincipal(usuario);
+    return rol ? this.adminService.formatearRol(rol.codigo_rol) : 'Usuario';
   }
 
   formatearFecha(fecha: Date): string {
@@ -226,22 +271,27 @@ export class DashboardComponent implements OnInit {
       day: '2-digit',
       month: 'short',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
-  formatearFechaRelativa(fecha: Date): string {
-    const ahora = new Date();
-    const diff = ahora.getTime() - fecha.getTime();
-    const dias = Math.floor(diff / 86400000);
+  formatearFechaRelativa(fecha?: string): string {
+  if (!fecha) return 'Sin fecha';
 
-    if (dias === 0) return 'Hoy';
-    if (dias === 1) return 'Ayer';
-    if (dias < 7) return `Hace ${dias} días`;
+  const fechaDate = new Date(fecha);
+  if (isNaN(fechaDate.getTime())) return 'Fecha inválida';
 
-    return fecha.toLocaleDateString('es-CO', {
-      day: '2-digit',
-      month: 'short'
-    });
-  }
+  const ahora = new Date();
+  const diff = ahora.getTime() - fechaDate.getTime();
+  const dias = Math.floor(diff / 86400000);
+
+  if (dias === 0) return 'Hoy';
+  if (dias === 1) return 'Ayer';
+  if (dias < 7) return `Hace ${dias} días`;
+
+  return fechaDate.toLocaleDateString('es-CO', {
+    day: '2-digit',
+    month: 'short',
+  });
+}
 }

@@ -1,30 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subject, forkJoin, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { UsuarioHelperService } from '../../../core/services/usuario-helper.service';
+import { ContadorService } from '../../../core/services/contador.service';
 import { UsuarioAutenticado } from '../../../core/models/usuario.interface';
+import { SolicitudRecompensa } from '../../../core/models/solicitud.interface';
 
 interface Estadisticas {
   retirosPendientes: number;
   retirosHoy: number;
   montoMes: number;
   totalRetiros: number;
-}
-
-interface SolicitudRetiro {
-  id: string;
-  referenteNombre: string;
-  monto: number;
-  fechaSolicitud: Date;
-  estado: 'pendiente' | 'aprobado' | 'rechazado';
 }
 
 @Component({
@@ -38,105 +36,144 @@ interface SolicitudRetiro {
     NzIconModule,
     NzStatisticModule,
     NzTableModule,
-    NzTagModule
+    NzTagModule,
+    NzSpinModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   usuario: UsuarioAutenticado | null = null;
+  cargando = true;
+
   estadisticas: Estadisticas = {
     retirosPendientes: 0,
     retirosHoy: 0,
     montoMes: 0,
-    totalRetiros: 0
+    totalRetiros: 0,
   };
-  ultimasSolicitudes: SolicitudRetiro[] = [];
+
+  ultimasSolicitudes: SolicitudRecompensa[] = [];
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
-    public usuarioHelper: UsuarioHelperService
+    public usuarioHelper: UsuarioHelperService,
+    private contadorService: ContadorService,
+    private message: NzMessageService
   ) {}
 
   ngOnInit() {
     this.usuario = this.authService.usuario();
-    this.cargarEstadisticas();
-    this.cargarUltimasSolicitudes();
+    this.cargarDatos();
   }
 
-  cargarEstadisticas() {
-    this.estadisticas = {
-      retirosPendientes: 8,
-      retirosHoy: 5,
-      montoMes: 4500000,
-      totalRetiros: 142
-    };
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  cargarUltimasSolicitudes() {
-    this.ultimasSolicitudes = [
-      {
-        id: '1',
-        referenteNombre: 'María González',
-        monto: 250000,
-        fechaSolicitud: new Date('2024-01-28'),
-        estado: 'pendiente'
-      },
-      {
-        id: '2',
-        referenteNombre: 'Carlos Ramírez',
-        monto: 180000,
-        fechaSolicitud: new Date('2024-01-27'),
-        estado: 'pendiente'
-      },
-      {
-        id: '3',
-        referenteNombre: 'Ana Martínez',
-        monto: 320000,
-        fechaSolicitud: new Date('2024-01-27'),
-        estado: 'aprobado'
-      },
-      {
-        id: '4',
-        referenteNombre: 'Pedro Sánchez',
-        monto: 150000,
-        fechaSolicitud: new Date('2024-01-26'),
-        estado: 'aprobado'
-      },
-      {
-        id: '5',
-        referenteNombre: 'Luis Hernández',
-        monto: 95000,
-        fechaSolicitud: new Date('2024-01-26'),
-        estado: 'rechazado'
+  /**
+   * Cargar todos los datos del dashboard
+   * SOLO usando endpoints que el contador puede acceder
+   */
+  cargarDatos() {
+    this.cargando = true;
+
+    // Solo cargar solicitudes - NO usar /kpi/general que requiere permisos de gerente
+    forkJoin({
+      solicitudesPendientes: this.contadorService.listarTodasSolicitudes({
+        estado: 'pendiente',
+        limite: 5,
+        pagina: 1,
+      }),
+      todasSolicitudes: this.contadorService.listarTodasSolicitudes({
+        limite: 1000, // Aumentar límite para obtener todas
+        pagina: 1,
+      }),
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.procesarEstadisticas(data.todasSolicitudes.solicitudes);
+          this.ultimasSolicitudes = data.solicitudesPendientes.solicitudes;
+          this.cargando = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar dashboard:', error);
+          this.message.error('Error al cargar datos del dashboard');
+          this.cargando = false;
+        },
+      });
+  }
+
+  /**
+   * Procesar estadísticas desde las solicitudes
+   */
+  procesarEstadisticas(solicitudes: SolicitudRecompensa[]) {
+    const stats = this.contadorService.calcularEstadisticasSolicitudes(solicitudes);
+
+    this.estadisticas.retirosPendientes = stats.pendientes;
+    this.estadisticas.totalRetiros = stats.total;
+
+    // Calcular retiros de hoy
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    this.estadisticas.retirosHoy = solicitudes.filter((s) => {
+      if (!s.fecha_procesamiento || s.estado_solicitud !== 'aprobada') {
+        return false;
       }
-    ];
+      const fechaProceso = new Date(s.fecha_procesamiento);
+      fechaProceso.setHours(0, 0, 0, 0);
+      return fechaProceso.getTime() === hoy.getTime();
+    }).length;
+
+    // Calcular monto del mes actual
+    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+    this.estadisticas.montoMes = solicitudes
+      .filter((s) => {
+        if (!s.fecha_procesamiento || s.estado_solicitud !== 'aprobada') {
+          return false;
+        }
+        const fechaProceso = new Date(s.fecha_procesamiento);
+        return fechaProceso >= inicioMes;
+      })
+      .reduce((sum, s) => sum + s.monto_solicitado, 0);
   }
 
+  /**
+   * Obtener color del estado
+   */
   getEstadoColor(estado: string): string {
-    const colores = {
-      'pendiente': 'orange',
-      'aprobado': 'green',
-      'rechazado': 'red'
-    };
-    return colores[estado as keyof typeof colores] || 'default';
+    return this.contadorService.obtenerColorEstado(estado as any);
   }
 
+  /**
+   * Obtener texto del estado
+   */
   getEstadoTexto(estado: string): string {
-    const textos = {
-      'pendiente': 'Pendiente',
-      'aprobado': 'Aprobado',
-      'rechazado': 'Rechazado'
-    };
-    return textos[estado as keyof typeof textos] || estado;
+    return this.contadorService.obtenerTextoEstado(estado as any);
   }
 
-  formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-CO', {
+  /**
+   * Formatear fecha
+   */
+  formatearFecha(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-CO', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
+  }
+
+  /**
+   * Obtener nombre del referente
+   */
+  obtenerNombreReferente(solicitud: SolicitudRecompensa): string {
+    return this.contadorService.obtenerNombreReferente(solicitud);
   }
 
   get nombreCompleto(): string {

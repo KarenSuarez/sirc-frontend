@@ -1,7 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+  FormsModule,
+} from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -18,17 +26,8 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
-interface Plan {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  valor: number;
-  comisionPorcentaje: number;
-  puntos: number;
-  icono: string;
-  color: string;
-  activo: boolean;
-}
+import { PlanService } from '../../../../core/services/plan.service';
+import { Plan, CrearPlanRequest, ActualizarPlanRequest } from '../../../../core/models/plan.interface';
 
 @Component({
   selector: 'app-configuracion-planes',
@@ -50,12 +49,12 @@ interface Plan {
     NzSwitchModule,
     NzSpaceModule,
     NzToolTipModule,
-    NzAlertModule
+    NzAlertModule,
   ],
   templateUrl: './configuracion-planes.component.html',
-  styleUrl: './configuracion-planes.component.css'
+  styleUrl: './configuracion-planes.component.css',
 })
-export class ConfiguracionPlanesComponent implements OnInit {
+export class ConfiguracionPlanesComponent implements OnInit, OnDestroy {
   planes: Plan[] = [];
   planesFiltrados: Plan[] = [];
   loading = true;
@@ -74,11 +73,14 @@ export class ConfiguracionPlanesComponent implements OnInit {
     { label: 'Corona', value: 'crown' },
     { label: 'Fuego', value: 'fire' },
     { label: 'Corazón', value: 'heart' },
-    { label: 'Diamante', value: 'skin' }
+    { label: 'Archivo', value: 'file-text' },
   ];
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
+    private planService: PlanService,
     private message: NzMessageService,
     private modal: NzModalService
   ) {}
@@ -88,64 +90,52 @@ export class ConfiguracionPlanesComponent implements OnInit {
     this.cargarPlanes();
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   initForm() {
     this.planForm = this.fb.group({
-      nombre: ['', Validators.required],
+      nombre_plan: ['', Validators.required],
       descripcion: [''],
-      valor: [0, [Validators.required, Validators.min(1)]],
-      comisionPorcentaje: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      puntos: [0, [Validators.required, Validators.min(0)]],
-      icono: ['star'],
-      color: ['#4A90E2']
+      precio_actual: [0, [Validators.required, Validators.min(1)]],
+      porcentaje_comision_base: [
+        0,
+        [Validators.required, Validators.min(0), Validators.max(100)],
+      ],
+      puntos_otorgados: [0, [Validators.required, Validators.min(0)]],
+      icono_plan: ['file-text'],
+      color_plan: ['#4A90E2'],
     });
   }
 
+  /**
+   * Cargar planes desde backend
+   */
   cargarPlanes() {
     this.loading = true;
 
-    // Simulación de datos
-    setTimeout(() => {
-      this.planes = [
-        {
-          id: '1',
-          nombre: 'Plan Básico',
-          descripcion: 'Perfecto para emprendedores y pequeños negocios',
-          valor: 80000,
-          comisionPorcentaje: 10,
-          puntos: 100,
-          icono: 'star',
-          color: '#52c41a',
-          activo: true
+    this.planService
+      .listarPlanes()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (planes) => {
+          this.planes = planes;
+          this.planesFiltrados = [...this.planes];
+          this.loading = false;
         },
-        {
-          id: '2',
-          nombre: 'Plan Profesional',
-          descripcion: 'Ideal para empresas en crecimiento',
-          valor: 150000,
-          comisionPorcentaje: 12,
-          puntos: 150,
-          icono: 'trophy',
-          color: '#1890ff',
-          activo: true
+        error: (error) => {
+          console.error('Error al cargar planes:', error);
+          this.message.error('Error al cargar planes');
+          this.loading = false;
         },
-        {
-          id: '3',
-          nombre: 'Plan Empresarial',
-          descripcion: 'Solución completa para grandes empresas',
-          valor: 300000,
-          comisionPorcentaje: 15,
-          puntos: 200,
-          icono: 'crown',
-          color: '#722ed1',
-          activo: true
-        }
-      ];
-
-      this.planesFiltrados = [...this.planes];
-      this.loading = false;
-    }, 1000);
+      });
   }
 
+  /**
+   * Filtrar planes
+   */
   filtrarPlanes() {
     if (!this.searchText) {
       this.planesFiltrados = [...this.planes];
@@ -153,35 +143,53 @@ export class ConfiguracionPlanesComponent implements OnInit {
     }
 
     const search = this.searchText.toLowerCase();
-    this.planesFiltrados = this.planes.filter(plan =>
-      plan.nombre.toLowerCase().includes(search) ||
-      plan.descripcion.toLowerCase().includes(search)
+    this.planesFiltrados = this.planes.filter(
+      (plan) =>
+        plan.nombre_plan.toLowerCase().includes(search) ||
+        (plan.descripcion_plan && plan.descripcion_plan.toLowerCase().includes(search))
     );
   }
 
+  /**
+   * Mostrar modal para crear
+   */
   mostrarModalCrear() {
     this.modoEdicion = false;
     this.planSeleccionado = null;
     this.planForm.reset({
-      icono: 'star',
-      color: '#4A90E2',
-      valor: 0,
-      comisionPorcentaje: 0,
-      puntos: 0
+      icono_plan: 'file-text',
+      color_plan: '#4A90E2',
+      precio_actual: 0,
+      porcentaje_comision_base: 0,
+      puntos_otorgados: 0,
     });
     this.modalVisible = true;
   }
 
+  /**
+   * Editar plan
+   */
   editarPlan(plan: Plan) {
     this.modoEdicion = true;
     this.planSeleccionado = plan;
-    this.planForm.patchValue(plan);
+    this.planForm.patchValue({
+      nombre_plan: plan.nombre_plan,
+      descripcion: plan.descripcion_plan || '',
+      precio_actual: plan.precio_actual,
+      porcentaje_comision_base: plan.porcentaje_comision,
+      puntos_otorgados: plan.puntos_plan,
+      icono_plan: plan.icono_plan || 'file-text',
+      color_plan: plan.color_plan || '#4A90E2',
+    });
     this.modalVisible = true;
   }
 
+  /**
+   * Guardar plan (crear o actualizar)
+   */
   guardarPlan() {
     if (!this.planForm.valid) {
-      Object.values(this.planForm.controls).forEach(control => {
+      Object.values(this.planForm.controls).forEach((control) => {
         if (control.invalid) {
           control.markAsDirty();
           control.updateValueAndValidity({ onlySelf: true });
@@ -192,73 +200,145 @@ export class ConfiguracionPlanesComponent implements OnInit {
 
     this.guardando = true;
 
-    setTimeout(() => {
-      if (this.modoEdicion && this.planSeleccionado) {
-        // Actualizar plan existente
-        const index = this.planes.findIndex(p => p.id === this.planSeleccionado!.id);
-        this.planes[index] = {
-          ...this.planSeleccionado,
-          ...this.planForm.value
-        };
-        this.message.success('Plan actualizado correctamente');
-      } else {
-        // Crear nuevo plan
-        const nuevoPlan: Plan = {
-          id: Date.now().toString(),
-          ...this.planForm.value,
-          activo: true
-        };
-        this.planes.push(nuevoPlan);
-        this.message.success('Plan creado correctamente');
-      }
+    const datosFormulario = this.planForm.value;
 
-      this.filtrarPlanes();
-      this.guardando = false;
-      this.cerrarModal();
-    }, 1000);
+    if (this.modoEdicion && this.planSeleccionado) {
+      // Actualizar
+      const datosActualizar: ActualizarPlanRequest = datosFormulario;
+
+      this.planService
+        .actualizarPlan(this.planSeleccionado.id_plan, datosActualizar)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.message.success('Plan actualizado correctamente');
+            this.cargarPlanes();
+            this.guardando = false;
+            this.cerrarModal();
+          },
+          error: (error) => {
+            console.error('Error al actualizar plan:', error);
+            this.message.error('Error al actualizar plan');
+            this.guardando = false;
+          },
+        });
+    } else {
+      // Crear
+      const datosCrear: CrearPlanRequest = datosFormulario;
+
+      this.planService
+        .crearPlan(datosCrear)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.message.success('Plan creado correctamente');
+            this.cargarPlanes();
+            this.guardando = false;
+            this.cerrarModal();
+          },
+          error: (error) => {
+            console.error('Error al crear plan:', error);
+            this.message.error('Error al crear plan');
+            this.guardando = false;
+          },
+        });
+    }
   }
 
+  /**
+   * Cambiar estado del plan (activar/desactivar)
+   */
   cambiarEstadoPlan(plan: Plan) {
-    const estado = plan.activo ? 'activado' : 'desactivado';
-    this.message.success(`Plan ${estado} correctamente`);
+    const nuevoEstado = plan.estado_plan === 'activo' ? 'inactivo' : 'activo';
+
+    this.planService
+      .actualizarPlan(plan.id_plan, { estado_plan: nuevoEstado })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          plan.estado_plan = nuevoEstado;
+          this.message.success(
+            `Plan ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`
+          );
+        },
+        error: (error) => {
+          console.error('Error al cambiar estado:', error);
+          this.message.error('Error al cambiar estado del plan');
+          // Revertir cambio en la UI
+          plan.estado_plan = plan.estado_plan === 'activo' ? 'inactivo' : 'activo';
+        },
+      });
   }
 
+  /**
+   * Eliminar plan
+   */
   eliminarPlan(plan: Plan) {
     this.modal.confirm({
-      nzTitle: '¿Eliminar plan?',
-      nzContent: `¿Estás seguro de eliminar el plan "${plan.nombre}"? Esta acción no se puede deshacer.`,
-      nzOkText: 'Sí, eliminar',
+      nzTitle: '¿Desactivar plan?',
+      nzContent: `¿Estás seguro de desactivar el plan "${plan.nombre_plan}"? No se eliminará, solo cambiará a estado inactivo.`,
+      nzOkText: 'Sí, desactivar',
       nzOkDanger: true,
       nzCancelText: 'Cancelar',
       nzOnOk: () => {
-        this.planes = this.planes.filter(p => p.id !== plan.id);
-        this.filtrarPlanes();
-        this.message.success('Plan eliminado correctamente');
-      }
+        this.planService
+          .eliminarPlan(plan.id_plan)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.message.success('Plan desactivado correctamente');
+              this.cargarPlanes();
+            },
+            error: (error) => {
+              console.error('Error al desactivar plan:', error);
+              this.message.error(
+                error.error?.message || 'Error al desactivar plan'
+              );
+            },
+          });
+      },
     });
   }
 
+  /**
+   * Cerrar modal
+   */
   cerrarModal() {
     this.modalVisible = false;
     this.planSeleccionado = null;
     this.planForm.reset();
   }
 
+  /**
+   * Calcular comisión
+   */
   calcularComision(valor: number, porcentaje: number): number {
     return (valor * porcentaje) / 100;
   }
 
-  // Formatters y parsers para currency
-  formatterCurrency = (value: number): string => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  /**
+   * Formatters y parsers para currency
+   */
+  formatterCurrency = (value: number): string =>
+    `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   parserCurrency = (value: string): number => {
     const parsed = value.replace(/\$\s?|(,*)/g, '');
     return isNaN(Number(parsed)) ? 0 : Number(parsed);
   };
 
-  // Formatters y parsers para percentage
+  /**
+   * Formatters y parsers para percentage
+   */
   formatterPercent = (value: number): string => `${value}%`;
   parserPercent = (value: string): number => {
     const parsed = value.replace('%', '');
     return isNaN(Number(parsed)) ? 0 : Number(parsed);
   };
+
+  /**
+   * Verificar si plan está activo
+   */
+  estaActivo(plan: Plan): boolean {
+    return plan.estado_plan === 'activo';
+  }
 }

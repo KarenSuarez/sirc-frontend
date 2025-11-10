@@ -1,23 +1,4 @@
 <div class="referentes-container">
-  <div class="referentes-header">
-    <div class="header-content">
-      <h1>Gestión de Referentes</h1>
-      <p>Supervisa el desempeño y actividad de los referentes</p>
-    </div>
-    <div class="header-actions">
-      <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
-        <input
-          type="text"
-          nz-input
-          placeholder="Buscar referente..."
-          [(ngModel)]="searchText"
-          (ngModelChange)="filtrarReferentes()" />
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="search"></i>
-      </ng-template>
-    </div>
-  </div>
 
   <!-- Estadísticas generales -->
   <div class="estadisticas-section">
@@ -29,7 +10,7 @@
           </div>
           <div class="stat-content">
             <div class="stat-label">Total Referentes</div>
-            <div class="stat-value">{{ referentes.length }}</div>
+            <div class="stat-value">{{ total }}</div>
           </div>
         </div>
 
@@ -59,7 +40,9 @@
           </div>
           <div class="stat-content">
             <div class="stat-label">Comisiones Totales</div>
-            <div class="stat-value">{{ calcularTotalComisiones() | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+            <div class="stat-value">
+              {{ calcularTotalComisiones() | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </div>
           </div>
         </div>
       </div>
@@ -68,25 +51,42 @@
 
   <!-- Filtros -->
   <div class="filtros-section">
-    <nz-segmented
-      [nzOptions]="opcionesFiltro"
-      [(ngModel)]="filtroActual"
-      (ngModelChange)="aplicarFiltroRapido()">
-    </nz-segmented>
+    <nz-card [nzBordered]="false" class="filtros-card">
+      <div class="filtros-row">
+        <nz-segmented
+          [nzOptions]="opcionesFiltro"
+          [(ngModel)]="filtroActual"
+          (ngModelChange)="aplicarFiltroRapido()">
+        </nz-segmented>
 
-    <nz-select
-      [(ngModel)]="ordenarPor"
-      (ngModelChange)="ordenarReferentes()"
-      class="ordenar-select">
-      <nz-option nzValue="nombre" nzLabel="Ordenar por Nombre"></nz-option>
-      <nz-option nzValue="referidos" nzLabel="Más Referidos"></nz-option>
-      <nz-option nzValue="conversiones" nzLabel="Más Conversiones"></nz-option>
-      <nz-option nzValue="comisiones" nzLabel="Mayores Comisiones"></nz-option>
-      <nz-option nzValue="nivel" nzLabel="Mayor Nivel"></nz-option>
-    </nz-select>
+        <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
+          <input
+            type="text"
+            nz-input
+            placeholder="Buscar referente..."
+            [(ngModel)]="searchText"
+            (ngModelChange)="filtrarReferentes()" />
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="search"></i>
+        </ng-template>
+
+        <nz-select
+          [(ngModel)]="ordenarPor"
+          (ngModelChange)="ordenarReferentes()"
+          class="ordenar-select"
+          nzPlaceHolder="Ordenar por...">
+          <nz-option nzValue="nombre" nzLabel="Ordenar por Nombre"></nz-option>
+          <nz-option nzValue="referidos" nzLabel="Más Referidos"></nz-option>
+          <nz-option nzValue="conversiones" nzLabel="Más Conversiones"></nz-option>
+          <nz-option nzValue="comisiones" nzLabel="Mayores Comisiones"></nz-option>
+          <nz-option nzValue="nivel" nzLabel="Mayor Nivel"></nz-option>
+        </nz-select>
+      </div>
+    </nz-card>
   </div>
 
-  <!-- Tabla de referentes -->
+  <!-- Grid de referentes -->
   <div class="tabla-section">
     <nz-card [nzBordered]="false" class="tabla-card">
       <div class="referentes-grid">
@@ -98,14 +98,16 @@
           <!-- Header de la card -->
           <div class="referente-header">
             <div class="referente-avatar">
-              {{ referente.nombre.charAt(0).toUpperCase() }}{{ referente.apellido.charAt(0).toUpperCase() }}
+              {{ getIniciales(referente) }}
             </div>
             <div class="referente-info">
-              <div class="referente-nombre">{{ referente.nombre }} {{ referente.apellido }}</div>
-              <div class="referente-codigo">{{ referente.codigo }}</div>
+              <div class="referente-nombre">
+                {{ getNombreCompleto(referente) }}
+              </div>
+              <div class="referente-codigo">{{ referente.codigo_referente }}</div>
             </div>
-            <nz-tag [nzColor]="getNivelColor(referente.nivel)" class="nivel-tag">
-              {{ referente.nivel }}
+            <nz-tag [nzColor]="getNivelColor(getNivel(referente))" class="nivel-tag">
+              {{ getNivel(referente) }}
             </nz-tag>
           </div>
 
@@ -113,15 +115,15 @@
           <div class="referente-contacto">
             <div class="contacto-item">
               <i nz-icon nzType="mail"></i>
-              <span>{{ referente.correo }}</span>
+              <span>{{ referente.usuario.correo_electronico }}</span>
             </div>
-            <div class="contacto-item">
+            <div class="contacto-item" *ngIf="referente.usuario.telefono">
               <i nz-icon nzType="phone"></i>
-              <span>{{ referente.telefono }}</span>
+              <span>{{ referente.usuario.telefono }}</span>
             </div>
           </div>
 
-          <nz-divider></nz-divider>
+          <nz-divider [nzDashed]="true" style="margin: 16px 0;"></nz-divider>
 
           <!-- Métricas -->
           <div class="referente-metricas">
@@ -131,7 +133,7 @@
               </div>
               <div class="metrica-content">
                 <div class="metrica-label">Referidos</div>
-                <div class="metrica-valor">{{ referente.totalReferidos }}</div>
+                <div class="metrica-valor">{{ referente.metricas.total_referidos }}</div>
               </div>
             </div>
 
@@ -141,7 +143,9 @@
               </div>
               <div class="metrica-content">
                 <div class="metrica-label">Activos</div>
-                <div class="metrica-valor success">{{ referente.referidosActivos }}</div>
+                <div class="metrica-valor success">
+                  {{ referente.metricas.referidos_activos }}
+                </div>
               </div>
             </div>
 
@@ -151,12 +155,14 @@
               </div>
               <div class="metrica-content">
                 <div class="metrica-label">Pendientes</div>
-                <div class="metrica-valor warning">{{ referente.referidosPendientes }}</div>
+                <div class="metrica-valor warning">
+                  {{ calcularReferidosPendientes(referente) }}
+                </div>
               </div>
             </div>
           </div>
 
-          <nz-divider></nz-divider>
+          <nz-divider [nzDashed]="true" style="margin: 16px 0;"></nz-divider>
 
           <!-- Información financiera -->
           <div class="referente-financiero">
@@ -165,7 +171,9 @@
                 <i nz-icon nzType="trophy"></i>
                 Puntos
               </div>
-              <div class="financiero-valor puntos">{{ referente.puntos }}</div>
+              <div class="financiero-valor puntos">
+                {{ referente.puntos_actuales }}
+              </div>
             </div>
 
             <div class="financiero-item">
@@ -174,7 +182,7 @@
                 Comisiones
               </div>
               <div class="financiero-valor comision">
-                {{ referente.comisionesGeneradas | currency:'COP':'symbol-narrow':'1.0-0' }}
+                {{ referente.total_comisiones_historico | currency:'COP':'symbol-narrow':'1.0-0' }}
               </div>
             </div>
 
@@ -184,7 +192,7 @@
                 Disponible
               </div>
               <div class="financiero-valor disponible">
-                {{ referente.saldoDisponible | currency:'COP':'symbol-narrow':'1.0-0' }}
+                {{ referente.saldo_disponible | currency:'COP':'symbol-narrow':'1.0-0' }}
               </div>
             </div>
           </div>
@@ -255,24 +263,36 @@
       <!-- Información personal -->
       <nz-descriptions nzBordered [nzColumn]="2" class="detalle-descriptions">
         <nz-descriptions-item nzTitle="Nombre Completo" [nzSpan]="2">
-          {{ referenteSeleccionado.nombre }} {{ referenteSeleccionado.apellido }}
+          {{ getNombreCompleto(referenteSeleccionado) }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Código">
-          {{ referenteSeleccionado.codigo }}
+          {{ referenteSeleccionado.codigo_referente }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Nivel">
-          <nz-tag [nzColor]="getNivelColor(referenteSeleccionado.nivel)">
-            {{ referenteSeleccionado.nivel }}
+          <nz-tag [nzColor]="getNivelColor(getNivel(referenteSeleccionado))">
+            {{ getNivel(referenteSeleccionado) }}
           </nz-tag>
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Correo Electrónico" [nzSpan]="2">
-          {{ referenteSeleccionado.correo }}
+          {{ referenteSeleccionado.usuario.correo_electronico }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Teléfono">
-          {{ referenteSeleccionado.telefono }}
+          {{ referenteSeleccionado.usuario.telefono || 'No registrado' }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Fecha de Registro">
-          {{ formatearFecha(referenteSeleccionado.fechaRegistro) }}
+        <nz-descriptions-item nzTitle="Documento">
+          {{ referenteSeleccionado.usuario.numero_documento }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Fecha de Registro" [nzSpan]="2">
+          {{ formatearFecha(referenteSeleccionado.creado_en) }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Estado">
+          <nz-tag
+            [nzColor]="referenteSeleccionado.estado_referente === 'activo' ? 'green' : 'red'">
+            {{ referenteSeleccionado.estado_referente | uppercase }}
+          </nz-tag>
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Tipo">
+          {{ referenteSeleccionado.tipo_referente }}
         </nz-descriptions-item>
       </nz-descriptions>
 
@@ -281,7 +301,7 @@
         <h4>Métricas de Desempeño</h4>
         <div class="metricas-grid">
           <nz-statistic
-            [nzValue]="referenteSeleccionado.totalReferidos"
+            [nzValue]="referenteSeleccionado.metricas.total_referidos"
             nzTitle="Total Referidos">
             <ng-template #nzPrefix>
               <i nz-icon nzType="usergroup-add"></i>
@@ -289,7 +309,7 @@
           </nz-statistic>
 
           <nz-statistic
-            [nzValue]="referenteSeleccionado.referidosActivos"
+            [nzValue]="referenteSeleccionado.metricas.referidos_activos"
             nzTitle="Referidos Activos"
             [nzValueStyle]="{ color: '#52c41a' }">
             <ng-template #nzPrefix>
@@ -298,7 +318,7 @@
           </nz-statistic>
 
           <nz-statistic
-            [nzValue]="referenteSeleccionado.puntos"
+            [nzValue]="referenteSeleccionado.puntos_actuales"
             nzTitle="Puntos Acumulados">
             <ng-template #nzPrefix>
               <i nz-icon nzType="trophy"></i>
@@ -306,10 +326,24 @@
           </nz-statistic>
 
           <nz-statistic
-            [nzValue]="referenteSeleccionado.comisionesGeneradas"
+            [nzValue]="referenteSeleccionado.total_comisiones_historico"
             [nzPrefix]="'$'"
             nzTitle="Comisiones Generadas"
             [nzValueStyle]="{ color: '#4A90E2' }">
+          </nz-statistic>
+
+          <nz-statistic
+            [nzValue]="referenteSeleccionado.saldo_disponible"
+            [nzPrefix]="'$'"
+            nzTitle="Saldo Disponible"
+            [nzValueStyle]="{ color: '#52c41a' }">
+          </nz-statistic>
+
+          <nz-statistic
+            [nzValue]="referenteSeleccionado.total_retirado"
+            [nzPrefix]="'$'"
+            nzTitle="Total Retirado"
+            [nzValueStyle]="{ color: '#8c8c8c' }">
           </nz-statistic>
         </div>
       </div>
@@ -324,7 +358,11 @@
           <i nz-icon nzType="mail"></i>
           Enviar Email
         </button>
-        <button nz-button nzType="default" (click)="llamarReferenteDetalle()">
+        <button
+          nz-button
+          nzType="default"
+          (click)="llamarReferenteDetalle()"
+          *ngIf="referenteSeleccionado.usuario.telefono">
           <i nz-icon nzType="phone"></i>
           Llamar
         </button>

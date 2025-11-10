@@ -1,7 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  FormsModule,
+} from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -20,27 +27,15 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzUploadModule, NzUploadFile } from 'ng-zorro-antd/upload';
 import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
-interface Retiro {
-  id: string;
-  referenteNombre: string;
-  referenteCodigo: string;
-  monto: number;
-  fechaSolicitud: Date;
-  fechaProcesado?: Date;
-  estado: 'pendiente' | 'aprobado' | 'rechazado';
-  metodoPago: string;
-  datosBancarios?: {
-    banco: string;
-    tipoCuenta: string;
-    numeroCuenta: string;
-    titular: string;
-  };
-  procesadoPor?: string;
-  observaciones?: string;
-}
+import { ContadorService } from '../../../core/services/contador.service';
+import {
+  SolicitudRecompensa,
+  EstadoSolicitud,
+} from '../../../core/models/solicitud.interface';
 
 @Component({
   selector: 'app-gestion-retiros',
@@ -67,184 +62,201 @@ interface Retiro {
     NzFormModule,
     NzRadioModule,
     NzUploadModule,
-    NzMessageModule
+    NzMessageModule,
+    NzSpinModule,
   ],
   templateUrl: './gestion-retiros.component.html',
-  styleUrl: './gestion-retiros.component.css'
+  styleUrl: './gestion-retiros.component.css',
 })
-export class GestionRetirosComponent implements OnInit {
-  retiros: Retiro[] = [];
-  retirosFiltrados: Retiro[] = [];
+export class GestionRetirosComponent implements OnInit, OnDestroy {
+  solicitudes: SolicitudRecompensa[] = [];
+  solicitudesFiltradas: SolicitudRecompensa[] = [];
   loading = true;
 
   searchText = '';
-  filtroEstado = 'todos';
+  filtroEstado: string = 'todos';
   ordenarPor = 'fecha';
 
   opcionesEstado = [
     { label: 'Todos', value: 'todos' },
     { label: 'Pendientes', value: 'pendiente' },
-    { label: 'Aprobados', value: 'aprobado' },
-    { label: 'Rechazados', value: 'rechazado' }
+    { label: 'Aprobados', value: 'aprobada' },
+    { label: 'Rechazados', value: 'rechazada' },
   ];
 
   modalProcesarVisible = false;
   modalDetalleVisible = false;
-  retiroSeleccionado: Retiro | null = null;
+  solicitudSeleccionada: SolicitudRecompensa | null = null;
   procesarForm!: FormGroup;
   procesando = false;
   fileList: NzUploadFile[] = [];
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private contadorService: ContadorService,
     private message: NzMessageService,
     private modal: NzModalService
   ) {}
 
   ngOnInit() {
     this.initForm();
-    this.cargarRetiros();
+    this.cargarSolicitudes();
+
+    // Si viene un ID en query params, abrir detalle
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      if (params['id']) {
+        const id = parseInt(params['id']);
+        this.cargarYMostrarDetalle(id);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   initForm() {
     this.procesarForm = this.fb.group({
       decision: [''],
-      observaciones: ['']
+      observaciones: [''],
+      comprobante_pago_url: [''],
     });
   }
 
-  cargarRetiros() {
+  /**
+   * Cargar solicitudes desde backend
+   */
+  cargarSolicitudes() {
     this.loading = true;
 
-    setTimeout(() => {
-      this.retiros = [
-        {
-          id: 'RET-2024-001',
-          referenteNombre: 'María González',
-          referenteCodigo: 'REF-2024-001',
-          monto: 250000,
-          fechaSolicitud: new Date('2024-01-28T10:30:00'),
-          estado: 'pendiente',
-          metodoPago: 'Transferencia Bancaria',
-          datosBancarios: {
-            banco: 'Bancolombia',
-            tipoCuenta: 'Ahorros',
-            numeroCuenta: '12345678901',
-            titular: 'María González'
-          }
+    this.contadorService
+      .listarTodasSolicitudes({ limite: 100, pagina: 1 })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.solicitudes = response.solicitudes;
+          this.solicitudesFiltradas = [...this.solicitudes];
+          this.ordenarSolicitudes();
+          this.loading = false;
         },
-        {
-          id: 'RET-2024-002',
-          referenteNombre: 'Carlos Ramírez',
-          referenteCodigo: 'REF-2024-002',
-          monto: 180000,
-          fechaSolicitud: new Date('2024-01-27T14:20:00'),
-          estado: 'pendiente',
-          metodoPago: 'Transferencia Bancaria',
-          datosBancarios: {
-            banco: 'Banco de Bogotá',
-            tipoCuenta: 'Corriente',
-            numeroCuenta: '98765432109',
-            titular: 'Carlos Ramírez'
-          }
+        error: (error) => {
+          console.error('Error al cargar solicitudes:', error);
+          this.message.error('Error al cargar solicitudes');
+          this.loading = false;
         },
-        {
-          id: 'RET-2024-003',
-          referenteNombre: 'Ana Martínez',
-          referenteCodigo: 'REF-2024-004',
-          monto: 320000,
-          fechaSolicitud: new Date('2024-01-27T09:15:00'),
-          fechaProcesado: new Date('2024-01-27T16:00:00'),
-          estado: 'aprobado',
-          metodoPago: 'Transferencia Bancaria',
-          procesadoPor: 'Laura Pérez',
-          observaciones: 'Pago procesado exitosamente'
-        },
-        {
-          id: 'RET-2024-004',
-          referenteNombre: 'Pedro Sánchez',
-          referenteCodigo: 'REF-2024-003',
-          monto: 150000,
-          fechaSolicitud: new Date('2024-01-26T11:45:00'),
-          fechaProcesado: new Date('2024-01-26T17:30:00'),
-          estado: 'aprobado',
-          metodoPago: 'Transferencia Bancaria',
-          procesadoPor: 'Laura Pérez'
-        },
-        {
-          id: 'RET-2024-005',
-          referenteNombre: 'Luis Hernández',
-          referenteCodigo: 'REF-2024-005',
-          monto: 95000,
-          fechaSolicitud: new Date('2024-01-26T08:00:00'),
-          fechaProcesado: new Date('2024-01-26T15:00:00'),
-          estado: 'rechazado',
-          metodoPago: 'Transferencia Bancaria',
-          procesadoPor: 'Laura Pérez',
-          observaciones: 'Datos bancarios incorrectos'
-        }
-      ];
-
-      this.retirosFiltrados = [...this.retiros];
-      this.ordenarRetiros();
-      this.loading = false;
-    }, 1000);
+      });
   }
 
-  filtrarRetiros() {
-    let resultados = [...this.retiros];
+  /**
+   * Cargar y mostrar detalle de una solicitud específica
+   */
+  cargarYMostrarDetalle(id: number) {
+    this.contadorService
+      .obtenerSolicitud(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (solicitud) => {
+          this.solicitudSeleccionada = solicitud;
+          this.modalDetalleVisible = true;
+        },
+        error: (error) => {
+          console.error('Error al cargar solicitud:', error);
+          this.message.error('Error al cargar detalle de la solicitud');
+        },
+      });
+  }
+
+  /**
+   * Filtrar solicitudes
+   */
+  filtrarSolicitudes() {
+    let resultados = [...this.solicitudes];
 
     // Filtro de búsqueda
     if (this.searchText) {
       const search = this.searchText.toLowerCase();
-      resultados = resultados.filter(r =>
-        r.referenteNombre.toLowerCase().includes(search) ||
-        r.id.toLowerCase().includes(search) ||
-        r.referenteCodigo.toLowerCase().includes(search)
-      );
+      resultados = resultados.filter((s) => {
+        const nombreReferente = this.obtenerNombreReferente(s).toLowerCase();
+        const codigo = s.referente?.codigo_referente?.toLowerCase() || '';
+        const id = s.id_solicitud.toString();
+        return (
+          nombreReferente.includes(search) ||
+          codigo.includes(search) ||
+          id.includes(search)
+        );
+      });
     }
 
     // Filtro de estado
     if (this.filtroEstado !== 'todos') {
-      resultados = resultados.filter(r => r.estado === this.filtroEstado);
+      resultados = resultados.filter(
+        (s) => s.estado_solicitud === this.filtroEstado
+      );
     }
 
-    this.retirosFiltrados = resultados;
-    this.ordenarRetiros();
+    this.solicitudesFiltradas = resultados;
+    this.ordenarSolicitudes();
   }
 
-  ordenarRetiros() {
+  /**
+   * Ordenar solicitudes
+   */
+  ordenarSolicitudes() {
     switch (this.ordenarPor) {
       case 'fecha':
-        this.retirosFiltrados.sort((a, b) =>
-          b.fechaSolicitud.getTime() - a.fechaSolicitud.getTime()
+        this.solicitudesFiltradas.sort(
+          (a, b) =>
+            new Date(b.fecha_solicitud).getTime() -
+            new Date(a.fecha_solicitud).getTime()
         );
         break;
       case 'monto-desc':
-        this.retirosFiltrados.sort((a, b) => b.monto - a.monto);
+        this.solicitudesFiltradas.sort(
+          (a, b) => b.monto_solicitado - a.monto_solicitado
+        );
         break;
       case 'monto-asc':
-        this.retirosFiltrados.sort((a, b) => a.monto - b.monto);
+        this.solicitudesFiltradas.sort(
+          (a, b) => a.monto_solicitado - b.monto_solicitado
+        );
         break;
       case 'referente':
-        this.retirosFiltrados.sort((a, b) =>
-          a.referenteNombre.localeCompare(b.referenteNombre)
+        this.solicitudesFiltradas.sort((a, b) =>
+          this.obtenerNombreReferente(a).localeCompare(
+            this.obtenerNombreReferente(b)
+          )
         );
         break;
     }
   }
 
+  /**
+   * Calcular monto total
+   */
   calcularMontoTotal(): number {
-    return this.retirosFiltrados.reduce((sum, r) => sum + r.monto, 0);
+    return this.solicitudesFiltradas.reduce(
+      (sum, s) => sum + s.monto_solicitado,
+      0
+    );
   }
 
-  procesarRetiro(retiro: Retiro) {
-    this.retiroSeleccionado = retiro;
+  /**
+   * Procesar retiro
+   */
+  procesarRetiro(solicitud: SolicitudRecompensa) {
+    this.solicitudSeleccionada = solicitud;
     this.procesarForm.reset();
     this.fileList = [];
     this.modalProcesarVisible = true;
   }
 
+  /**
+   * Confirmar proceso (aprobar o rechazar)
+   */
   confirmarProceso() {
     const decision = this.procesarForm.get('decision')?.value;
 
@@ -254,14 +266,22 @@ export class GestionRetirosComponent implements OnInit {
     }
 
     if (decision === 'aprobar' && this.fileList.length === 0) {
-      this.message.warning('Por favor carga el comprobante de pago');
-      return;
+      this.message.warning(
+        'Por favor carga el comprobante de pago o ingresa la URL'
+      );
+      // Permitir continuar si hay URL en el formulario
+      const urlComprobante = this.procesarForm.get('comprobante_pago_url')?.value;
+      if (!urlComprobante) {
+        return;
+      }
     }
 
-    const titulo = decision === 'aprobar' ? '¿Aprobar retiro?' : '¿Rechazar retiro?';
-    const contenido = decision === 'aprobar'
-      ? `¿Confirmas que has realizado el pago de ${this.retiroSeleccionado?.monto.toLocaleString('es-CO')} a ${this.retiroSeleccionado?.referenteNombre}?`
-      : `¿Estás seguro de rechazar esta solicitud de retiro?`;
+    const titulo =
+      decision === 'aprobar' ? '¿Aprobar retiro?' : '¿Rechazar retiro?';
+    const contenido =
+      decision === 'aprobar'
+        ? `¿Confirmas que has realizado el pago de ${this.solicitudSeleccionada?.monto_solicitado.toLocaleString('es-CO')} a ${this.obtenerNombreReferente(this.solicitudSeleccionada!)}?`
+        : `¿Estás seguro de rechazar esta solicitud de retiro?`;
 
     this.modal.confirm({
       nzTitle: titulo,
@@ -271,103 +291,168 @@ export class GestionRetirosComponent implements OnInit {
       nzOnOk: () => {
         this.procesando = true;
 
-        setTimeout(() => {
-          if (this.retiroSeleccionado) {
-            const index = this.retiros.findIndex(r => r.id === this.retiroSeleccionado!.id);
-            this.retiros[index] = {
-              ...this.retiros[index],
-              estado: decision === 'aprobar' ? 'aprobado' : 'rechazado',
-              fechaProcesado: new Date(),
-              procesadoPor: 'Usuario Actual',
-              observaciones: this.procesarForm.get('observaciones')?.value
-            };
-
-            this.filtrarRetiros();
-            this.message.success(
-              decision === 'aprobar' ? 'Retiro aprobado exitosamente' : 'Retiro rechazado'
-            );
-          }
-
-          this.procesando = false;
-          this.cerrarModalProcesar();
-        }, 1500);
-      }
+        if (decision === 'aprobar') {
+          this.aprobarSolicitud();
+        } else {
+          this.rechazarSolicitud();
+        }
+      },
     });
   }
 
-  verDetalle(retiro: Retiro) {
-    this.retiroSeleccionado = retiro;
+  /**
+   * Aprobar solicitud
+   */
+  aprobarSolicitud() {
+    const observaciones = this.procesarForm.get('observaciones')?.value;
+    const comprobante_pago_url = this.procesarForm.get(
+      'comprobante_pago_url'
+    )?.value;
+
+    this.contadorService
+      .aprobarSolicitud(this.solicitudSeleccionada!.id_solicitud, {
+        observaciones,
+        comprobante_pago_url,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.message.success('Retiro aprobado exitosamente');
+          this.cargarSolicitudes();
+          this.procesando = false;
+          this.cerrarModalProcesar();
+        },
+        error: (error) => {
+          console.error('Error al aprobar solicitud:', error);
+          this.message.error(
+            error.error?.message || 'Error al aprobar retiro'
+          );
+          this.procesando = false;
+        },
+      });
+  }
+
+  /**
+   * Rechazar solicitud
+   */
+  rechazarSolicitud() {
+    const observaciones = this.procesarForm.get('observaciones')?.value;
+
+    this.contadorService
+      .rechazarSolicitud(this.solicitudSeleccionada!.id_solicitud, {
+        observaciones,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.message.success('Retiro rechazado');
+          this.cargarSolicitudes();
+          this.procesando = false;
+          this.cerrarModalProcesar();
+        },
+        error: (error) => {
+          console.error('Error al rechazar solicitud:', error);
+          this.message.error(
+            error.error?.message || 'Error al rechazar retiro'
+          );
+          this.procesando = false;
+        },
+      });
+  }
+
+  /**
+   * Ver detalle
+   */
+  verDetalle(solicitud: SolicitudRecompensa) {
+    this.solicitudSeleccionada = solicitud;
     this.modalDetalleVisible = true;
   }
 
-  descargarComprobante(retiro: Retiro) {
-    this.message.info(`Descargando comprobante de ${retiro.id}...`);
+  /**
+   * Descargar comprobante (simulado)
+   */
+  descargarComprobante(solicitud: SolicitudRecompensa) {
+    if (solicitud.comprobante_pago_url) {
+      window.open(solicitud.comprobante_pago_url, '_blank');
+    } else {
+      this.message.info(`No hay comprobante disponible`);
+    }
   }
 
-  reenviarNotificacion(retiro: Retiro) {
-    this.message.success(`Notificación reenviada a ${retiro.referenteNombre}`);
+  /**
+   * Reenviar notificación (simulado)
+   */
+  reenviarNotificacion(solicitud: SolicitudRecompensa) {
+    this.message.success(
+      `Notificación reenviada a ${this.obtenerNombreReferente(solicitud)}`
+    );
   }
 
   cerrarModalProcesar() {
     this.modalProcesarVisible = false;
-    this.retiroSeleccionado = null;
+    this.solicitudSeleccionada = null;
     this.fileList = [];
   }
 
   cerrarModalDetalle() {
     this.modalDetalleVisible = false;
-    this.retiroSeleccionado = null;
+    this.solicitudSeleccionada = null;
   }
 
   beforeUpload = (file: NzUploadFile): boolean => {
     this.fileList = [file];
+    // Aquí podrías subir el archivo a un servidor y obtener la URL
+    // Por ahora solo guardamos el archivo localmente
     return false;
   };
 
+  // Métodos helper usando el servicio
   getEstadoColor(estado: string): string {
-    const colores = {
-      'pendiente': 'orange',
-      'aprobado': 'green',
-      'rechazado': 'red'
-    };
-    return colores[estado as keyof typeof colores] || 'default';
+    return this.contadorService.obtenerColorEstado(estado as EstadoSolicitud);
   }
 
   getEstadoTexto(estado: string): string {
-    const textos = {
-      'pendiente': 'Pendiente',
-      'aprobado': 'Aprobado',
-      'rechazado': 'Rechazado'
-    };
-    return textos[estado as keyof typeof textos] || estado;
+    return this.contadorService.obtenerTextoEstado(estado as EstadoSolicitud);
   }
 
   getMetodoIcon(metodo: string): string {
-    return 'bank';
+    return this.contadorService.obtenerIconoMetodo(metodo as any);
   }
 
-  formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-CO', {
+  obtenerNombreReferente(solicitud: SolicitudRecompensa): string {
+    return this.contadorService.obtenerNombreReferente(solicitud);
+  }
+
+  obtenerInicialesReferente(solicitud: SolicitudRecompensa): string {
+    return this.contadorService.obtenerInicialesReferente(solicitud);
+  }
+
+  formatearMetodoRetiro(metodo: string): string {
+    return this.contadorService.formatearMetodoRetiro(metodo as any);
+  }
+
+  formatearFecha(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-CO', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 
-  formatearHora(fecha: Date): string {
-    return fecha.toLocaleTimeString('es-CO', {
+  formatearHora(fecha: string): string {
+    return new Date(fecha).toLocaleTimeString('es-CO', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
-  formatearFechaCompleta(fecha: Date): string {
-    return fecha.toLocaleString('es-CO', {
+  formatearFechaCompleta(fecha: string): string {
+    return new Date(fecha).toLocaleString('es-CO', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 }

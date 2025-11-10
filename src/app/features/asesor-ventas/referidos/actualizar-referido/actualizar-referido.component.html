@@ -1,239 +1,454 @@
 <div class="actualizar-container">
-  <div class="actualizar-header">
-    <button nz-button nzType="text" (click)="volver()" class="btn-volver">
-      <i nz-icon nzType="arrow-left"></i>
-      Volver
-    </button>
-    <h1>Actualizar Referido</h1>
-    <p>Gestiona el estado y asignación de plan del referido</p>
-  </div>
-
-  <div class="contenido-grid" *ngIf="referido">
-    <!-- Información del Referido -->
-    <nz-card nzTitle="Información del Referido" class="info-card">
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-avatar">
-            {{ referido.nombre.charAt(0).toUpperCase() }}
-          </div>
-          <div class="info-datos">
-            <div class="info-label">Nombre Completo</div>
-            <div class="info-valor">{{ referido.nombre }}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">
-            <i nz-icon nzType="idcard"></i>
-          </div>
-          <div class="info-datos">
-            <div class="info-label">Documento</div>
-            <div class="info-valor">{{ referido.tipoDoc }} {{ referido.documento }}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">
-            <i nz-icon nzType="mail"></i>
-          </div>
-          <div class="info-datos">
-            <div class="info-label">Correo Electrónico</div>
-            <div class="info-valor">{{ referido.correo }}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">
-            <i nz-icon nzType="phone"></i>
-          </div>
-          <div class="info-datos">
-            <div class="info-label">Teléfono</div>
-            <div class="info-valor">{{ referido.telefono }}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">
+  <nz-spin [nzSpinning]="cargando" nzTip="Cargando datos...">
+    <!-- Header -->
+    <div class="page-header">
+      <button
+        nz-button
+        nzType="text"
+        nzSize="large"
+        (click)="cancelar()"
+        class="back-button">
+        <i nz-icon nzType="arrow-left"></i>
+        <span>Volver</span>
+      </button>
+      <div class="header-content" *ngIf="referido">
+        <h1>{{ nombreCompletoReferido }}</h1>
+        <div class="header-meta">
+          <nz-tag [nzColor]="getEstadoColor(referido.estado_referido)">
+            {{ getEstadoTexto(referido.estado_referido) }}
+          </nz-tag>
+          <span class="meta-item">
             <i nz-icon nzType="calendar"></i>
-          </div>
-          <div class="info-datos">
-            <div class="info-label">Fecha de Registro</div>
-            <div class="info-valor">{{ formatearFecha(referido.fechaRegistro) }}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">
-            <i nz-icon nzType="user"></i>
-          </div>
-          <div class="info-datos">
-            <div class="info-label">Referente</div>
-            <div class="info-valor">
-              {{ referido.referenteNombre }}
-              <span class="codigo-ref">({{ referido.referenteCodigo }})</span>
-            </div>
-          </div>
+            Registrado: {{ formatearFecha(referido.fecha_referencia) }}
+          </span>
+          <span class="meta-item" *ngIf="referido.fecha_primer_contacto">
+            <i nz-icon nzType="phone"></i>
+            Contactado: {{ formatearFecha(referido.fecha_primer_contacto) }}
+          </span>
         </div>
       </div>
+    </div>
 
-      <nz-divider></nz-divider>
+    <div class="content-grid" *ngIf="referido">
+      <!-- Columna Izquierda -->
+      <div class="left-column">
+        <!-- Información del Referido -->
+        <nz-card nzTitle="Información del Referido" class="info-card">
+          <nz-descriptions nzBordered [nzColumn]="1" nzSize="middle">
+            <nz-descriptions-item nzTitle="Nombre Completo">
+              <div class="desc-content">
+                <i nz-icon nzType="user" class="desc-icon"></i>
+                {{ referido.nombre_referido }} {{ referido.apellido_referido }}
+              </div>
+            </nz-descriptions-item>
 
-      <div class="estado-actual">
-        <span class="estado-label">Estado Actual:</span>
-        <nz-tag [nzColor]="getEstadoColor(referido.estado)" class="estado-tag">
-          {{ getEstadoTexto(referido.estado) }}
-        </nz-tag>
-      </div>
-    </nz-card>
+            <nz-descriptions-item nzTitle="Correo Electrónico">
+              <div class="desc-content">
+                <i nz-icon nzType="mail" class="desc-icon"></i>
+                <a [href]="'mailto:' + referido.correo_referido">
+                  {{ referido.correo_referido }}
+                </a>
+              </div>
+            </nz-descriptions-item>
 
-    <!-- Formulario de Actualización -->
-    <nz-card nzTitle="Actualizar Estado y Plan" class="form-card">
-      <form nz-form [formGroup]="actualizarForm" (ngSubmit)="guardarCambios()">
+            <nz-descriptions-item nzTitle="Teléfono">
+              <div class="desc-content">
+                <i nz-icon nzType="phone" class="desc-icon"></i>
+                <a
+                  *ngIf="referido.telefono_referido"
+                  [href]="'tel:' + referido.telefono_referido">
+                  {{ referido.telefono_referido }}
+                </a>
+                <span *ngIf="!referido.telefono_referido" style="color: #8c8c8c;">
+                  No registrado
+                </span>
+              </div>
+            </nz-descriptions-item>
 
-        <!-- Estado -->
-        <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzRequired nzFor="estado">
-            Cambiar Estado
-          </nz-form-label>
-          <nz-form-control
-            [nzSpan]="24"
-            nzErrorTip="Por favor selecciona un estado">
-            <nz-select
-              formControlName="estado"
-              nzPlaceHolder="Selecciona el nuevo estado"
-              (ngModelChange)="onEstadoChange()">
-              <nz-option nzValue="pendiente" nzLabel="Pendiente"></nz-option>
-              <nz-option nzValue="contactado" nzLabel="Contactado"></nz-option>
-              <nz-option nzValue="activo" nzLabel="Activo (Cliente)"></nz-option>
-              <nz-option nzValue="rechazado" nzLabel="Rechazado"></nz-option>
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
+            <nz-descriptions-item nzTitle="Documento">
+              <div class="desc-content">
+                <i nz-icon nzType="idcard" class="desc-icon"></i>
+                <span *ngIf="referido.tipoDocumento">
+                  {{ referido.tipoDocumento.codigo_tipo }}
+                </span>
+                {{ referido.numero_documento_referido }}
+              </div>
+            </nz-descriptions-item>
 
-        <!-- Fecha de Contacto -->
-        <nz-form-item *ngIf="mostrarFechaContacto()">
-          <nz-form-label [nzSpan]="24" nzFor="fechaContacto">
-            Fecha de Contacto
-          </nz-form-label>
-          <nz-form-control [nzSpan]="24">
-            <nz-date-picker
-              formControlName="fechaContacto"
-              nzPlaceHolder="Selecciona la fecha de contacto"
-              nzFormat="dd/MM/yyyy"
-              class="full-width">
-            </nz-date-picker>
-          </nz-form-control>
-        </nz-form-item>
+            <nz-descriptions-item nzTitle="Empresa" *ngIf="referido.empresa_referido">
+              <div class="desc-content">
+                <i nz-icon nzType="bank" class="desc-icon"></i>
+                {{ referido.empresa_referido }}
+              </div>
+            </nz-descriptions-item>
 
-        <!-- Plan -->
-        <nz-form-item *ngIf="mostrarSeleccionPlan()">
-          <nz-form-label [nzSpan]="24" nzRequired nzFor="plan">
-            Asignar Plan
-          </nz-form-label>
-          <nz-form-control
-            [nzSpan]="24"
-            nzErrorTip="Por favor selecciona un plan">
-            <nz-select
-              formControlName="plan"
-              nzPlaceHolder="Selecciona el plan adquirido"
-              (ngModelChange)="onPlanChange()">
-              <nz-option
-                *ngFor="let plan of planes"
-                [nzValue]="plan.id"
-                [nzLabel]="plan.nombre">
-                <div class="plan-option">
-                  <span class="plan-nombre">{{ plan.nombre }}</span>
-                  <span class="plan-valor">{{ plan.valor | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <nz-descriptions-item nzTitle="Cargo" *ngIf="referido.cargo_referido">
+              <div class="desc-content">
+                <i nz-icon nzType="solution" class="desc-icon"></i>
+                {{ referido.cargo_referido }}
+              </div>
+            </nz-descriptions-item>
+
+            <nz-descriptions-item nzTitle="Referente">
+              <div class="desc-content">
+                <i nz-icon nzType="team" class="desc-icon"></i>
+                <div>
+                  <strong>{{ referido.referente?.codigo_referente }}</strong>
+                  <br />
+                  <small>{{ nombreReferente }}</small>
                 </div>
-              </nz-option>
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
+              </div>
+            </nz-descriptions-item>
 
-        <!-- Vista previa del plan seleccionado -->
-        <nz-alert
-          *ngIf="planSeleccionado && mostrarSeleccionPlan()"
-          nzType="info"
-          nzShowIcon
-          class="plan-preview">
-          <div class="plan-detalles">
-            <h4>Plan Seleccionado: {{ planSeleccionado.nombre }}</h4>
-            <ul>
-              <li>Valor del plan: <strong>{{ planSeleccionado.valor | currency:'COP':'symbol-narrow':'1.0-0' }}</strong></li>
-              <li>Comisión referente: <strong>{{ planSeleccionado.comisionPorcentaje }}%</strong> ({{ calcularComision() | currency:'COP':'symbol-narrow':'1.0-0' }})</li>
-              <li>Puntos otorgados: <strong>{{ planSeleccionado.puntos }}</strong></li>
-            </ul>
+            <nz-descriptions-item nzTitle="Plan Actual" *ngIf="referido.plan">
+              <div class="desc-content">
+                <i nz-icon nzType="file-text" class="desc-icon"></i>
+                <nz-tag [nzColor]="referido.plan.color_plan || 'blue'">
+                  {{ referido.plan.nombre_plan }}
+                </nz-tag>
+              </div>
+            </nz-descriptions-item>
+          </nz-descriptions>
+
+          <nz-divider></nz-divider>
+
+          <div class="quick-actions">
+            <button
+              nz-button
+              nzType="default"
+              (click)="llamarReferido()"
+              *ngIf="referido.telefono_referido">
+              <i nz-icon nzType="phone"></i>
+              Llamar
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              (click)="enviarEmail()">
+              <i nz-icon nzType="mail"></i>
+              Enviar email
+            </button>
+            <button
+              nz-button
+              nzType="primary"
+              (click)="registrarContacto()"
+              *ngIf="puedeRegistrarContacto"
+              [nzLoading]="guardando">
+              <i nz-icon nzType="phone"></i>
+              Registrar contacto
+            </button>
           </div>
-        </nz-alert>
+        </nz-card>
 
-        <!-- Observaciones -->
-        <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzFor="observaciones">
-            Observaciones
-          </nz-form-label>
-          <nz-form-control [nzSpan]="24">
-            <textarea
-              nz-input
-              formControlName="observaciones"
-              placeholder="Añade observaciones sobre el seguimiento..."
-              [nzAutosize]="{ minRows: 4, maxRows: 6 }">
-            </textarea>
-          </nz-form-control>
-        </nz-form-item>
+        <!-- Actualizar Datos Personales -->
+        <nz-card nzTitle="Actualizar Datos Personales" class="form-card">
+          <form nz-form [formGroup]="datosForm" (ngSubmit)="guardarDatos()">
+            <div class="form-row">
+              <nz-form-item class="form-item-half">
+                <nz-form-label nzRequired>Nombres</nz-form-label>
+                <nz-form-control [nzErrorTip]="nombreError">
+                  <input
+                    nz-input
+                    formControlName="nombre_referido"
+                    placeholder="Nombres" />
+                  <ng-template #nombreError let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      El nombre es requerido
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('minlength')">
+                      Mínimo 2 caracteres
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
 
-        <!-- Botones de acción -->
-        <nz-form-item class="form-actions">
-          <button
-            nz-button
-            nzType="default"
-            nzSize="large"
-            type="button"
-            (click)="cancelar()"
-            class="btn-cancelar">
-            Cancelar
-          </button>
-          <button
-            nz-button
-            nzType="primary"
-            nzSize="large"
-            type="submit"
-            [nzLoading]="guardando"
-            [disabled]="!actualizarForm.valid"
-            class="btn-guardar">
-            <i nz-icon nzType="save"></i>
-            Guardar Cambios
-          </button>
-        </nz-form-item>
-      </form>
-    </nz-card>
-
-    <!-- Historial de Cambios -->
-    <nz-card nzTitle="Historial de Cambios" class="historial-card">
-      <nz-timeline>
-        <nz-timeline-item
-          *ngFor="let cambio of historial"
-          [nzColor]="cambio.color">
-          <div class="timeline-content">
-            <div class="timeline-header">
-              <span class="timeline-fecha">{{ formatearFechaHora(cambio.fecha) }}</span>
-              <nz-tag [nzColor]="cambio.color" nzSize="small">{{ cambio.tipo }}</nz-tag>
+              <nz-form-item class="form-item-half">
+                <nz-form-label nzRequired>Apellidos</nz-form-label>
+                <nz-form-control [nzErrorTip]="apellidoError">
+                  <input
+                    nz-input
+                    formControlName="apellido_referido"
+                    placeholder="Apellidos" />
+                  <ng-template #apellidoError let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      El apellido es requerido
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('minlength')">
+                      Mínimo 2 caracteres
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
             </div>
-            <div class="timeline-descripcion">{{ cambio.descripcion }}</div>
-            <div class="timeline-usuario">Por: {{ cambio.usuario }}</div>
-          </div>
-        </nz-timeline-item>
-      </nz-timeline>
 
-      <div class="historial-empty" *ngIf="historial.length === 0">
-        <i nz-icon nzType="history"></i>
-        <p>No hay cambios registrados aún</p>
+            <div class="form-row">
+              <nz-form-item class="form-item-half">
+                <nz-form-label nzRequired>Correo</nz-form-label>
+                <nz-form-control [nzErrorTip]="correoError">
+                  <input
+                    nz-input
+                    formControlName="correo_referido"
+                    placeholder="correo@ejemplo.com" />
+                  <ng-template #correoError let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      El correo es requerido
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('email')">
+                      Correo inválido
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item class="form-item-half">
+                <nz-form-label>Teléfono</nz-form-label>
+                <nz-form-control [nzErrorTip]="'Ingrese 10 dígitos'">
+                  <input
+                    nz-input
+                    formControlName="telefono_referido"
+                    placeholder="3001234567" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <div class="form-row">
+              <nz-form-item class="form-item-half">
+                <nz-form-label>Empresa</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
+                    formControlName="empresa_referido"
+                    placeholder="Nombre de la empresa" />
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item class="form-item-half">
+                <nz-form-label>Cargo</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
+                    formControlName="cargo_referido"
+                    placeholder="Cargo en la empresa" />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <div class="form-actions">
+              <button
+                nz-button
+                nzType="primary"
+                nzHtmlType="submit"
+                [nzLoading]="guardando"
+                [disabled]="!datosForm.valid || !datosForm.dirty">
+                <i nz-icon nzType="save"></i>
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </nz-card>
       </div>
-    </nz-card>
-  </div>
 
-  <!-- Loading state -->
-  <div class="loading-container" *ngIf="!referido">
-    <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
-    <p>Cargando información del referido...</p>
-  </div>
+      <!-- Columna Derecha -->
+      <div class="right-column">
+        <!-- Cambiar Estado -->
+        <nz-card nzTitle="Gestión de Estado" class="form-card estado-card">
+          <nz-alert
+            *ngIf="referido.estado_referido === 'activo'"
+            nzType="success"
+            nzMessage="Referido Convertido"
+            nzDescription="Este referido ya fue convertido a cliente."
+            nzShowIcon
+            [nzCloseable]="false"
+            style="margin-bottom: 16px;">
+          </nz-alert>
+
+          <form nz-form [formGroup]="estadoForm" (ngSubmit)="guardarEstado()">
+            <nz-form-item>
+              <nz-form-label nzRequired>Estado</nz-form-label>
+              <nz-form-control>
+                <nz-select
+                  formControlName="estado_referido"
+                  nzPlaceHolder="Seleccionar estado"
+                  nzSize="large">
+                  <nz-option nzValue="pendiente" nzLabel="Pendiente"></nz-option>
+                  <nz-option nzValue="contactado" nzLabel="Contactado"></nz-option>
+                  <nz-option nzValue="activo" nzLabel="Convertir a Cliente"></nz-option>
+                  <nz-option nzValue="no_interesado" nzLabel="No Interesado"></nz-option>
+                  <nz-option nzValue="inactivo" nzLabel="Inactivo"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+              <nz-form-label>Observaciones</nz-form-label>
+              <nz-form-control>
+                <textarea
+                  nz-input
+                  formControlName="observaciones"
+                  [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                  placeholder="Agrega notas sobre el seguimiento...">
+                </textarea>
+              </nz-form-control>
+            </nz-form-item>
+
+            <div class="form-actions">
+              <button
+                nz-button
+                nzType="primary"
+                nzSize="large"
+                nzBlock
+                nzHtmlType="submit"
+                [nzLoading]="guardando"
+                [disabled]="!estadoForm.valid || !estadoForm.dirty">
+                <i nz-icon nzType="check"></i>
+                Actualizar estado
+              </button>
+            </div>
+          </form>
+        </nz-card>
+
+        <!-- Formulario de Conversión -->
+        <nz-card
+          nzTitle="Convertir Referido"
+          class="conversion-card"
+          *ngIf="puedeConvertir && (mostrarFormularioConversion || referido.estado_referido === 'contactado')">
+
+          <nz-alert
+            nzType="info"
+            nzMessage="Convertir a Cliente"
+            nzDescription="Selecciona el plan adquirido para completar la conversión. Esto generará la comisión para el referente automáticamente."
+            nzShowIcon
+            [nzCloseable]="false"
+            style="margin-bottom: 16px;">
+          </nz-alert>
+
+          <form nz-form [formGroup]="conversionForm" (ngSubmit)="convertirReferido()">
+            <nz-form-item>
+              <nz-form-label nzRequired>Plan Adquirido</nz-form-label>
+              <nz-form-control [nzErrorTip]="'Selecciona un plan'">
+                <nz-select
+                  formControlName="id_plan_adquirido"
+                  nzPlaceHolder="Seleccionar plan"
+                  nzSize="large"
+                  (ngModelChange)="onPlanChange()">
+                  <nz-option
+                    *ngFor="let plan of planes"
+                    [nzValue]="plan.id_plan"
+                    [nzLabel]="plan.nombre_plan">
+                    <div class="plan-option">
+                      <span>{{ plan.nombre_plan }}</span>
+                      <span class="plan-precio">${{ plan.precio_actual.toLocaleString('es-CO') }}</span>
+                    </div>
+                  </nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+
+            <!-- Detalles del plan seleccionado -->
+            <div class="plan-details" *ngIf="planSeleccionado">
+              <nz-divider nzText="Resumen de Conversión"></nz-divider>
+
+              <div class="detail-row">
+                <span class="detail-label">
+                  <i nz-icon nzType="dollar" class="detail-icon"></i>
+                  Valor del plan:
+                </span>
+                <span class="detail-value">
+                  ${{ planSeleccionado.precio_actual.toLocaleString('es-CO') }}
+                </span>
+              </div>
+
+              <div class="detail-row highlight">
+                <span class="detail-label">
+                  <i nz-icon nzType="wallet" class="detail-icon"></i>
+                  Comisión ({{ planSeleccionado.porcentaje_comision }}%):
+                </span>
+                <span class="detail-value success">
+                  ${{ calcularComision().toLocaleString('es-CO') }}
+                </span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">
+                  <i nz-icon nzType="trophy" class="detail-icon"></i>
+                  Puntos:
+                </span>
+                <span class="detail-value">
+                  {{ planSeleccionado.puntos_plan }} pts
+                </span>
+              </div>
+
+              <nz-alert
+                nzType="success"
+                [nzMessage]="'El referente recibirá $' + calcularComision().toLocaleString('es-CO') + ' en comisiones'"
+                nzShowIcon
+                style="margin-top: 16px;">
+              </nz-alert>
+            </div>
+
+            <div class="form-actions" style="margin-top: 24px;">
+              <button
+                nz-button
+                nzType="primary"
+                nzSize="large"
+                nzBlock
+                nzHtmlType="submit"
+                [nzLoading]="convirtiendo"
+                [disabled]="!conversionForm.valid">
+                <i nz-icon nzType="check-circle"></i>
+                Confirmar Conversión
+              </button>
+            </div>
+          </form>
+        </nz-card>
+
+        <!-- Historial (Timeline) -->
+        <nz-card nzTitle="Historial de Actividad" class="timeline-card">
+          <nz-timeline>
+            <nz-timeline-item
+              *ngIf="referido.fecha_conversion"
+              nzColor="green"
+              [nzDot]="dotConvertido">
+              <ng-template #dotConvertido>
+                <i nz-icon nzType="check-circle" style="font-size: 16px;"></i>
+              </ng-template>
+              <p class="timeline-title">Convertido a Cliente</p>
+              <p class="timeline-date">
+                {{ formatearFechaHora(referido.fecha_conversion) }}
+              </p>
+              <p class="timeline-desc" *ngIf="referido.plan">
+                Plan: {{ referido.plan.nombre_plan }}
+              </p>
+            </nz-timeline-item>
+
+            <nz-timeline-item
+              *ngIf="referido.fecha_primer_contacto"
+              nzColor="blue"
+              [nzDot]="dotContactado">
+              <ng-template #dotContactado>
+                <i nz-icon nzType="phone" style="font-size: 16px;"></i>
+              </ng-template>
+              <p class="timeline-title">Primer Contacto</p>
+              <p class="timeline-date">
+                {{ formatearFechaHora(referido.fecha_primer_contacto) }}
+              </p>
+            </nz-timeline-item>
+
+            <nz-timeline-item [nzDot]="dotCreado">
+              <ng-template #dotCreado>
+                <i nz-icon nzType="plus-circle" style="font-size: 16px;"></i>
+              </ng-template>
+              <p class="timeline-title">Referido Creado</p>
+              <p class="timeline-date">
+                {{ formatearFechaHora(referido.fecha_referencia) }}
+              </p>
+              <p class="timeline-desc">
+                Por: {{ nombreReferente }}
+              </p>
+            </nz-timeline-item>
+          </nz-timeline>
+        </nz-card>
+      </div>
+    </div>
+  </nz-spin>
 </div>

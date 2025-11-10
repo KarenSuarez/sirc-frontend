@@ -1,38 +1,147 @@
-<div class="dashboard-container" *ngIf="usuario">
-  <div class="dashboard-header">
-    <h1>¡Bienvenido, {{ usuario.nombre }}!</h1>
-    <p>Dashboard de Asesor de Ventas</p>
-  </div>
+<div class="dashboard-container">
+  <nz-spin [nzSpinning]="cargando" nzTip="Cargando datos...">
 
-  <div class="asesor-grid">
-    <nz-card nzTitle="Gestión de Referentes" class="dashboard-card">
-      <div class="card-content">
-        <p>Administra y supervisa a los referentes activos</p>
-        <button nz-button nzType="primary" [routerLink]="['/referentes/lista']">
-          <i nz-icon nzType="team"></i>
-          Ver Referentes
-        </button>
+    <!-- Sección de estadísticas principales -->
+    <div class="estadisticas-section">
+      <nz-card class="estadisticas-card" [nzBordered]="false">
+        <div class="estadisticas-content">
+          <div class="welcome-section">
+            <div class="avatar-section">
+              <nz-avatar [nzSize]="64" [nzText]="iniciales"></nz-avatar>
+            </div>
+            <div class="welcome-text">
+              <h1>Hola, {{ nombreCompleto }}</h1>
+              <p>Asesor de Ventas</p>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+              </div>
+              <nz-statistic
+                [nzValue]="metricas?.referidos_convertidos_total || 0">
+              </nz-statistic>
+              <span class="stat-label"> Referidos Convertidos</span>
+            </div>
+
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <i nz-icon nzType="dollar" nzTheme="outline"></i>
+              </div>
+              <nz-statistic
+                [nzValue]="metricas?.comisiones_generadas_total || 0"
+                nzPrefix="$">
+              </nz-statistic>
+              <span class="stat-label">Comisiones Generadas</span>
+            </div>
+
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <i nz-icon nzType="rise" nzTheme="outline"></i>
+              </div>
+              <nz-statistic
+                [nzValue]="metricas?.conversiones_ultimos_30_dias || 0">
+              </nz-statistic>
+              <span class="stat-label">Conversiones (30 días)</span>
+            </div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Resumen por estados -->
+    <nz-card nzTitle="Resumen de Referidos" class="summary-card">
+      <div class="estados-grid">
+        <div class="estado-item" (click)="verReferidosPorEstado('pendiente')">
+          <div class="estado-icon pendiente">
+            <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+          </div>
+          <div class="estado-info">
+            <span class="estado-numero">{{ referidosPendientes }}</span>
+            <span class="estado-label">Pendientes</span>
+          </div>
+        </div>
+
+        <div class="estado-item" (click)="verReferidosPorEstado('contactado')">
+          <div class="estado-icon contactado">
+            <i nz-icon nzType="phone" nzTheme="outline"></i>
+          </div>
+          <div class="estado-info">
+            <span class="estado-numero">{{ referidosContactados }}</span>
+            <span class="estado-label">Contactados</span>
+          </div>
+        </div>
+
+        <div class="estado-item" (click)="verReferidosPorEstado('activo')">
+          <div class="estado-icon activo">
+            <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+          </div>
+          <div class="estado-info">
+            <span class="estado-numero">{{ referidosActivos }}</span>
+            <span class="estado-label">Convertidos</span>
+          </div>
+        </div>
       </div>
+
+
     </nz-card>
 
-    <nz-card nzTitle="Gestión de Referidos" class="dashboard-card">
-      <div class="card-content">
-        <p>Revisa el estado y progreso de los referidos</p>
-        <button nz-button nzType="primary" [routerLink]="['/referidos/lista']">
-          <i nz-icon nzType="usergroup-add"></i>
-          Ver Referidos
-        </button>
-      </div>
-    </nz-card>
+    <!-- Últimos referidos -->
+    <nz-card nzTitle="Últimos Referidos Asignados" class="table-card">
+      <nz-table
+        #referidosTable
+        [nzData]="ultimosReferidos"
+        [nzShowPagination]="false"
+        nzSize="small">
+        <thead>
+          <tr>
+            <th>Referido</th>
+            <th>Referente</th>
+            <th>Estado</th>
+            <th>Fecha Registro</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let referido of referidosTable.data">
+            <td>
+              <div class="referido-info">
+                <strong>{{ referido.nombre_referido }} {{ referido.apellido_referido }}</strong>
+                <small>{{ referido.correo_referido }}</small>
+              </div>
+            </td>
+            <td>
+              <div *ngIf="referido.referente">
+                <strong>{{ referido.referente.codigo_referente }}</strong>
+                <br>
+                <small>{{ referido.referente.usuario.nombre }} {{referido.referente.usuario.apellido }}</small>
+              </div>
+            </td>
+            <td>
+              <nz-tag [nzColor]="getEstadoColor(referido.estado_referido)">
+                {{ getEstadoTexto(referido.estado_referido) }}
+              </nz-tag>
+            </td>
+            <td>{{ formatearFecha(referido.fecha_referencia) }}</td>
+            <td>
+              <button
+                nz-button
+                nzType="link"
+                nzSize="small"
+                (click)="verDetalleReferido(referido)">
+                Ver detalle
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
 
-    <nz-card nzTitle="Reportes" class="dashboard-card">
-      <div class="card-content">
-        <p>Consulta métricas y estadísticas de ventas</p>
-        <button nz-button nzType="primary" [routerLink]="['/reportes']">
-          <i nz-icon nzType="bar-chart"></i>
-          Ver Reportes
-        </button>
+      <div class="empty-state" *ngIf="ultimosReferidos.length === 0 && !cargando">
+        <i nz-icon nzType="inbox"></i>
+        <p>No hay referidos asignados aún</p>
       </div>
     </nz-card>
-  </div>
+  </nz-spin>
 </div>

@@ -73,6 +73,7 @@ export class ListaReferidosComponent implements OnInit, OnDestroy {
         next: (referidos) => {
           this.referidos = referidos;
           this.loading = false;
+          console.log('Referidos cargados:', referidos);
         },
         error: (error) => {
           console.error('Error al cargar referidos:', error);

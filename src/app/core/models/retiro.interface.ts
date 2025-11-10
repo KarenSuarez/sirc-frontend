@@ -20,13 +20,7 @@ export interface SolicitudRetiro {
 
 export type MetodoRetiro = 'retiro' | 'bono_pago';
 
-export type EstadoSolicitud =
-  | 'pendiente'
-  | 'en_revision'
-  | 'aprobada'
-  | 'rechazada'
-  | 'procesada'
-  | 'pagada';
+export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada';
 
 export interface CrearSolicitudDTO {
   metodo_retiro: MetodoRetiro;

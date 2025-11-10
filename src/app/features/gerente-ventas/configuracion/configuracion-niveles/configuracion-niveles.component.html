@@ -1,8 +1,8 @@
 <div class="configuracion-container">
   <div class="configuracion-header">
-    <button nz-button nzType="text" [routerLink]="['/gerente/dashboard']" class="btn-volver">
+   <button nz-button nzType="text" [routerLink]="['/gerente/configuracion']" class="btn-volver">
       <i nz-icon nzType="arrow-left"></i>
-      Volver al Dashboard
+      Volver a Configuración
     </button>
     <h1>Configuración de Niveles</h1>
     <p>Gestiona los niveles de gamificación y sus beneficios</p>
@@ -27,12 +27,12 @@
         [class.nivel-destacado]="i === 0">
 
         <div class="nivel-header">
-          <div class="nivel-badge" [style.background-color]="nivel.color">
-            <i nz-icon [nzType]="nivel.icono"></i>
+          <div class="nivel-badge" [style.background-color]="nivel.color_nivel">
+            <i nz-icon [nzType]="nivel.icono_nivel ?? 'question-circle'"></i>
           </div>
           <div class="nivel-info">
-            <h3>{{ nivel.nombre }}</h3>
-            <span class="nivel-orden">Nivel {{ nivel.orden }}</span>
+            <h3>{{ nivel.nombre_nivel }}</h3>
+            <span class="nivel-orden">Nivel {{ nivel.orden_nivel }}</span>
           </div>
         </div>
 
@@ -43,7 +43,7 @@
             <i nz-icon nzType="trophy"></i>
             <div class="requisito-content">
               <span class="requisito-label">Puntos Mínimos</span>
-              <span class="requisito-valor">{{ nivel.puntosMinimos }}</span>
+              <span class="requisito-valor">{{ nivel.puntos_minimos }}</span>
             </div>
           </div>
 
@@ -51,7 +51,7 @@
             <i nz-icon nzType="rise"></i>
             <div class="requisito-content">
               <span class="requisito-label">Bonificación Extra</span>
-              <span class="requisito-valor bonus">+{{ nivel.bonificacionExtra }}%</span>
+              <span class="requisito-valor bonus">+{{ nivel.porcentaje_comision_extra }}%</span>
             </div>
           </div>
         </div>
@@ -60,10 +60,10 @@
           <p>{{ nivel.descripcion }}</p>
         </div>
 
-        <div class="nivel-beneficios" *ngIf="nivel.beneficios && nivel.beneficios.length > 0">
+        <div class="nivel-beneficios" *ngIf="nivel.beneficios_nivel && nivel.beneficios_nivel.length > 0">
           <h4>Beneficios:</h4>
           <ul>
-            <li *ngFor="let beneficio of nivel.beneficios">
+            <li *ngFor="let beneficio of nivel.beneficios_nivel">
               <i nz-icon nzType="check-circle"></i>
               {{ beneficio }}
             </li>

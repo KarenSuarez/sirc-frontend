@@ -26,6 +26,7 @@ export const REFERIDOS_ENDPOINTS = {
 } as const;
 
 export const ASESOR_ENDPOINTS = {
+  // Referidos
   REFERIDOS: {
     BASE: `${API_URL}/asesor/referidos`,
     DETALLE: (id: number) => `${API_URL}/asesor/referidos/${id}`,
@@ -34,6 +35,8 @@ export const ASESOR_ENDPOINTS = {
     ACTUALIZAR: (id: number) => `${API_URL}/asesor/referidos/${id}`,
     CONTACTAR: (id: number) => `${API_URL}/asesor/referidos/${id}/contactar`,
   },
+
+  // Referentes
   REFERENTES: {
     BASE: `${API_URL}/asesor/referentes`,
     DETALLE: (id: number) => `${API_URL}/asesor/referentes/${id}`,
@@ -80,11 +83,19 @@ export const NIVELES_ENDPOINTS = {
   ELIMINAR: (id: number) => `${API_URL}/niveles/${id}`,
 } as const;
 
-export const KPI_ENDPOINTS = {
-  GENERAL: `${API_URL}/kpi/general`,
-  REFERENTES: `${API_URL}/kpi/referentes`,
-  COMISIONES: `${API_URL}/kpi/comisiones`,
-  DASHBOARD: `${API_URL}/kpi/dashboard`,
+export const GERENTE_ENDPOINTS = {
+  // KPIs
+  KPI: {
+    GENERAL: `${API_URL}/kpi/general`,
+    REFERENTES: `${API_URL}/kpi/referentes`,
+    COMISIONES: `${API_URL}/kpi/comisiones`,
+    DASHBOARD: `${API_URL}/kpi/dashboard`,
+  },
+
+  // Ya están definidos globalmente, pero pueden accederse desde aquí
+  PLANES: PLANES_ENDPOINTS,
+  NIVELES: NIVELES_ENDPOINTS,
+  INSIGNIAS: INSIGNIAS_ENDPOINTS,
 } as const;
 
 export const USUARIOS_ENDPOINTS = {

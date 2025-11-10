@@ -44,7 +44,6 @@
                     nz-input
                     formControlName="nombre"
                     placeholder="Ingrese sus nombres"
-                    [disabled]="!isEditMode"
                   />
 
                   <ng-template #nombreErrorTemplate let-control>
@@ -65,7 +64,6 @@
                     nz-input
                     formControlName="apellido"
                     placeholder="Ingrese sus apellidos"
-                    [disabled]="!isEditMode"
                   />
 
                   <ng-template #apellidoErrorTemplate let-control>
@@ -87,7 +85,6 @@
                   <input
                     nz-input
                     formControlName="tipoDoc"
-                    [disabled]="true"
                     placeholder="Cargando..."
                   />
                 </nz-form-control>
@@ -99,7 +96,6 @@
                   <input
                     nz-input
                     formControlName="documento"
-                    [disabled]="true"
                   />
                 </nz-form-control>
               </nz-form-item>
@@ -113,7 +109,6 @@
                     nz-input
                     formControlName="correo"
                     placeholder="correo@ejemplo.com"
-                    [disabled]="!isEditMode"
                   />
 
                   <ng-template #emailErrorTemplate let-control>
@@ -134,7 +129,6 @@
                     nz-input
                     formControlName="telefono"
                     placeholder="3001234567"
-                    [disabled]="!isEditMode"
                   />
 
                   <ng-template #telefonoErrorTemplate let-control>
@@ -151,7 +145,6 @@
                 nz-button
                 nzType="default"
                 (click)="cancelEdit()"
-                [disabled]="isLoading"
               >
                 Cancelar
               </button>
@@ -160,7 +153,6 @@
                 nzType="primary"
                 nzHtmlType="submit"
                 [nzLoading]="isLoading"
-                [disabled]="!perfilForm.valid"
               >
                 Guardar Cambios
               </button>
@@ -289,7 +281,6 @@
                 nzType="primary"
                 nzHtmlType="submit"
                 [nzLoading]="isLoading"
-                [disabled]="!passwordForm.valid"
               >
                 Cambiar Contraseña
               </button>

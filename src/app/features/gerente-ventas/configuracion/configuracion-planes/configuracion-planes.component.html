@@ -1,8 +1,8 @@
 <div class="configuracion-container">
   <div class="configuracion-header">
-    <button nz-button nzType="text" [routerLink]="['/gerente/dashboard']" class="btn-volver">
+    <button nz-button nzType="text" [routerLink]="['/gerente/configuracion']" class="btn-volver">
       <i nz-icon nzType="arrow-left"></i>
-      Volver al Dashboard
+      Volver a Configuración
     </button>
     <h1>Configuración de Planes</h1>
     <p>Gestiona los planes disponibles para los clientes</p>
@@ -51,31 +51,32 @@
         <tr *ngFor="let plan of planesTable.data">
           <td>
             <div class="plan-info">
-              <div class="plan-icon" [style.background-color]="plan.color">
-                <i nz-icon [nzType]="plan.icono"></i>
+              <div class="plan-icon" [style.background-color]="plan.color_plan">
+               <i nz-icon [nzType]="plan.icono_plan ?? 'question-circle'"></i>
+
               </div>
-              <span class="plan-nombre">{{ plan.nombre }}</span>
+              <span class="plan-nombre">{{ plan.nombre_plan }}</span>
             </div>
           </td>
           <td>
-            <span class="plan-descripcion">{{ plan.descripcion }}</span>
+            <span class="plan-descripcion">{{ plan.descripcion_plan }}</span>
           </td>
           <td>
-            <span class="plan-valor">{{ plan.valor | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="plan-valor">{{ plan.precio_actual | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
           </td>
           <td>
-            <span class="comision-badge">{{ plan.comisionPorcentaje }}%</span>
-            <span class="comision-valor">{{ calcularComision(plan.valor, plan.comisionPorcentaje) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="comision-badge">{{ plan.porcentaje_comision }}%</span>
+            <span class="comision-valor">{{ calcularComision(plan.precio_actual, plan.porcentaje_comision) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
           </td>
           <td>
             <span class="puntos-badge">
               <i nz-icon nzType="trophy"></i>
-              {{ plan.puntos }}
+              {{ plan.puntos_plan }}
             </span>
           </td>
           <td>
             <nz-switch
-              [(ngModel)]="plan.activo"
+              [(ngModel)]="plan.estado_plan"
               (ngModelChange)="cambiarEstadoPlan(plan)"
               [nzCheckedChildren]="checkedTemplate"
               [nzUnCheckedChildren]="unCheckedTemplate">

@@ -27,8 +27,8 @@
         [class.insignia-destacada]="insignia.destacada">
 
         <div class="insignia-header">
-          <div class="insignia-badge" [style.background]="insignia.color">
-            <i nz-icon [nzType]="insignia.icono" class="insignia-icon"></i>
+          <div class="insignia-badge" [style.background]="insignia.color_insignia">
+            <i nz-icon [nzType]="insignia.icono_insignia" class="insignia-icon"></i>
           </div>
           <div class="insignia-estado">
             <nz-switch
@@ -40,26 +40,16 @@
         </div>
 
         <div class="insignia-contenido">
-          <h3>{{ insignia.nombre }}</h3>
+          <h3>{{ insignia.nombre_insignia }}</h3>
           <p class="insignia-descripcion">{{ insignia.descripcion }}</p>
 
           <nz-divider></nz-divider>
 
           <div class="insignia-criterios">
             <h4>Criterios de Obtención:</h4>
-            <div class="criterio-item" *ngFor="let criterio of insignia.criterios">
+            <div class="criterio-item" *ngFor="let criterio of insignia.criteriosArray">
               <i nz-icon nzType="check-circle"></i>
               <span>{{ criterio }}</span>
-            </div>
-          </div>
-
-          <div class="insignia-recompensa" *ngIf="insignia.recompensa">
-            <div class="recompensa-icon">
-              <i nz-icon nzType="gift"></i>
-            </div>
-            <div class="recompensa-content">
-              <span class="recompensa-label">Recompensa:</span>
-              <span class="recompensa-valor">{{ insignia.recompensa }}</span>
             </div>
           </div>
 

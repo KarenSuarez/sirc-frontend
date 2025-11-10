@@ -18,10 +18,10 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UsuarioHelperService } from '../../../core/services/usuario-helper.service';
 import { UsuarioAutenticado } from '../../../core/models/usuario.interface';
 import {
-  Nivel,
   Insignia,
   InsigniaReferente,
-} from '../../../core/models/nivel.interface';
+} from '../../../core/models/insignia.interface';
+import { Nivel } from '../../../core/models/nivel.interface';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -46,7 +46,7 @@ export class PuntosComponent implements OnInit, OnDestroy {
   puntosActuales = 0;
   niveles: Nivel[] = [];
   insignias: InsigniaReferente[] = [];
-  todasLasInsignias: Insignia[] = []
+  todasLasInsignias: Insignia[] = [];
 
   logrosDesbloqueados: any[] = [];
   logrosBloqueados: any[] = [];
@@ -117,10 +117,12 @@ export class PuntosComponent implements OnInit, OnDestroy {
             ? data.niveles.sort((a, b) => a.orden_nivel - b.orden_nivel)
             : [];
 
-          this.insignias = Array.isArray(data.misInsignias) ? data.misInsignias : [];
+          this.insignias = Array.isArray(data.misInsignias)
+            ? data.misInsignias
+            : [];
 
           this.todasLasInsignias = Array.isArray(data.todasInsignias)
-            ? data.todasInsignias.filter(i => i.estado === 'activa')
+            ? data.todasInsignias.filter((i) => i.estado === 'activa')
             : [];
 
           this.puntosActuales = data.perfil?.progreso?.puntos_actuales || 0;
@@ -176,7 +178,8 @@ export class PuntosComponent implements OnInit, OnDestroy {
       beneficio: siguiente.beneficios_nivel,
     };
 
-    this.puntosParaSiguienteNivel = siguiente.puntos_minimos - this.puntosActuales;
+    this.puntosParaSiguienteNivel =
+      siguiente.puntos_minimos - this.puntosActuales;
   }
 
   private calcularProgreso() {
@@ -204,11 +207,11 @@ export class PuntosComponent implements OnInit, OnDestroy {
       .filter((i) => i && i.insignia)
       .map((i) => ({
         id: i.id_insignia,
-        nombre: i.insignia.nombre_insignia || 'Sin nombre',
-        descripcion: i.insignia.descripcion || 'Sin descripción',
-        icon: i.insignia.icono_insignia || 'trophy',
-        color: i.insignia.color_insignia || '#FFD700',
-        rareza: i.insignia.rareza || 'comun',
+        nombre: i.insignia?.nombre_insignia || 'Sin nombre',
+        descripcion: i.insignia?.descripcion || 'Sin descripción',
+        icon: i.insignia?.icono_insignia || 'trophy',
+        color: i.insignia?.color_insignia || '#FFD700',
+        rareza: i.insignia?.rareza || 'comun',
         fecha: new Date(i.fecha_obtencion).toLocaleDateString('es-CO'),
       }));
 
