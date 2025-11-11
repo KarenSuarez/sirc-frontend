@@ -1,6 +1,5 @@
 <div class="dashboard-container">
   <nz-spin [nzSpinning]="cargando" nzTip="Cargando datos...">
-
     <!-- Sección de estadísticas principales -->
     <div class="estadisticas-section">
       <nz-card class="estadisticas-card" [nzBordered]="false">
@@ -21,7 +20,8 @@
                 <i nz-icon nzType="check-circle" nzTheme="outline"></i>
               </div>
               <nz-statistic
-                [nzValue]="metricas?.referidos_convertidos_total || 0">
+                [nzValue]="metricas?.referidos_convertidos_total || 0"
+              >
               </nz-statistic>
               <span class="stat-label"> Referidos Convertidos</span>
             </div>
@@ -31,8 +31,11 @@
                 <i nz-icon nzType="dollar" nzTheme="outline"></i>
               </div>
               <nz-statistic
-                [nzValue]="metricas?.comisiones_generadas_total || 0"
-                nzPrefix="$">
+                [nzValue]="
+                  '$' +
+                  (metricas?.comisiones_generadas_total || 0 | number : '1.0-0' : 'es-CO')
+                "
+              >
               </nz-statistic>
               <span class="stat-label">Comisiones Generadas</span>
             </div>
@@ -42,7 +45,8 @@
                 <i nz-icon nzType="rise" nzTheme="outline"></i>
               </div>
               <nz-statistic
-                [nzValue]="metricas?.conversiones_ultimos_30_dias || 0">
+                [nzValue]="metricas?.conversiones_ultimos_30_dias || 0"
+              >
               </nz-statistic>
               <span class="stat-label">Conversiones (30 días)</span>
             </div>
@@ -84,8 +88,6 @@
           </div>
         </div>
       </div>
-
-
     </nz-card>
 
     <!-- Últimos referidos -->
@@ -94,29 +96,36 @@
         #referidosTable
         [nzData]="ultimosReferidos"
         [nzShowPagination]="false"
-        nzSize="small">
+        nzSize="small"
+      >
         <thead>
           <tr>
             <th>Referido</th>
             <th>Referente</th>
             <th>Estado</th>
             <th>Fecha Registro</th>
-            <th>Acciones</th>
+            <th nzAlign="center">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let referido of referidosTable.data">
             <td>
               <div class="referido-info">
-                <strong>{{ referido.nombre_referido }} {{ referido.apellido_referido }}</strong>
+                <strong
+                  >{{ referido.nombre_referido }}
+                  {{ referido.apellido_referido }}</strong
+                >
                 <small>{{ referido.correo_referido }}</small>
               </div>
             </td>
             <td>
               <div *ngIf="referido.referente">
-                <strong>{{ referido.referente.codigo_referente }}</strong>
-                <br>
-                <small>{{ referido.referente.usuario.nombre }} {{referido.referente.usuario.apellido }}</small>
+                <strong style="color:var(--primary-color)">{{ referido.referente.codigo_referente }}</strong>
+                <br />
+                <small
+                  >{{ referido.referente.usuario.nombre }}
+                  {{ referido.referente.usuario.apellido }}</small
+                >
               </div>
             </td>
             <td>
@@ -124,21 +133,34 @@
                 {{ getEstadoTexto(referido.estado_referido) }}
               </nz-tag>
             </td>
-            <td>{{ formatearFecha(referido.fecha_referencia) }}</td>
             <td>
-              <button
-                nz-button
-                nzType="link"
-                nzSize="small"
-                (click)="verDetalleReferido(referido)">
-                Ver detalle
-              </button>
+              <div class="fecha-info">
+              <i nz-icon nzType="calendar"></i>
+              {{ formatearFecha(referido.fecha_referencia) }}
+              </div>
+            </td>
+
+            <td nzAlign="center">
+              <div class="action-buttons">
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="verDetalleReferido(referido)"
+                  nz-tooltip="Ver detalles"
+                >
+                  <i nz-icon nzType="eye"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </nz-table>
 
-      <div class="empty-state" *ngIf="ultimosReferidos.length === 0 && !cargando">
+      <div
+        class="empty-state"
+        *ngIf="ultimosReferidos.length === 0 && !cargando"
+      >
         <i nz-icon nzType="inbox"></i>
         <p>No hay referidos asignados aún</p>
       </div>

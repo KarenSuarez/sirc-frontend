@@ -6,8 +6,8 @@ export interface Plan {
   nombre_plan: string;
   descripcion_plan?: string;
   precio_actual: number;
-  porcentaje_comision: number;
-  puntos_plan: number;
+  porcentaje_comision_base: number;
+  puntos_otorgados: number;
   duracion_dias: number;
   icono_plan?: string;
   color_plan?: string;

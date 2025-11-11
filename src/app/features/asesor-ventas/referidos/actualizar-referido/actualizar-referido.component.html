@@ -361,7 +361,7 @@
               <div class="detail-row highlight">
                 <span class="detail-label">
                   <i nz-icon nzType="wallet" class="detail-icon"></i>
-                  Comisión ({{ planSeleccionado.porcentaje_comision }}%):
+                  Comisión ({{ planSeleccionado.porcentaje_comision_base }}%):
                 </span>
                 <span class="detail-value success">
                   ${{ calcularComision().toLocaleString('es-CO') }}
@@ -374,7 +374,7 @@
                   Puntos:
                 </span>
                 <span class="detail-value">
-                  {{ planSeleccionado.puntos_plan }} pts
+                  {{ planSeleccionado.puntos_otorgados }} pts
                 </span>
               </div>
 

@@ -65,13 +65,13 @@
             <span class="plan-valor">{{ plan.precio_actual | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
           </td>
           <td>
-            <span class="comision-badge">{{ plan.porcentaje_comision }}%</span>
-            <span class="comision-valor">{{ calcularComision(plan.precio_actual, plan.porcentaje_comision) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="comision-badge">{{ plan.porcentaje_comision_base }}%</span>
+            <span class="comision-valor">{{ calcularComision(plan.precio_actual, plan.porcentaje_comision_base) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
           </td>
           <td>
             <span class="puntos-badge">
               <i nz-icon nzType="trophy"></i>
-              {{ plan.puntos_plan }}
+              {{ plan.puntos_otorgados }}
             </span>
           </td>
           <td>

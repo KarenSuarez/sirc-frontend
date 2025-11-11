@@ -99,26 +99,6 @@ export class ListaReferidosComponent implements OnInit, OnDestroy {
     return this.expandedReferidoId === referido.id_referido;
   }
 
-  eliminarReferido(referido: Referido) {
-    if (referido.estado_referido !== 'pendiente') {
-      this.message.warning(
-        'Solo se pueden eliminar referidos en estado pendiente'
-      );
-      return;
-    }
-
-    this.modal.confirm({
-      nzTitle: '¿Eliminar referido?',
-      nzContent: `¿Estás seguro de eliminar a ${referido.nombre_referido} ${referido.apellido_referido}? Esta acción no se puede deshacer.`,
-      nzOkText: 'Sí, eliminar',
-      nzCancelText: 'Cancelar',
-      nzOkDanger: true,
-      nzOnOk: () => {
-        this.message.info('Función de eliminación en desarrollo');
-      },
-    });
-  }
-
   getEstadoColor(estado: string): string {
     const colores: Record<string, string> = {
       pendiente: 'orange',

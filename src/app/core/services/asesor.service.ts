@@ -35,7 +35,8 @@ export class AsesorService {
   listarReferidos(
     estado?: EstadoReferido,
     limite: number = 50,
-    pagina: number = 1
+    pagina: number = 1,
+    busqueda?: string
   ): Observable<ReferidosPaginados> {
     let params = new HttpParams()
       .set('limite', limite.toString())
@@ -43,6 +44,10 @@ export class AsesorService {
 
     if (estado) {
       params = params.set('estado', estado);
+    }
+
+    if (busqueda && busqueda.trim()) {
+      params = params.set('busqueda', busqueda.trim());
     }
 
     return this.http.get<ReferidosPaginados>(

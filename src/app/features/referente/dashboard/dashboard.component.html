@@ -38,8 +38,7 @@
               <i nz-icon nzType="dollar" nzTheme="outline"></i>
             </div>
             <nz-statistic
-              [nzValue]="perfilReferente.saldo_disponible || 0"
-              nzPrefix="$"
+              [nzValue]="'$' + (perfilReferente.saldo_disponible || 0 | number:'1.0-0')"
             ></nz-statistic>
             <span class="stat-label">Saldo</span>
           </div>

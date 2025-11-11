@@ -48,7 +48,7 @@
 
 ::ng-deep .stat-card .ant-statistic-title {
   text-align: left !important;
-  font-size: 13px !important; /* Un poco más pequeño */
+  font-size: 13px !important;
 }
 
 ::ng-deep .stat-card .ant-statistic-content {
@@ -59,9 +59,9 @@
 .stat-card-content {
   display: flex;
   align-items: center;
-  gap: 16px; /* Espacio entre ícono, info y botón */
+  gap: 16px;
 }
-/* --- INICIO: Estilos de Iconos (como en Dashboard) --- */
+
 .stat-icon-wrapper {
   width: 48px;
   height: 48px;
@@ -69,38 +69,41 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0; /* Evita que el ícono se encoja */
+  flex-shrink: 0;
 }
 
 .stat-icon-wrapper i {
   color: white;
   font-size: 20px;
 }
+
 .stat-saldo {
   background-color: var(--primary-color);
 }
+
 .stat-pendiente {
   background-color: var(--warning-color);
 }
+
 .stat-pagado {
   background-color: var(--success-color);
 }
 
-/* 5. Fondos suaves para las tarjetas (como en dashboard) */
 .stat-card-saldo {
   background-color: rgba(74, 144, 226, 0.08) !important;
 }
+
 .stat-card-pendiente {
   background-color: rgba(250, 173, 20, 0.08) !important;
 }
+
 .stat-card-pagado {
   background-color: rgba(82, 196, 26, 0.08) !important;
 }
 
-/* 6. Contenedor de la estadística (para que crezca) */
 .stat-info {
-  flex-grow: 1; /* Ocupa el espacio restante */
-  min-width: 0; /* Importante para que el flexbox no se desborde */
+  flex-grow: 1;
+  min-width: 0;
 }
 
 /* Table Card */
@@ -239,10 +242,16 @@
 }
 
 /* Modal Styles */
+::ng-deep .ant-modal-content {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
 ::ng-deep .ant-modal-header {
   background: white;
   border-bottom: 1px solid #f0f0f0;
   padding: 20px 24px;
+  border-radius: 16px 16px 0 0 !important;
 }
 
 ::ng-deep .ant-modal-title {
@@ -258,6 +267,7 @@
 ::ng-deep .ant-modal-footer {
   border-top: 1px solid #f0f0f0;
   padding: 16px 24px;
+  border-radius: 0 0 16px 16px !important;
 }
 
 ::ng-deep .ant-modal-footer button {
@@ -286,9 +296,30 @@
   color: #ff4d4f !important;
 }
 
-::ng-deep .ant-input,
-::ng-deep .ant-input-number,
+/* Estilos para inputs simples (Banco y Número de Cuenta) */
+::ng-deep .ant-input {
+  border-radius: var(--border-radius) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  height: 48px !important;
+}
+
+::ng-deep .ant-input:hover {
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .ant-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+}
+
+/* Estilos para select (Método de Retiro) */
 ::ng-deep .ant-select-selector {
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
   border-radius: var(--border-radius) !important;
   border: 1px solid #e5e7eb !important;
   padding: 12px 16px !important;
@@ -296,32 +327,43 @@
   transition: all 0.3s ease !important;
 }
 
-::ng-deep .ant-select-selector {
-  height: 48px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-::ng-deep .ant-input:hover,
-::ng-deep .ant-input-number:hover,
 ::ng-deep .ant-select-selector:hover {
   border-color: var(--primary-color) !important;
 }
 
-::ng-deep .ant-input:focus,
-::ng-deep .ant-input-number:focus,
 ::ng-deep .ant-select-focused .ant-select-selector {
   border-color: var(--primary-color) !important;
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
 }
 
-::ng-deep .ant-input-group-addon {
-  background: #f5f5f5 !important;
+/* Estilos para input con prefix (Monto a Retirar con $) */
+::ng-deep .ant-input-affix-wrapper {
+  border-radius: var(--border-radius) !important;
   border: 1px solid #e5e7eb !important;
-  border-right: none !important;
-  padding: 0 12px !important;
-  color: var(--text-light) !important;
-  font-weight: 600 !important;
+  padding: 12px 16px !important;
+  transition: all 0.3s ease !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+::ng-deep .ant-input-affix-wrapper .ant-input {
+  padding: 0 !important;
+  border: none !important;
+  height: auto !important;
+}
+
+::ng-deep .ant-input-affix-wrapper:hover {
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep .ant-input-affix-wrapper-focused {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+}
+
+::ng-deep .ant-input-prefix {
+  margin-right: 8px !important;
 }
 
 /* Divider en modal */
@@ -358,6 +400,39 @@
   font-weight: 600;
   font-size: 12px;
   border: none;
+}
+
+/* Estilo para el botón "Nueva Solicitud" */
+::ng-deep .table-card .ant-card-extra .btn-nueva-solicitud {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  border-radius: var(--border-radius) !important;
+  height: 44px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  transition: all 0.3s ease !important;
+  color: white !important;
+}
+
+::ng-deep .table-card .ant-card-extra .btn-nueva-solicitud:hover:not(:disabled) {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+  color: white !important;
+}
+
+::ng-deep .table-card .ant-card-extra .btn-nueva-solicitud:disabled {
+  background-color: #f5f5f5 !important;
+  border-color: #d9d9d9 !important;
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* Botones principales */
@@ -415,6 +490,7 @@
   .stat-card {
     margin-bottom: 0;
   }
+
   .stat-button-text {
     display: none;
   }
@@ -428,15 +504,15 @@
   }
 
   .stat-card-content {
-    gap: 12px; /* Reduce el espacio en móviles */
+    gap: 12px;
   }
 
   .stat-card ::ng-deep .ant-card-body {
-    padding: 16px !important; /* Aún más compacto */
+    padding: 16px !important;
   }
 
   ::ng-deep .stat-card .ant-statistic-content {
-    font-size: 22px !important; /* Más pequeño en móvil */
+    font-size: 22px !important;
   }
 
   .table-card ::ng-deep .ant-card-body {
@@ -497,21 +573,6 @@
   }
 }
 
-/* Variables CSS */
-:root {
-  --primary-color: #4a90e2;
-  --primary-dark: #357abd;
-  --text-dark: #2c3e50;
-  --text-light: #7f8c8d;
-  --white: #ffffff;
-  --danger-color: #ff4d4f;
-  --success-color: #52c41a;
-  --warning-color: #faad14;
-  --border-radius: 8px;
-  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
 /* Animaciones */
 @keyframes fadeInUp {
   from {
@@ -544,18 +605,4 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* Redondear el botón "Solicitar Retiro" */
-::ng-deep .stat-card .ant-btn-primary {
-  border-radius: 5px !important;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-/* Efecto hover coherente */
-::ng-deep .stat-card .ant-btn-primary:hover {
-  transform: translateY(-1px);
-  background-color: var(--primary-dark, #1a73e8) !important;
-  border-color: var(--primary-dark, #1a73e8) !important;
 }

@@ -139,7 +139,7 @@ export class PlanService {
    * Calcular comisión de un plan
    */
   calcularComision(plan: Plan): number {
-    return (plan.precio_actual * plan.porcentaje_comision) / 100;
+    return (plan.precio_actual * plan.porcentaje_comision_base) / 100;
   }
 
   /**

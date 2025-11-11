@@ -274,6 +274,7 @@ export class ActualizarReferidoComponent implements OnInit, OnDestroy {
     }
 
     const plan = this.planSeleccionado;
+    console.log('Plan seleccionado:', plan);
 
     if (!plan) {
       this.message.error('Selecciona un plan válido');
@@ -287,7 +288,7 @@ export class ActualizarReferidoComponent implements OnInit, OnDestroy {
         <p><strong>Plan:</strong> ${plan.nombre_plan}</p>
         <p><strong>Valor:</strong> $${plan.precio_actual.toLocaleString('es-CO')}</p>
         <p><strong>Comisión para referente:</strong> $${this.calcularComision().toLocaleString('es-CO')}</p>
-        <p><strong>Puntos:</strong> ${plan.puntos_plan}</p>
+        <p><strong>Puntos:</strong> ${plan.puntos_otorgados}</p>
       `,
       nzOkText: 'Sí, convertir',
       nzOkType: 'primary',
@@ -404,7 +405,7 @@ export class ActualizarReferidoComponent implements OnInit, OnDestroy {
     if (!this.planSeleccionado) return 0;
     return (
       (this.planSeleccionado.precio_actual *
-        this.planSeleccionado.porcentaje_comision) /
+        this.planSeleccionado.porcentaje_comision_base) /
       100
     );
   }

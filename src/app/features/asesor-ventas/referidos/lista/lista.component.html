@@ -70,6 +70,7 @@
           nz-input
           placeholder="Buscar por nombre, correo, documento..."
           [(ngModel)]="searchText"
+          (ngModelChange)="aplicarFiltros()"
           (keyup.enter)="aplicarFiltros()"
         />
       </nz-input-group>
@@ -107,7 +108,7 @@
   <nz-card class="table-card">
     <nz-table
       #referidosTable
-      [nzData]="referidos"
+      [nzData]="getReferidosPaginados()"
       [nzLoading]="loading"
       [nzTotal]="total"
       [nzPageSize]="pageSize"
@@ -156,13 +157,13 @@
             </td>
             <td>
               <span *ngIf="referido.tipoDocumento">
-                {{ referido.tipoDocumento.codigo_tipo }}
+                {{ referido.tipoDocumento.codigo_tipo }} -
               </span>
               {{ referido.numero_documento_referido }}
             </td>
             <td>
               <div class="referente-info" *ngIf="referido.referente">
-                <strong>{{ getCodigoReferente(referido) }}</strong>
+                <strong style="color:var(--primary-color)">{{ getCodigoReferente(referido) }}</strong>
                 <small>{{ getNombreReferente(referido) }}</small>
               </div>
             </td>
@@ -173,13 +174,20 @@
             </td>
             <td>
               <span *ngIf="referido.plan">
+                <nz-tag [nzColor]="referido.plan.color_plan || 'blue'">
                 {{ referido.plan.nombre_plan }}
+                </nz-tag>
               </span>
               <span *ngIf="!referido.plan" style="color: #8c8c8c">
                 Sin plan
               </span>
             </td>
-            <td>{{ formatearFecha(referido.fecha_referencia) }}</td>
+            <td>
+              <div class="fecha-info">
+              <i nz-icon nzType="calendar"></i>
+              {{ formatearFecha(referido.fecha_referencia) }}
+              </div>
+            </td>
             <td nzAlign="center">
               <div class="action-buttons">
                 <button
@@ -210,7 +218,6 @@
             <td colspan="8" class="detalle-cell">
               <div class="detalle-container">
                 <nz-descriptions
-                  nzTitle="Información Completa"
                   nzBordered
                   [nzColumn]="2"
                   nzSize="small"
@@ -277,7 +284,7 @@
                         {{ referido.plan.nombre_plan }}
                       </nz-tag>
                       <span class="plan-precio">
-                        ${{ referido.plan.precio_actual | number : "1.0-0" }}
+                        ${{ referido.plan.precio_actual | number : '1.0-0' : 'es-CO' }}
                       </span>
                     </div>
                   </nz-descriptions-item>

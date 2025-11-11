@@ -176,8 +176,8 @@ export class ConfiguracionPlanesComponent implements OnInit, OnDestroy {
       nombre_plan: plan.nombre_plan,
       descripcion: plan.descripcion_plan || '',
       precio_actual: plan.precio_actual,
-      porcentaje_comision_base: plan.porcentaje_comision,
-      puntos_otorgados: plan.puntos_plan,
+      porcentaje_comision_base: plan.porcentaje_comision_base,
+      puntos_otorgados: plan.puntos_otorgados,
       icono_plan: plan.icono_plan || 'file-text',
       color_plan: plan.color_plan || '#4A90E2',
     });

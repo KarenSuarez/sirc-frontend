@@ -91,7 +91,7 @@
             *ngFor="let mes of pagosPorMes"
             class="chart-bar"
             [style.height.%]="(mes.monto / maxPagoMes) * 100">
-            <span class="bar-value">{{ mes.monto / 1000000 | number:'1.0-0' }}M</span>
+            <span class="bar-value">{{ mes.monto / 1000000 | number : '1.0-0' : 'es-CO' }}M</span>
           </div>
         </div>
         <div class="chart-labels">

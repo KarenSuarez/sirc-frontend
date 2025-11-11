@@ -237,14 +237,4 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.showUserMenu = false;
     }
   }
-
-    @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    const clickedInside = target.closest('.user-profile');
-    if (!clickedInside) {
-      this.showUserMenu = false;
-    }
-  }
-
 }

@@ -11,7 +11,8 @@
           nz-input
           placeholder="Buscar por referente..."
           [(ngModel)]="searchText"
-          (ngModelChange)="filtrarSolicitudes()" />
+          (ngModelChange)="filtrarSolicitudes()"
+        />
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="search"></i>
@@ -28,7 +29,8 @@
           <nz-segmented
             [nzOptions]="opcionesEstado"
             [(ngModel)]="filtroEstado"
-            (ngModelChange)="filtrarSolicitudes()">
+            (ngModelChange)="filtrarSolicitudes()"
+          >
           </nz-segmented>
         </div>
 
@@ -37,11 +39,15 @@
           <nz-select
             [(ngModel)]="ordenarPor"
             (ngModelChange)="ordenarSolicitudes()"
-            class="ordenar-select">
+            class="ordenar-select"
+          >
             <nz-option nzValue="fecha" nzLabel="Fecha más reciente"></nz-option>
             <nz-option nzValue="monto-desc" nzLabel="Mayor monto"></nz-option>
             <nz-option nzValue="monto-asc" nzLabel="Menor monto"></nz-option>
-            <nz-option nzValue="referente" nzLabel="Referente (A-Z)"></nz-option>
+            <nz-option
+              nzValue="referente"
+              nzLabel="Referente (A-Z)"
+            ></nz-option>
           </nz-select>
         </div>
       </div>
@@ -53,7 +59,9 @@
         </div>
         <div class="stat-filtro">
           <span class="stat-label">Monto Total:</span>
-          <span class="stat-value primary">{{ calcularMontoTotal() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          <span class="stat-value primary">{{
+            calcularMontoTotal() | currency : "COP" : "symbol-narrow" : "1.0-0"
+          }}</span>
         </div>
       </div>
     </nz-card>
@@ -66,8 +74,8 @@
       [nzData]="solicitudesFiltradas"
       [nzLoading]="loading"
       nzSize="middle"
-      [nzPageSize]="10">
-
+      [nzPageSize]="10"
+    >
       <thead>
         <tr>
           <th>ID Solicitud</th>
@@ -91,18 +99,29 @@
                 {{ obtenerInicialesReferente(solicitud) }}
               </div>
               <div class="referente-datos">
-                <span class="referente-nombre">{{ obtenerNombreReferente(solicitud) }}</span>
-                <span class="referente-codigo">{{ solicitud.referente?.codigo_referente }}</span>
+                <span class="referente-nombre">{{
+                  obtenerNombreReferente(solicitud)
+                }}</span>
+                <span class="referente-codigo">{{
+                  solicitud.referente?.codigo_referente
+                }}</span>
               </div>
             </div>
           </td>
           <td>
-            <span class="monto-solicitud">{{ solicitud.monto_solicitado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="monto-solicitud">{{
+              solicitud.monto_solicitado
+                | currency : "COP" : "symbol-narrow" : "1.0-0"
+            }}</span>
           </td>
           <td>
             <div class="fecha-info">
-              <span class="fecha">{{ formatearFecha(solicitud.fecha_solicitud) }}</span>
-              <span class="hora">{{ formatearHora(solicitud.fecha_solicitud) }}</span>
+              <span class="fecha">{{
+                formatearFecha(solicitud.fecha_solicitud)
+              }}</span>
+              <span class="hora">{{
+                formatearHora(solicitud.fecha_solicitud)
+              }}</span>
             </div>
           </td>
           <td>
@@ -119,39 +138,40 @@
           <td>
             <nz-space nzSize="small">
               <ng-container *ngIf="solicitud.estado_solicitud === 'pendiente'">
-  <button
-    *nzSpaceItem
-    nz-button
-    nzType="primary"
-    nzSize="small"
-    (click)="procesarRetiro(solicitud)">
-    <i nz-icon nzType="check"></i>
-    Procesar
-  </button>
-</ng-container>
-
+                <button
+                  *nzSpaceItem
+                  nz-button
+                  nzType="primary"
+                  nzSize="small"
+                  (click)="procesarRetiro(solicitud)"
+                >
+                  <i nz-icon nzType="check"></i>
+                  Procesar
+                </button>
+              </ng-container>
 
               <button
                 *nzSpaceItem
                 nz-button
                 nzType="default"
                 nzSize="small"
-                (click)="verDetalle(solicitud)">
+                (click)="verDetalle(solicitud)"
+              >
                 <i nz-icon nzType="eye"></i>
               </button>
 
               <ng-container *ngIf="solicitud.estado_solicitud === 'pendiente'">
-  <button
-    *nzSpaceItem
-    nz-button
-    nzType="primary"
-    nzSize="small"
-    (click)="procesarRetiro(solicitud)">
-    <i nz-icon nzType="check"></i>
-    Procesar
-  </button>
-</ng-container>
-
+                <button
+                  *nzSpaceItem
+                  nz-button
+                  nzType="primary"
+                  nzSize="small"
+                  (click)="procesarRetiro(solicitud)"
+                >
+                  <i nz-icon nzType="check"></i>
+                  Procesar
+                </button>
+              </ng-container>
 
               <nz-dropdown-menu #menu="nzDropdownMenu">
                 <ul nz-menu>
@@ -171,7 +191,10 @@
       </tbody>
     </nz-table>
 
-    <div class="tabla-empty" *ngIf="!loading && solicitudesFiltradas.length === 0">
+    <div
+      class="tabla-empty"
+      *ngIf="!loading && solicitudesFiltradas.length === 0"
+    >
       <div class="empty-content">
         <i nz-icon nzType="inbox" class="empty-icon"></i>
         <h3>No se encontraron solicitudes</h3>
@@ -189,11 +212,13 @@
 <!-- Modal Procesar Retiro -->
 <nz-modal
   [(nzVisible)]="modalProcesarVisible"
-  [nzTitle]="'Procesar Retiro - #' + (solicitudSeleccionada?.id_solicitud || '')"
+  [nzTitle]="
+    'Procesar Retiro - #' + (solicitudSeleccionada?.id_solicitud || '')
+  "
   [nzFooter]="null"
   nzWidth="600px"
-  (nzOnCancel)="cerrarModalProcesar()">
-
+  (nzOnCancel)="cerrarModalProcesar()"
+>
   <div *nzModalContent>
     <div *ngIf="solicitudSeleccionada">
       <div class="modal-info">
@@ -202,17 +227,29 @@
             {{ obtenerNombreReferente(solicitudSeleccionada) }}
           </nz-descriptions-item>
           <nz-descriptions-item nzTitle="Monto">
-            <strong style="font-size: 18px; color: #4A90E2;">
-              {{ solicitudSeleccionada.monto_solicitado | currency:'COP':'symbol-narrow':'1.0-0' }}
+            <strong style="font-size: 18px; color: #4a90e2">
+              {{
+                solicitudSeleccionada.monto_solicitado
+                  | currency : "COP" : "symbol-narrow" : "1.0-0"
+              }}
             </strong>
           </nz-descriptions-item>
           <nz-descriptions-item nzTitle="Método de Pago">
             {{ formatearMetodoRetiro(solicitudSeleccionada.metodo_retiro) }}
           </nz-descriptions-item>
-          <nz-descriptions-item nzTitle="Información Bancaria" *ngIf="solicitudSeleccionada.banco_destino">
+          <nz-descriptions-item
+            nzTitle="Información Bancaria"
+            *ngIf="solicitudSeleccionada.banco_destino"
+          >
             <div class="datos-bancarios">
-              <p><strong>Banco:</strong> {{ solicitudSeleccionada.banco_destino }}</p>
-              <p><strong>Cuenta:</strong> {{ solicitudSeleccionada.cuenta_destino }}</p>
+              <p>
+                <strong>Banco:</strong>
+                {{ solicitudSeleccionada.banco_destino }}
+              </p>
+              <p>
+                <strong>Cuenta:</strong>
+                {{ solicitudSeleccionada.cuenta_destino }}
+              </p>
             </div>
           </nz-descriptions-item>
         </nz-descriptions>
@@ -222,17 +259,15 @@
         <nz-divider></nz-divider>
 
         <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzRequired>
-            Decisión
-          </nz-form-label>
+          <nz-form-label [nzSpan]="24" nzRequired> Decisión </nz-form-label>
           <nz-form-control [nzSpan]="24">
             <nz-radio-group formControlName="decision">
               <label nz-radio nzValue="aprobar">
-                <i nz-icon nzType="check-circle" style="color: #52c41a;"></i>
+                <i nz-icon nzType="check-circle" style="color: #52c41a"></i>
                 Aprobar Retiro
               </label>
               <label nz-radio nzValue="rechazar">
-                <i nz-icon nzType="close-circle" style="color: #ff4d4f;"></i>
+                <i nz-icon nzType="close-circle" style="color: #ff4d4f"></i>
                 Rechazar Retiro
               </label>
             </nz-radio-group>
@@ -247,7 +282,8 @@
             <input
               nz-input
               formControlName="comprobante_pago_url"
-              placeholder="https://ejemplo.com/comprobante.pdf" />
+              placeholder="https://ejemplo.com/comprobante.pdf"
+            />
           </nz-form-control>
         </nz-form-item>
 
@@ -261,12 +297,15 @@
               [nzMultiple]="false"
               nzAccept=".pdf,.jpg,.jpeg,.png"
               [nzBeforeUpload]="beforeUpload"
-              [nzFileList]="fileList">
+              [nzFileList]="fileList"
+            >
               <p class="ant-upload-drag-icon">
                 <i nz-icon nzType="inbox"></i>
               </p>
               <p class="ant-upload-text">Haz clic o arrastra el archivo aquí</p>
-              <p class="ant-upload-hint">Formatos permitidos: PDF, JPG, PNG (Máx. 5MB)</p>
+              <p class="ant-upload-hint">
+                Formatos permitidos: PDF, JPG, PNG (Máx. 5MB)
+              </p>
             </nz-upload>
           </nz-form-control>
         </nz-form-item>
@@ -280,23 +319,38 @@
               nz-input
               formControlName="observaciones"
               placeholder="Agrega observaciones sobre esta decisión (opcional)"
-              [nzAutosize]="{ minRows: 3, maxRows: 5 }">
+              [nzAutosize]="{ minRows: 3, maxRows: 5 }"
+            >
             </textarea>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item class="form-actions">
-          <button nz-button nzType="default" type="button" (click)="cerrarModalProcesar()">
+          <button
+            nz-button
+            nzType="default"
+            type="button"
+            (click)="cerrarModalProcesar()"
+          >
             Cancelar
           </button>
           <button
             nz-button
-            [nzType]="procesarForm.get('decision')?.value === 'aprobar' ? 'primary' : 'default'"
+            [nzType]="
+              procesarForm.get('decision')?.value === 'aprobar'
+                ? 'primary'
+                : 'default'
+            "
             [nzDanger]="procesarForm.get('decision')?.value === 'rechazar'"
             type="submit"
             [nzLoading]="procesando"
-            [disabled]="!procesarForm.get('decision')?.value">
-            {{ procesarForm.get('decision')?.value === 'aprobar' ? 'Aprobar y Pagar' : 'Rechazar Solicitud' }}
+            [disabled]="!procesarForm.get('decision')?.value"
+          >
+            {{
+              procesarForm.get("decision")?.value === "aprobar"
+                ? "Aprobar y Pagar"
+                : "Rechazar Solicitud"
+            }}
           </button>
         </nz-form-item>
       </form>
@@ -310,8 +364,8 @@
   nzTitle="Detalle de Retiro"
   [nzFooter]="null"
   nzWidth="600px"
-  (nzOnCancel)="cerrarModalDetalle()">
-
+  (nzOnCancel)="cerrarModalDetalle()"
+>
   <div *nzModalContent>
     <div *ngIf="solicitudSeleccionada">
       <nz-descriptions nzBordered [nzColumn]="1">
@@ -328,12 +382,17 @@
           {{ solicitudSeleccionada.referente?.usuario?.correo_electronico }}
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Monto">
-          <strong style="font-size: 18px; color: #4A90E2;">
-            {{ solicitudSeleccionada.monto_solicitado | currency:'COP':'symbol-narrow':'1.0-0' }}
+          <strong style="font-size: 18px; color: #4a90e2">
+            {{
+              solicitudSeleccionada.monto_solicitado
+                | currency : "COP" : "symbol-narrow" : "1.0-0"
+            }}
           </strong>
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="Estado">
-          <nz-tag [nzColor]="getEstadoColor(solicitudSeleccionada.estado_solicitud)">
+          <nz-tag
+            [nzColor]="getEstadoColor(solicitudSeleccionada.estado_solicitud)"
+          >
             {{ getEstadoTexto(solicitudSeleccionada.estado_solicitud) }}
           </nz-tag>
         </nz-descriptions-item>
@@ -343,20 +402,41 @@
         <nz-descriptions-item nzTitle="Fecha Solicitud">
           {{ formatearFechaCompleta(solicitudSeleccionada.fecha_solicitud) }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Fecha Procesado" *ngIf="solicitudSeleccionada.fecha_procesamiento">
-          {{ formatearFechaCompleta(solicitudSeleccionada.fecha_procesamiento) }}
+        <nz-descriptions-item
+          nzTitle="Fecha Procesado"
+          *ngIf="solicitudSeleccionada.fecha_procesamiento"
+        >
+          {{
+            formatearFechaCompleta(solicitudSeleccionada.fecha_procesamiento)
+          }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Procesado Por" *ngIf="solicitudSeleccionada.procesado_por">
-          {{ solicitudSeleccionada.procesado_por.nombre }} {{ solicitudSeleccionada.procesado_por.apellido }}
+        <nz-descriptions-item
+          nzTitle="Procesado Por"
+          *ngIf="solicitudSeleccionada.procesado_por"
+        >
+          {{ solicitudSeleccionada.procesado_por.nombre }}
+          {{ solicitudSeleccionada.procesado_por.apellido }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Banco Destino" *ngIf="solicitudSeleccionada.banco_destino">
+        <nz-descriptions-item
+          nzTitle="Banco Destino"
+          *ngIf="solicitudSeleccionada.banco_destino"
+        >
           {{ solicitudSeleccionada.banco_destino }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Cuenta Destino" *ngIf="solicitudSeleccionada.cuenta_destino">
+        <nz-descriptions-item
+          nzTitle="Cuenta Destino"
+          *ngIf="solicitudSeleccionada.cuenta_destino"
+        >
           {{ solicitudSeleccionada.cuenta_destino }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Comprobante" *ngIf="solicitudSeleccionada.comprobante_pago_url">
-          <a [href]="solicitudSeleccionada.comprobante_pago_url" target="_blank">
+        <nz-descriptions-item
+          nzTitle="Comprobante"
+          *ngIf="solicitudSeleccionada.comprobante_pago_url"
+        >
+          <a
+            [href]="solicitudSeleccionada.comprobante_pago_url"
+            target="_blank"
+          >
             <i nz-icon nzType="download"></i> Descargar Comprobante
           </a>
         </nz-descriptions-item>

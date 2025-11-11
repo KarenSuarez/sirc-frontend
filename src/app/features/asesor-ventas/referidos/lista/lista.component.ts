@@ -22,7 +22,10 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 
 import { AsesorService } from '../../../../core/services/asesor.service';
-import { Referido, EstadoReferido } from '../../../../core/models/referido.interface';
+import {
+  Referido,
+  EstadoReferido,
+} from '../../../../core/models/referido.interface';
 
 @Component({
   selector: 'app-lista',
@@ -51,7 +54,8 @@ import { Referido, EstadoReferido } from '../../../../core/models/referido.inter
   styleUrl: './lista.component.css',
 })
 export class ListaComponent implements OnInit, OnDestroy {
-  referidos: Referido[] = [];
+  referidos: Referido[] = []; // Todos los referidos (sin filtrar)
+  referidosFiltrados: Referido[] = []; // Referidos después de aplicar filtros
   loading = true;
 
   total = 0; // Total de referidos filtrados (para paginación)
@@ -84,15 +88,17 @@ export class ListaComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Leer parámetros de query (si vienen desde dashboard)
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      if (params['estado']) {
-        this.filtroEstado = params['estado'] as EstadoReferido;
-      }
-      if (params['referente']) {
-        this.filtroReferente = params['referente'];
-      }
-      this.cargarDatos();
-    });
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        if (params['estado']) {
+          this.filtroEstado = params['estado'] as EstadoReferido;
+        }
+        if (params['referente']) {
+          this.filtroReferente = params['referente'];
+        }
+        this.cargarDatos();
+      });
   }
 
   ngOnDestroy() {
@@ -106,17 +112,9 @@ export class ListaComponent implements OnInit, OnDestroy {
   cargarDatos() {
     this.loading = true;
 
-    // Cargar referidos filtrados Y estadísticas totales en paralelo
+    // Cargar TODOS los referidos de una vez (sin filtros del backend)
     forkJoin({
-      referidosFiltrados: this.asesorService.listarReferidos(
-        this.filtroEstado || undefined,
-        this.pageSize,
-        this.pageIndex
-      ),
-      // Llamada adicional para obtener el total general SIN filtros
-      // No pasar el primer parámetro (estado) para obtener todos
-      todosLosReferidos: this.asesorService.listarReferidos(undefined, 1, 1),
-      // Cargar estadísticas totales (sin filtro de estado)
+      todosLosReferidos: this.asesorService.listarReferidos(undefined, 1000, 1), // Cargar todos
       totalPendientes: this.asesorService.listarReferidos('pendiente', 1, 1),
       totalContactados: this.asesorService.listarReferidos('contactado', 1, 1),
       totalActivos: this.asesorService.listarReferidos('activo', 1, 1),
@@ -124,25 +122,22 @@ export class ListaComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log('Response completo:', response); // Debug temporal
+          console.log('Response completo:', response);
 
-          // Referidos filtrados para la tabla
-          this.referidos = response.referidosFiltrados.referidos;
-          this.total = response.referidosFiltrados.total; // Total filtrado (para paginación)
-
-          // Total general (sin filtros)
+          // Guardar TODOS los referidos
+          this.referidos = response.todosLosReferidos.referidos;
           this.totalGeneral = response.todosLosReferidos.total;
 
-          console.log('Total general:', this.totalGeneral); // Debug temporal
-          console.log('Total filtrado:', this.total); // Debug temporal
-
-          // Estadísticas totales (independientes del filtro)
+          // Estadísticas totales
           this.estadisticas = {
             pendientes: response.totalPendientes.total,
             contactados: response.totalContactados.total,
             activos: response.totalActivos.total,
-            no_interesados: 0, // Si necesitas este dato, añade otra llamada
+            no_interesados: 0,
           };
+
+          // Aplicar filtros del lado del cliente
+          this.aplicarFiltrosCliente();
 
           this.loading = false;
         },
@@ -155,10 +150,19 @@ export class ListaComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cargar referidos desde backend (método simplificado)
+   * Cargar referidos desde backend
    */
   cargarReferidos() {
     this.cargarDatos();
+  }
+
+  /**
+   * Obtener referidos paginados (del lado del cliente)
+   */
+  getReferidosPaginados(): Referido[] {
+    const startIndex = (this.pageIndex - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.referidosFiltrados.slice(startIndex, endIndex);
   }
 
   /**
@@ -166,7 +170,39 @@ export class ListaComponent implements OnInit, OnDestroy {
    */
   aplicarFiltros() {
     this.pageIndex = 1; // Resetear a página 1
-    this.cargarDatos();
+    this.aplicarFiltrosCliente();
+  }
+
+  /**
+   * Aplicar filtros del lado del cliente
+   */
+  aplicarFiltrosCliente() {
+    let resultados = [...this.referidos];
+
+    // Filtro por texto de búsqueda
+    if (this.searchText && this.searchText.trim()) {
+      const search = this.searchText.toLowerCase().trim();
+      resultados = resultados.filter(
+        (ref) =>
+          ref.nombre_referido.toLowerCase().includes(search) ||
+          ref.apellido_referido.toLowerCase().includes(search) ||
+          ref.correo_referido.toLowerCase().includes(search) ||
+          ref.numero_documento_referido.toLowerCase().includes(search) ||
+          (ref.empresa_referido && ref.empresa_referido.toLowerCase().includes(search)) ||
+          (ref.telefono_referido && ref.telefono_referido.toLowerCase().includes(search))
+      );
+    }
+
+    // Filtro por estado
+    if (this.filtroEstado) {
+      resultados = resultados.filter(
+        (ref) => ref.estado_referido === this.filtroEstado
+      );
+    }
+
+    // Guardar resultados filtrados
+    this.referidosFiltrados = resultados;
+    this.total = resultados.length;
   }
 
   /**
@@ -177,7 +213,7 @@ export class ListaComponent implements OnInit, OnDestroy {
     this.filtroEstado = '';
     this.filtroReferente = '';
     this.pageIndex = 1;
-    this.cargarDatos();
+    this.aplicarFiltrosCliente();
   }
 
   /**
@@ -203,7 +239,7 @@ export class ListaComponent implements OnInit, OnDestroy {
   filtrarPorEstado(estado: EstadoReferido | '') {
     this.filtroEstado = estado;
     this.pageIndex = 1;
-    this.cargarDatos();
+    this.aplicarFiltrosCliente();
   }
 
   /**
@@ -228,9 +264,7 @@ export class ListaComponent implements OnInit, OnDestroy {
    * Editar referido
    */
   editarReferido(referido: Referido) {
-    this.router.navigate([
-      `/asesor/referidos/${referido.id_referido}/editar`
-    ]);
+    this.router.navigate([`/asesor/referidos/${referido.id_referido}/editar`]);
   }
 
   /**

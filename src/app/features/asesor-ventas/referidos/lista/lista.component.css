@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 24px;
   min-height: 100%;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 /* Sección de estadísticas */
@@ -115,50 +116,50 @@
   align-items: center;
 }
 
+/* Input de búsqueda - ESTILOS ACTUALIZADOS */
 .search-input {
   flex: 1;
   min-width: 250px;
 }
 
-/* Eliminar el borde del input group */
-.search-input ::ng-deep .ant-input-group {
-  border: none !important;
-  box-shadow: none !important;
-}
-
 .search-input ::ng-deep .ant-input-affix-wrapper {
-  border-radius: var(--border-radius) !important;
+  border-radius: 8px !important;
   border: 1px solid #e5e7eb !important;
-  padding: 10px 16px !important;
-  font-size: 14px !important;
+  padding: 12px 16px !important;
+  transition: all 0.3s ease !important;
   height: 40px !important;
-  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-.search-input ::ng-deep .ant-input-affix-wrapper:hover,
-.search-input ::ng-deep .ant-input-affix-wrapper:focus,
+.search-input ::ng-deep .ant-input-affix-wrapper .ant-input {
+  padding: 0 !important;
+  border: none !important;
+  height: auto !important;
+  font-size: 14px !important;
+}
+
+.search-input ::ng-deep .ant-input-affix-wrapper:hover {
+  border-color: var(--primary-color) !important;
+}
+
 .search-input ::ng-deep .ant-input-affix-wrapper-focused {
   border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1) !important;
-}
-
-.search-input ::ng-deep .ant-input {
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
 }
 
 .search-input ::ng-deep .ant-input-prefix {
-  margin-right: 8px;
+  margin-right: 8px !important;
   color: #8c8c8c;
 }
 
+/* Select de filtro */
 .filter-select {
   min-width: 200px;
 }
 
 .filter-select ::ng-deep .ant-select-selector {
-  border-radius: var(--border-radius) !important;
+  border-radius: 8px !important;
   border: 1px solid #e5e7eb !important;
   height: 40px !important;
   display: flex !important;
@@ -171,7 +172,7 @@
 
 .filters-row button {
   height: 40px !important;
-  border-radius: var(--border-radius) !important;
+  border-radius: 8px !important;
   font-weight: 600 !important;
   display: flex !important;
   align-items: center !important;
@@ -208,7 +209,7 @@
 }
 
 .table-card ::ng-deep .ant-card-body {
-  padding: 0 !important;
+  padding: 24px;
 }
 
 /* Estilos de la tabla */
@@ -260,6 +261,14 @@
 ::ng-deep .table-card .ant-pagination {
   padding: 16px 24px !important;
 }
+/* Tags de estado */
+::ng-deep .ant-tag {
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-weight: 600;
+  font-size: 12px;
+  border: none;
+}
 
 /* Información del referido */
 .referido-info,
@@ -302,6 +311,12 @@
   font-size: 14px;
   color: var(--primary-color);
 }
+
+.fecha-info i {
+  font-size: 14px;
+  color: var(--primary-color);
+}
+
 
 /* Acciones */
 .action-buttons {
@@ -447,15 +462,14 @@
   }
 }
 
-/* Variables CSS */
-:root {
-  --primary-color: #4A90E2;
-  --primary-dark: #357ABD;
-  --text-dark: #2c3e50;
-  --text-light: #7f8c8d;
-  --white: #ffffff;
-  --danger-color: #ff4d4f;
-  --border-radius: 8px;
-  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
