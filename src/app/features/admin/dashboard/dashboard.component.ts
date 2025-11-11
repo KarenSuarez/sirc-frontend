@@ -3,11 +3,60 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { AdminDashboardService } from './admin-dashboard.service';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule, NzCardModule, NzStatisticModule, NzTableModule],
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css',
+})
+export class DashboardComponent implements OnInit {
+  estadisticas: any;
+  usuarios: any[] = [];
+  loading = true;
+
+  constructor(private dashboardService: AdminDashboardService) {}
+
+  ngOnInit() {
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    this.loading = true;
+
+    this.dashboardService.obtenerEstadisticas().subscribe({
+      next: (data) => {
+        this.estadisticas = data;
+        console.log('✅ Estadísticas cargadas:', data);
+      },
+      error: (err) => console.error('❌ Error al cargar estadísticas:', err),
+    });
+
+    this.dashboardService.listarUsuarios().subscribe({
+      next: (data) => {
+        this.usuarios = data;
+        console.log('👥 Usuarios:', data);
+      },
+      error: (err) => console.error('❌ Error al listar usuarios:', err),
+      complete: () => (this.loading = false),
+    });
+  }
+}
+
+/*import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzTableModule } from 'ng-zorro-antd/table';
-
+*/
+/*
 interface Estadisticas {
   totalUsuarios: number;
   usuariosActivos: number;
@@ -69,11 +118,12 @@ export class DashboardComponent implements OnInit {
     totalReferentes: 0,
     ingresosTotal: 0
   };
-
+/*
   distribucionRoles: DistribucionRol[] = [];
   chartSegments: ChartSegment[] = [];
   actividadReciente: Actividad[] = [];
   ultimosUsuarios: Usuario[] = [];
+
 
   ngOnInit() {
     this.cargarEstadisticas();
@@ -81,7 +131,7 @@ export class DashboardComponent implements OnInit {
     this.cargarActividadReciente();
     this.cargarUltimosUsuarios();
   }
-
+    
   cargarEstadisticas() {
     this.estadisticas = {
       totalUsuarios: 47,
@@ -244,4 +294,6 @@ export class DashboardComponent implements OnInit {
       month: 'short'
     });
   }
+  
 }
+*/
