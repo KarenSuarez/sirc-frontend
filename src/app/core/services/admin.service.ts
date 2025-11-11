@@ -1,16 +1,38 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from './api.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AdminService {
-  constructor(private api: ApiService) {}
+  private apiUrl = `${environment.apiUrl}/usuarios`; // Asegúrate de que apiUrl apunte al backend base
 
-  obtenerEstadisticas(): Observable<any> {
-    return this.api.get('/usuarios/admin/estadisticas');
+  constructor(private http: HttpClient) {}
+
+  // ✅ Obtener todos los usuarios
+  obtenerUsuarios(): Observable<any> {
+    return this.http.get(`${this.apiUrl}`);
   }
 
-  asignarRol(data: { numero_documento: string; id_rol: number }): Observable<any> {
-    return this.api.post('/usuarios/admin/asignar-rol', data);
+  // ✅ Obtener un usuario por ID
+  obtenerUsuarioPorId(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}`);
+  }
+
+  // ✅ Crear usuario
+  crearUsuario(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}`, data);
+  }
+
+  // ✅ Actualizar usuario
+  actualizarUsuario(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, data);
+  }
+
+  // ✅ Eliminar usuario
+  eliminarUsuario(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
