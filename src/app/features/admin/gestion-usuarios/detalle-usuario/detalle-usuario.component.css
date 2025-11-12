@@ -43,6 +43,7 @@
 .header-buttons {
   display: flex;
   gap: 12px;
+  border-radius: 5px;
 }
 
 /* Cards */

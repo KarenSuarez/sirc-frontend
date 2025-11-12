@@ -33,6 +33,9 @@
 .stats-section {
   margin-bottom: 24px;
 }
+button {
+  border-radius: 10px; /* Redondeo de 10 píxeles */
+}
 
 .stats-card {
   border-radius: 16px !important;
@@ -114,22 +117,28 @@
   gap: 16px;
   align-items: center;
   flex-wrap: wrap;
+  border-radius: 8px; 
 }
 
 .search-input {
   flex: 1;
   min-width: 280px;
+  border-radius: 8px;
 }
 
 .filtro-select {
   min-width: 200px;
+  border-radius: 8px;
 }
-
+:nz_Select {
+  border-radius: 8px;
+}
 /* Tabla */
 .tabla-card {
   border-radius: 16px !important;
   box-shadow: var(--shadow-light) !important;
   border: none !important;
+  border-radius: 8px;
 }
 
 ::ng-deep .tabla-card .ant-table {

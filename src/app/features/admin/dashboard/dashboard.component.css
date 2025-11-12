@@ -21,7 +21,9 @@
   color: var(--text-light);
   margin: 0;
 }
-
+button {
+  border-radius: 8px; /* Redondeo de 10 píxeles */
+}
 /* KPIs */
 .kpis-section {
   display: grid;
